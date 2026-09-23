@@ -74,7 +74,13 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <span>© {new Date().getFullYear()} BuildTag. All rights reserved.</span>
+          <span>
+            © {new Date().getFullYear()} BuildTag. All rights reserved. Photography via{" "}
+            <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer" className="underline">
+              Unsplash
+            </a>
+            .
+          </span>
           <span className="font-display tracking-[0.2em] uppercase">Scan the build.</span>
         </div>
       </div>

@@ -7,7 +7,7 @@
 --
 -- The demo owner is a real auth user with a random, unknown password. Social
 -- URLs are obvious placeholders; the handle @ghost_supra is not a real account.
--- Images live in the app's /public/demo folder (storage_path prefix "demo/").
+-- Images live in the app's /public/demo folder (storage_path prefix "demo/"), fetched by `pnpm images` (Unsplash).
 -- =============================================================================
 
 do $$
@@ -74,9 +74,9 @@ begin
 
   -- Photos (served from /public/demo) ---------------------------------------
   insert into buildtag.vehicle_photos (vehicle_id, storage_path, caption, alt_text, width, height, sort_order) values
-    (v_id, 'demo/ghost-1', 'Night shoot after the Pure800 install', 'Dark Toyota GR Supra silhouette with red accent line', 1920, 1200, 0),
-    (v_id, 'demo/ghost-2', '612 WHP / 574 WTQ on E30', 'Dyno graphic reading 612 WHP', 1920, 1200, 1),
-    (v_id, 'demo/ghost-3', 'TE37 SAGA S-plus in Pressed Graphite', 'Volk Racing TE37 wheel graphic', 1920, 1200, 2);
+    (v_id, 'demo/ghost-1', 'Friday night meet, fresh off the Pure800 install', 'White Toyota GR Supra at a night car meet', 2000, 1333, 0),
+    (v_id, 'demo/ghost-2', 'Palms and parking lots', 'White GR Supra parked among cars under palm trees at night', 2000, 1333, 1),
+    (v_id, 'demo/ghost-3', 'Detail shot after the wrap', 'Close-up of a GR Supra headlight and fender', 2000, 1333, 2);
 
   -- Vehicle socials (placeholders) ------------------------------------------
   insert into buildtag.social_links (owner_type, owner_id, platform, handle, url, sort_order) values

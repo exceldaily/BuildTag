@@ -10,8 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "rls:test": "tsx --env-file=.env.local scripts/rls-test.ts",
     "icons": "node scripts/make-icons.mjs",
-    "demo:images": "node scripts/make-demo-images.mjs",
-    "qr:validate": "tsx scripts/qr-validate.ts"
+    "qr:validate": "tsx scripts/qr-validate.ts",
+    "images": "node scripts/fetch-images.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

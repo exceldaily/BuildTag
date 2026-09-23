@@ -37,7 +37,7 @@ export function NightCity() {
       <div className="absolute top-1/3 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(139,92,246,0.18),transparent_65%)]" />
 
       {/* skyline */}
-      <svg viewBox="0 0 1920 420" preserveAspectRatio="xMidYMax slice" className="absolute inset-x-0 bottom-[22%] h-[46%] w-full opacity-90">
+      <svg viewBox="0 0 1920 420" preserveAspectRatio="xMidYMax slice" className="absolute inset-x-0 bottom-[24%] h-[46%] w-full opacity-90">
         <defs>
           <linearGradient id="bld" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stopColor="#141127" />

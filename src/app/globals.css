@@ -264,6 +264,10 @@
 .animate-road {
   animation: roadline 0.9s linear infinite;
 }
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
 @keyframes rise {
   from {
     opacity: 0;

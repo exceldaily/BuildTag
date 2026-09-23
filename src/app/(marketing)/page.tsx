@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { featuredBuilds } from "@/lib/db/public";
+import { siteUrl } from "@/lib/env";
+import { scanUrl } from "@/lib/qr/generate";
+import { TEMPLATES, renderTagSvg } from "@/lib/tag";
 import { BuildCard } from "@/components/build/build-card";
-import { ConceptShowcase } from "@/components/marketing/concept-showcase";
+import { BrandChip, Faq, Pricing, ShowBuildTag, Ticker } from "@/components/marketing/home-sections";
 import { NightCity } from "@/components/marketing/night-city";
 
 export const metadata: Metadata = {
@@ -16,18 +19,39 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 const STEPS = [
-  { n: "01", title: "Build it", body: "Add your vehicle, performance specs and every modification.", color: "text-signal" },
-  { n: "02", title: "Tag it", body: "Design your permanent BuildTag decal and print it.", color: "text-neon-cyan" },
-  { n: "03", title: "Scan it", body: "Anyone can instantly see what's done to your ride.", color: "text-neon-amber" },
+  {
+    n: "01",
+    title: "Build it",
+    body: "Add your vehicle, power numbers, photos and every modification. Type fast: category and part name is enough to start.",
+    image: "/images/home/hood-open.webp",
+    alt: "Blue Subaru with its hood open at a meet",
+    color: "text-signal",
+  },
+  {
+    n: "02",
+    title: "Tag it",
+    body: "Pick a template, shape and style in the Designer. Download vector artwork with the QR protected, print it, stick it on.",
+    image: "/images/home/garage-86.webp",
+    alt: "White Toyota 86 parked inside a garage",
+    color: "text-neon-cyan",
+  },
+  {
+    n: "03",
+    title: "Scan it",
+    body: "Anyone at the meet, the track or the gas station scans and sees what's done to it. You see the scans.",
+    image: "/images/home/meet-crowd.webp",
+    alt: "Cars and people gathered at a night car meet",
+    color: "text-neon-amber",
+  },
 ];
 
 const FEATURES = [
-  { title: "Digital build sheet", body: "Every modification in one place, organized by category." },
+  { title: "Digital build sheet", body: "Every modification in one place, organized by category, with prices if you want them shown." },
   { title: "Permanent BuildTag", body: "One QR that stays with your build. Change anything, never reprint." },
-  { title: "Show your power", body: "Display WHP, torque and build specifications up front." },
-  { title: "Show your socials", body: "Connect your vehicle's Instagram, TikTok and YouTube." },
-  { title: "Design your tag", body: "Create an automotive decal that matches your build." },
-  { title: "Part discovery", body: "Let people see exactly which parts you're running." },
+  { title: "Show your power", body: "WHP, torque, dyno, mileage and build cost up front." },
+  { title: "Show your socials", body: "The car's Instagram, TikTok and YouTube first. Yours second, or hidden." },
+  { title: "Design your tag", body: "Ten shapes, nine automotive styles, QR frames, print-ready SVG and PNG." },
+  { title: "Part discovery", body: "Every part can link out. You see which parts people click." },
 ];
 
 export default async function HomePage() {
@@ -38,22 +62,44 @@ export default async function HomePage() {
     featured = [];
   }
 
+  // A real decal, rendered by the same code the Designer exports.
+  const decal = renderTagSvg(
+    { ...TEMPLATES.power.build(), shape: "rounded", style: "muscle" },
+    {
+      scanUrl: scanUrl(siteUrl(), "GHS7K2P9"),
+      year: 2022,
+      make: "Toyota",
+      model: "GR Supra",
+      nickname: "GHOST",
+      powerLabel: "612 WHP",
+      socialHandle: "@ghost_supra",
+    },
+    { idPrefix: "home-decal" },
+  ).svg;
+
   return (
     <>
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-line">
-        <NightCity />
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pt-16 pb-24 sm:px-6 md:grid-cols-[1.1fr_0.9fr] md:items-center md:pt-24 md:pb-32">
-          <div>
+        <div className="absolute inset-0" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/hero-drift.webp" alt="" fetchPriority="high" decoding="async" className="size-full object-cover object-[60%_center]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,5,13,0.92)_0%,rgba(6,5,13,0.75)_45%,rgba(6,5,13,0.25)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,5,13,1)_0%,rgba(6,5,13,0.2)_35%,rgba(6,5,13,0.35)_100%)]" />
+          <div className="streaks absolute inset-x-0 bottom-0 h-1/2 opacity-70" />
+          <div className="scanlines absolute inset-0" />
+        </div>
+        <div className="relative mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 md:pt-32 md:pb-36">
+          <div className="max-w-2xl">
             <p className="eyebrow neon-text animate-flicker">Scan the build.</p>
-            <h1 className="mt-5 text-[3rem] leading-[0.9] font-extrabold sm:text-6xl md:text-7xl lg:text-8xl">
+            <h1 className="mt-5 text-[3.1rem] leading-[0.88] font-extrabold sm:text-6xl md:text-7xl lg:text-[6.5rem]">
               <span className="speed-heading">Your build</span>
               <br />
               <span className="speed-heading">deserves</span>
               <br />
               <span className="speed-heading chrome-text">a spec sheet.</span>
             </h1>
-            <p className="mt-7 max-w-lg text-base text-foreground/80 sm:text-lg">
+            <p className="mt-7 max-w-lg text-base text-foreground/85 sm:text-lg">
               Create your digital build sheet. Stick your BuildTag on your car. Let anyone scan to see what&apos;s done
               to it.
             </p>
@@ -65,7 +111,7 @@ export default async function HomePage() {
                 See an example
               </Link>
             </div>
-            <dl className="mt-10 flex max-w-lg flex-wrap gap-2">
+            <dl className="mt-10 flex flex-wrap gap-2">
               {[
                 ["Permanent", "QR code", "border-signal/50 text-signal"],
                 ["Vector", "print export", "border-neon-cyan/50 text-neon-cyan"],
@@ -78,24 +124,39 @@ export default async function HomePage() {
               ))}
             </dl>
           </div>
-          <ConceptShowcase />
+        </div>
+      </section>
+
+      <Ticker />
+
+      {/* SHOW BUILDTAG */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+          <ShowBuildTag decalSvg={decal} />
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="relative border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+      <section id="how-it-works" className="relative overflow-hidden border-b border-line">
+        <NightCity />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
           <p className="eyebrow">How it works</p>
           <h2 className="mt-3 text-4xl sm:text-5xl">
             <span className="speed-heading">Three steps. One decal.</span>
           </h2>
           <ol className="mt-10 grid gap-5 md:grid-cols-3">
             {STEPS.map((s) => (
-              <li key={s.n} className="neon-card overflow-hidden p-6">
-                <span className={`font-display text-6xl leading-none font-extrabold italic ${s.color}`}>{s.n}</span>
-                <h3 className="mt-4 text-2xl">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
-                <span className="absolute -right-6 -bottom-6 size-20 rotate-45 border-t border-line" aria-hidden="true" />
+              <li key={s.n} className="neon-card overflow-hidden">
+                <div className="relative aspect-[16/10]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.image} alt={s.alt} loading="lazy" decoding="async" className="size-full object-cover" />
+                  <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(13,11,24,1),transparent_60%)]" />
+                  <span className={`absolute bottom-2 left-4 font-display text-6xl leading-none font-extrabold italic ${s.color}`}>{s.n}</span>
+                </div>
+                <div className="p-6 pt-3">
+                  <h3 className="text-2xl">{s.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
+                </div>
               </li>
             ))}
           </ol>
@@ -106,10 +167,18 @@ export default async function HomePage() {
       <section className="relative border-b border-line bg-[#080712]">
         <div className="absolute inset-0 grid-fade" aria-hidden="true" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
-          <p className="eyebrow">What you get</p>
-          <h2 className="mt-3 text-4xl sm:text-5xl">
-            <span className="speed-heading">Built for people who build.</span>
-          </h2>
+          <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+            <div>
+              <p className="eyebrow">What you get</p>
+              <h2 className="mt-3 text-4xl sm:text-5xl">
+                <span className="speed-heading">Built for people who build.</span>
+              </h2>
+            </div>
+            <p className="text-foreground/80">
+              Not a social network. A spec sheet that lives on the car, with the analytics to prove people are reading
+              it.
+            </p>
+          </div>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f, i) => (
               <li key={f.title} className="neon-card p-6">
@@ -119,6 +188,35 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* STREET GALLERY */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Wherever the car goes</p>
+              <h2 className="mt-3 text-4xl sm:text-5xl">
+                <span className="speed-heading">The tag goes too.</span>
+              </h2>
+            </div>
+          </div>
+          <div className="mt-10 grid gap-3 sm:grid-cols-3">
+            {[
+              { src: "/images/home/rolling-e30.webp", alt: "Yellow BMW E30 rolling shot through a lit-up street at night", chip: "Rolling shots" },
+              { src: "/images/home/lineup.webp", alt: "Modified cars parked at night under streetlights", chip: "The meet" },
+              { src: "/images/home/tunnel-gt3.webp", alt: "Lime green Porsche GT3 in a tunnel at night", chip: "The tunnel run" },
+            ].map((g) => (
+              <figure key={g.src} className="neon-card relative overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={g.src} alt={g.alt} loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover sm:aspect-[3/4]" />
+                <figcaption className="absolute bottom-3 left-3">
+                  <BrandChip text={g.chip} />
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -149,20 +247,55 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* PRICING */}
+      <section id="pricing" className="border-b border-line bg-[#080712]">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+          <p className="eyebrow">Plans</p>
+          <h2 className="mt-3 text-4xl sm:text-5xl">
+            <span className="speed-heading">Free is the real thing.</span>
+          </h2>
+          <div className="mt-10">
+            <Pricing />
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24">
+          <p className="eyebrow">Questions</p>
+          <h2 className="mt-3 text-4xl sm:text-5xl">
+            <span className="speed-heading">Before you print.</span>
+          </h2>
+          <div className="mt-10">
+            <Faq />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,45,122,0.25),transparent_60%)]" aria-hidden="true" />
-        <div className="streaks absolute inset-0 opacity-60" aria-hidden="true" />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 md:py-28">
-          <h2 className="neon-text text-5xl sm:text-7xl">
+        <div className="absolute inset-0" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/fog-lights.webp" alt="" loading="lazy" decoding="async" className="size-full object-cover" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(6,5,13,0.9),rgba(6,5,13,0.55),rgba(6,5,13,0.95))]" />
+          <div className="streaks absolute inset-0 opacity-60" />
+        </div>
+        <div className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:px-6 md:py-32">
+          <h2 className="neon-text text-5xl sm:text-7xl md:text-8xl">
             <span className="speed-heading">What&apos;s done to it?</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-foreground/80">
+          <p className="mx-auto mt-4 max-w-md text-foreground/85">
             Stop answering the same question in every parking lot. Put the answer on the car.
           </p>
-          <Link href="/signup" className="btn-signal mt-8">
-            Create your build
-          </Link>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link href="/signup" className="btn-signal">
+              Create your build
+            </Link>
+            <Link href="/explore" className="btn-ghost">
+              Explore builds
+            </Link>
+          </div>
         </div>
       </section>
     </>
