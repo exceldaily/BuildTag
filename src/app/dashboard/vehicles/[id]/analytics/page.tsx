@@ -20,5 +20,5 @@ export default async function AnalyticsPage({ params }: PageProps<"/dashboard/ve
       </div>
     );
   }
-  return <AnalyticsView data={data as unknown as VehicleAnalytics} />;
+  return <AnalyticsView data={data as unknown as VehicleAnalytics} vehicleId={vehicle.id} />;
 }

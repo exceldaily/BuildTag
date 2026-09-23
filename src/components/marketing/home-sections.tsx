@@ -5,7 +5,7 @@ import { LogoMark } from "@/components/layout/logo";
 /* ---------------------------------------------------------------------------
  * Ticker: the neon marquee strip between hero and content.
  * ------------------------------------------------------------------------- */
-const TICKER = ["Scan the build", "What's done to it?", "One permanent QR", "Print-ready decals", "Vehicle socials", "Part links"];
+const TICKER = ["Scan the build", "What's done to it?", "Get paid for your parts list", "One permanent QR", "Print-ready decals", "Vehicle socials", "Part links"];
 
 export function Ticker() {
   const items = [...TICKER, ...TICKER];
@@ -163,6 +163,10 @@ export function Pricing() {
  * ------------------------------------------------------------------------- */
 const FAQ = [
   {
+    q: "How do I make money from my build?",
+    a: "Join any affiliate program (Amazon Associates and eBay Partner Network approve most people in a day, and most big aftermarket shops run programs through Impact, ShareASale or CJ). Paste the tracking link on each part. When someone scans your car and taps View part, the click goes through your link and the program pays you the commission. BuildTag adds the required disclosure to your page and keeps nothing.",
+  },
+  {
     q: "What happens if I rename my build or change my username?",
     a: "Nothing, for the decal. The QR encodes a permanent short code, not a URL with your name in it. Scans always resolve to wherever your build lives now.",
   },
@@ -209,5 +213,52 @@ export function BrandChip({ text }: { text: string }) {
       <LogoMark className="size-4" />
       <span className="font-display text-[11px] font-bold tracking-[0.2em] uppercase">{text}</span>
     </span>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ * Earn showcase: a parts list where the links pay the owner
+ * ------------------------------------------------------------------------- */
+const EARN_PARTS = [
+  { cat: "Engine", brand: "Pure Turbos", name: "Pure800 turbo", program: "Brand program", clicks: 148 },
+  { cat: "Suspension", brand: "KW", name: "V3 coilovers", program: "Impact", clicks: 96 },
+  { cat: "Wheels", brand: "Volk", name: "TE37 SAGA 18x9.5", program: "eBay Partner", clicks: 211 },
+  { cat: "Exhaust", brand: "HKS", name: "Hi-Power cat-back", program: "Amazon Associates", clicks: 73 },
+  { cat: "Brakes", brand: "StopTech", name: "ST-40 big brake kit", program: "Impact", clicks: 41 },
+];
+
+export function EarnShowcase() {
+  const total = EARN_PARTS.reduce((s, p) => s + p.clicks, 0);
+  return (
+    <div className="neon-card overflow-hidden">
+      <div className="flex items-center justify-between border-b border-line px-4 py-3">
+        <p className="font-display text-sm font-bold tracking-[0.16em] uppercase">Parts list · GHOST</p>
+        <span className="rounded-full border border-signal/50 bg-signal/10 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] text-signal uppercase">5 of 5 earning</span>
+      </div>
+      <ul className="divide-y divide-line">
+        {EARN_PARTS.map((p) => (
+          <li key={p.name} className="flex items-center gap-3 px-4 py-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">
+                <span className="text-foreground/70">{p.brand} </span>
+                {p.name}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {p.cat} · via {p.program}
+              </p>
+            </div>
+            <span className="hidden font-display text-sm font-bold text-neon-cyan tabular-nums sm:inline">{p.clicks} taps</span>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-line px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] uppercase">View part ↗</span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex items-center justify-between gap-4 border-t border-line bg-signal/10 px-4 py-3">
+        <p className="text-xs text-foreground/80">Every tap goes through the owner&apos;s link. The program pays the commission. BuildTag takes nothing.</p>
+        <p className="shrink-0 text-right">
+          <span className="block font-display text-2xl leading-none font-extrabold text-signal tabular-nums">{total}</span>
+          <span className="label-tech">affiliate taps</span>
+        </p>
+      </div>
+    </div>
   );
 }

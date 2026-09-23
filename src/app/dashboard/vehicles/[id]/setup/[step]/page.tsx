@@ -19,7 +19,7 @@ const COPY: Record<Exclude<WizardStepId, "vehicle">, { title: string; body: stri
   photos: { title: "Photos", body: "A hero photo is the first thing anyone sees after a scan. Add it now, add more later." },
   performance: { title: "Performance", body: "Power and torque go on the build page and can go on your decal." },
   socials: { title: "Vehicle socials", body: "Accounts for this car. Your personal accounts live on your profile." },
-  modifications: { title: "Modifications", body: "Type fast. Category and part name are all you need to start." },
+  modifications: { title: "Modifications", body: "Type fast. Category and part name are all you need to start. Open a part to paste your affiliate link and get paid when people buy what is on your car." },
   buildtag: { title: "Your BuildTag", body: "This permanent QR was created with your vehicle. Now design the decal around it." },
 };
 

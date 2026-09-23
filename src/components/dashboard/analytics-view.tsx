@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { BadgeDollarSign } from "lucide-react";
+
 import { SOCIAL_PLATFORM_LABEL, type VehicleAnalytics } from "@/lib/types";
 import { formatCount } from "@/lib/utils";
 
@@ -10,7 +13,7 @@ function fmtDay(iso: string): string {
 }
 
 /** Server-rendered analytics: simple, understandable, no chart library. */
-export function AnalyticsView({ data }: { data: VehicleAnalytics }) {
+export function AnalyticsView({ data, vehicleId }: { data: VehicleAnalytics; vehicleId: string }) {
   const series = data.scans_by_day ?? [];
   const max = Math.max(1, ...series.map((d) => d.count));
   const devices = Object.entries(data.devices ?? {}).sort((a, b) => b[1] - a[1]);
@@ -28,6 +31,26 @@ export function AnalyticsView({ data }: { data: VehicleAnalytics }) {
         <StatTile label="Social clicks" value={formatCount(data.social_clicks)} />
         <StatTile label="Click rate" value={data.total_scans ? `${Math.round(((data.product_clicks + data.social_clicks) / data.total_scans) * 100)}%` : "—"} hint="Clicks per scan" />
       </dl>
+
+      <section className="rounded-lg border border-signal/40 bg-[linear-gradient(120deg,rgba(255,45,122,0.14),rgba(31,216,255,0.06)_60%,transparent)] p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="eyebrow text-signal">Affiliate earnings</p>
+            <h2 className="mt-1 text-2xl">
+              {formatCount(data.affiliate_clicks ?? 0)} affiliate click{(data.affiliate_clicks ?? 0) === 1 ? "" : "s"} sent to your programs
+            </h2>
+            <p className="mt-1 text-sm text-foreground/80">
+              {data.affiliate_clicks_30d ?? 0} in the last 30 days · {data.monetized_parts ?? 0} of {data.total_parts ?? 0} parts carry your affiliate link
+              {(data.linked_parts ?? 0) > (data.monetized_parts ?? 0) && ` · ${(data.linked_parts ?? 0) - (data.monetized_parts ?? 0)} linked parts are not earning yet`}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Commissions are paid by the programs themselves. Check their dashboards for what each click turned into.</p>
+          </div>
+          <Link href={`/dashboard/vehicles/${vehicleId}/modifications`} className="btn-signal btn-small shrink-0">
+            <BadgeDollarSign className="size-4" aria-hidden="true" />
+            {(data.monetized_parts ?? 0) === 0 ? "Add affiliate links" : "Manage links"}
+          </Link>
+        </div>
+      </section>
 
       <section>
         <h2 className="text-2xl">Scans over time</h2>
@@ -62,14 +85,17 @@ export function AnalyticsView({ data }: { data: VehicleAnalytics }) {
         <section>
           <h2 className="text-2xl">Most clicked parts</h2>
           {data.top_parts.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">No product clicks yet. Add product links to your modifications.</p>
+            <p className="mt-3 text-sm text-muted-foreground">No part clicks yet. Add affiliate links to your modifications so every click can pay you.</p>
           ) : (
             <ol className="mt-3 divide-y divide-line rounded-lg border border-line">
               {data.top_parts.map((p, i) => (
                 <li key={`${p.brand}-${p.part_name}-${i}`} className="flex items-center justify-between px-4 py-3 text-sm">
-                  <span className="truncate">
-                    {p.brand && <span className="text-foreground/70">{p.brand} </span>}
-                    {p.part_name}
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate">
+                      {p.brand && <span className="text-foreground/70">{p.brand} </span>}
+                      {p.part_name}
+                    </span>
+                    {p.is_affiliate && <span className="shrink-0 rounded-full border border-signal/50 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.14em] text-signal uppercase">Earning</span>}
                   </span>
                   <span className="font-display text-lg font-bold tabular-nums">{formatCount(p.count)}</span>
                 </li>

@@ -158,6 +158,8 @@ Files in `supabase/migrations/`, applied in order:
 | `0002_buildtag_functions.sql` | authorization helpers, slug/QR triggers, counters, plan limits, the public read model (`public_builds`, `get_public_build`), scan/like/click/report functions, analytics, admin functions |
 | `0003_buildtag_security.sql` | RLS enablement + policies, storage buckets + policies, append-safe PostgREST exposure of the `buildtag` schema |
 | `0004_buildtag_orders.sql` | print specifications, immutable production snapshots, orders/items/events, production + tag-asset buckets, `place_order()` and `admin_set_order_status()` |
+| `0005_buildtag_ensure_profile_race.sql` | `ensure_profile()` tolerates concurrent first-visit inserts |
+| `0006_buildtag_affiliate.sql` | public payload flags affiliate parts (`is_affiliate`, `has_affiliate_links`); analytics report affiliate clicks and monetized parts |
 
 Apply with the Supabase SQL editor, `psql`, the Supabase CLI (`supabase db push` after placing them in your project's migrations folder), or the Supabase MCP `apply_migration` tool. The exposure block in 0003 appends `buildtag` to `pgrst.db_schemas` without overwriting other schemas. If your project restricts the API through the dashboard instead, add `buildtag` under **Settings → API → Exposed schemas**.
 
@@ -259,6 +261,15 @@ Order statuses: draft, awaiting_payment, paid, preparing_artwork, submitted_to_p
 Print specifications (`print_specifications`) hold size, bleed, safe margin, cut-path style, minimum module size, price and provider SKU. Sizes ship as Small 3×3, Standard 4×4, Wide 5×3 and Large 5×5 in; Gloss and Matte are orderable, Transparent/Reflective/Holographic are preview-only until a SKU is configured.
 
 `pnpm qr:validate` renders every template × shape × frame plus every module × finder style (with and without a center logo) through the export pipeline and decodes them with jsQR at two sizes.
+
+## Affiliate links (owners earn from their parts list)
+
+Every modification can carry an owner's own affiliate link. Nothing is brokered by BuildTag: the owner joins the program (Amazon Associates, eBay Partner Network, Impact, ShareASale/Awin, AvantLink, CJ, or a brand's direct program), pastes the tracking link on the part, and keeps the commission.
+
+- `src/lib/affiliate.ts`: program directory, URL detection (names the program from the link shape, warns when a link is a plain product page with no tracking) and the disclosure text.
+- Editor (`src/components/dashboard/affiliate-panel.tsx`): monetization summary and progress at the top of the modifications page, an **Earning / Link / + Earn** badge on every part, and an "Earn from this part" block in the part dialog that auto-fills the program.
+- Public page: `View part` goes through `/out/<slug>/part/<id>` (affiliate URL preferred, click recorded, `rel="nofollow sponsored"`) and the modifications section shows the affiliate disclosure whenever the build has any affiliate link.
+- Analytics: affiliate clicks (all time and 30 days), monetized vs linked vs total parts, and an **Earning** marker on the most-clicked parts.
 
 ## Security and privacy
 

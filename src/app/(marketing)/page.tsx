@@ -6,7 +6,7 @@ import { siteUrl } from "@/lib/env";
 import { scanUrl } from "@/lib/qr/generate";
 import { TEMPLATES, renderTagSvg } from "@/lib/tag";
 import { BuildCard } from "@/components/build/build-card";
-import { BrandChip, Faq, Pricing, ShowBuildTag, Ticker } from "@/components/marketing/home-sections";
+import { BrandChip, EarnShowcase, Faq, Pricing, ShowBuildTag, Ticker } from "@/components/marketing/home-sections";
 import { NightCity } from "@/components/marketing/night-city";
 
 export const metadata: Metadata = {
@@ -46,12 +46,13 @@ const STEPS = [
 ];
 
 const FEATURES = [
+  { title: "Get paid for your parts", body: "Put your affiliate links on every part. Scans turn into View part taps, taps turn into commissions. BuildTag takes no cut." },
   { title: "Digital build sheet", body: "Every modification in one place, organized by category, with prices if you want them shown." },
   { title: "Permanent BuildTag", body: "One QR that stays with your build. Change anything, never reprint." },
   { title: "Show your power", body: "WHP, torque, dyno, mileage and build cost up front." },
   { title: "Show your socials", body: "The car's Instagram, TikTok and YouTube first. Yours second, or hidden." },
   { title: "Design your tag", body: "Ten shapes, nine automotive styles, QR frames, print-ready SVG and PNG." },
-  { title: "Part discovery", body: "Every part can link out. You see which parts people click." },
+  { title: "Part discovery", body: "Every part can link out. You see which parts people click and which ones are earning." },
 ];
 
 export default async function HomePage() {
@@ -192,6 +193,51 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* EARN */}
+      <section className="relative overflow-hidden border-b border-line">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,45,122,0.18),transparent_55%)]" aria-hidden="true" />
+        <div className="relative mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-16">
+            <div>
+              <p className="eyebrow neon-text">Your parts list pays you</p>
+              <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
+                <span className="speed-heading">People scan.</span>
+                <br />
+                <span className="speed-heading">People ask.</span>
+                <br />
+                <span className="speed-heading chrome-text">You get paid.</span>
+              </h2>
+              <p className="mt-6 max-w-lg text-foreground/85">
+                Every part on your build sheet can carry your affiliate link. Amazon, eBay, Impact, ShareASale, CJ, or a
+                brand that pays you direct. When someone scans your car and taps <span className="font-semibold text-foreground">View part</span>,
+                the click goes through your link and the commission is yours.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm text-foreground/85">
+                {[
+                  "Paste the link on a part. BuildTag detects the program and adds the disclosure for you.",
+                  "Analytics show which parts people tap and how many clicks went to your programs.",
+                  "No cut, no minimum, no approval from us. The programs pay you directly.",
+                ].map((t) => (
+                  <li key={t} className="flex gap-3">
+                    <span className="mt-1.5 size-2 shrink-0 rounded-full bg-signal shadow-[0_0_10px_var(--signal)]" aria-hidden="true" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/signup" className="btn-signal">
+                  Start earning from your build
+                </Link>
+                <Link href="/build/ghost-2022-toyota-gr-supra" className="btn-ghost">
+                  See it on a build
+                </Link>
+              </div>
+            </div>
+            <EarnShowcase />
+          </div>
         </div>
       </section>
 

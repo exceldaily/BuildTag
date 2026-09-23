@@ -1,13 +1,14 @@
 import { ArrowUpRight } from "lucide-react";
 
 import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, type ModCategory, type PublicModification } from "@/lib/types";
+import { AFFILIATE_DISCLOSURE } from "@/lib/affiliate";
 import { formatMoney } from "@/lib/utils";
 
 /**
  * Categorized modifications. Native <details> keeps sections collapsible on
  * mobile with zero JavaScript; sections start open on larger screens via CSS.
  */
-export function ModificationsList({ slug, modifications }: { slug: string; modifications: PublicModification[] }) {
+export function ModificationsList({ slug, modifications, hasAffiliateLinks = false }: { slug: string; modifications: PublicModification[]; hasAffiliateLinks?: boolean }) {
   if (modifications.length === 0) {
     return <p className="mt-4 text-sm text-muted-foreground">No modifications listed yet. Stock for now.</p>;
   }
@@ -21,6 +22,12 @@ export function ModificationsList({ slug, modifications }: { slug: string; modif
   const ordered = MOD_CATEGORIES.filter((c) => grouped.has(c.value));
 
   return (
+    <>
+    {hasAffiliateLinks && (
+      <p className="mt-3 text-xs text-muted-foreground" id="affiliate-disclosure">
+        {AFFILIATE_DISCLOSURE}
+      </p>
+    )}
     <div className="mt-4 divide-y divide-line rounded-lg border border-line">
       {ordered.map((cat, idx) => {
         const items = grouped.get(cat.value)!;
@@ -68,5 +75,6 @@ export function ModificationsList({ slug, modifications }: { slug: string; modif
         );
       })}
     </div>
+    </>
   );
 }

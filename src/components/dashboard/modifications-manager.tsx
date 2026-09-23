@@ -9,6 +9,7 @@ import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, type ModCategory, type Modification
 import { formatMoney } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+import { EarnBadge, EarnBlock, MonetizeSummary } from "./affiliate-panel";
 import { PartSuggest } from "./part-suggest";
 import { SortableItem, SortableList } from "./sortable";
 
@@ -93,6 +94,14 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
         <span className="label-tech">{mods.length} total</span>
       </div>
 
+      <MonetizeSummary
+        mods={mods}
+        onAddLink={() => {
+          const next = mods.find((m) => !m.affiliate_url);
+          if (next) setEditing(next);
+        }}
+      />
+
       <form onSubmit={quickAdd} className="panel grid gap-2 p-3 sm:grid-cols-[170px_1fr_1fr_auto] sm:items-end">
         <div>
           <label htmlFor="quick-category" className="field-label">
@@ -131,7 +140,7 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
           <Plus className="size-4" aria-hidden="true" />
           Add
         </button>
-        <p className="text-xs text-muted-foreground sm:col-span-4">Press Enter to add and keep typing. Open a part to add price, links and installer.</p>
+        <p className="text-xs text-muted-foreground sm:col-span-4">Press Enter to add and keep typing. Open a part to add the price, your affiliate link and the installer.</p>
       </form>
 
       {grouped.length === 0 ? (
@@ -159,13 +168,13 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
                               {[
                                 m.part_number ? `#${m.part_number}` : null,
                                 m.price !== null ? `${formatMoney(m.price)}${m.price_public ? "" : " (hidden)"}` : null,
-                                m.affiliate_url ? "affiliate link" : m.product_url ? "product link" : null,
                                 m.installed_by_text || (m.shop_id ? shops.find((s) => s.id === m.shop_id)?.name : null),
                               ]
                                 .filter(Boolean)
                                 .join(" · ")}
                             </p>
                           </div>
+                          <EarnBadge mod={m} onAdd={() => setEditing(m)} />
                           <button type="button" onClick={() => setEditing(m)} className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-white/5 hover:text-foreground" aria-label={`Edit ${m.part_name}`}>
                             <Pencil className="size-4" />
                           </button>
@@ -264,20 +273,7 @@ function EditModForm({ mod, shops, onSaved }: { mod: ModificationRow; shops: Sho
           Show price publicly
         </label>
       </div>
-      <Field label="Product URL" error={errors.product_url} hint="Where people can buy it.">
-        <input name="product_url" type="url" defaultValue={mod.product_url ?? ""} placeholder="https://" className="field" />
-      </Field>
-      <Field label="Affiliate URL" error={errors.affiliate_url} hint="Used for View Part when set.">
-        <input name="affiliate_url" type="url" defaultValue={mod.affiliate_url ?? ""} placeholder="https://" className="field" />
-      </Field>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Merchant">
-          <input name="merchant" defaultValue={mod.merchant} maxLength={80} className="field" />
-        </Field>
-        <Field label="Affiliate network">
-          <input name="affiliate_network" defaultValue={mod.affiliate_network} maxLength={80} className="field" />
-        </Field>
-      </div>
+      <EarnBlock mod={mod} errors={errors} />
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Installed by (text)">
           <input name="installed_by_text" defaultValue={mod.installed_by_text} maxLength={120} placeholder="Self / shop name" className="field" />

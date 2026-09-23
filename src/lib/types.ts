@@ -459,6 +459,9 @@ export interface PublicModification {
   description: string;
   price: number | null;
   has_link: boolean;
+  /** True when the outbound link is an affiliate link (the page shows a disclosure). */
+  is_affiliate: boolean;
+  merchant: string;
   installed_by_text: string;
   installation_date: string | null;
   shop: PublicShop | null;
@@ -513,6 +516,7 @@ export interface PublicBuild {
   created_at: string;
   updated_at: string;
   qr_code: string | null;
+  has_affiliate_links: boolean;
   photos: PublicPhoto[];
   modifications: PublicModification[];
   vehicle_socials: PublicSocial[];
@@ -533,8 +537,13 @@ export interface VehicleAnalytics {
   likes: number;
   product_clicks: number;
   social_clicks: number;
+  affiliate_clicks: number;
+  affiliate_clicks_30d: number;
+  total_parts: number;
+  linked_parts: number;
+  monetized_parts: number;
   scans_by_day: { day: string; count: number }[];
-  top_parts: { part_name: string; brand: string; count: number }[];
+  top_parts: { part_name: string; brand: string; count: number; is_affiliate: boolean }[];
   top_socials: { platform: SocialPlatform; handle: string; owner_type: SocialOwnerType; count: number }[];
   devices: Partial<Record<DeviceType, number>>;
   countries: { country: string; count: number }[];

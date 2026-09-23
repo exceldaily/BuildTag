@@ -134,7 +134,7 @@ export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; lik
             <h2 className="text-2xl">Modifications</h2>
             <span className="label-tech">{formatCount(b.mod_count)} total</span>
           </div>
-          <ModificationsList slug={b.slug} modifications={b.modifications} />
+          <ModificationsList slug={b.slug} modifications={b.modifications} hasAffiliateLinks={b.has_affiliate_links} />
         </section>
 
         {/* OWNER */}
