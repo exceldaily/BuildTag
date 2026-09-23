@@ -281,3 +281,17 @@
 .animate-rise {
   animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
+
+/* ---------------------------------------------------------------------------
+ * Decal typography. OFL-licensed fonts served from /public/fonts (licenses
+ * alongside). The same files feed the Designer preview (@font-face) and the
+ * export engine (opentype.js text-to-path), so preview equals print.
+ * ------------------------------------------------------------------------- */
+@font-face { font-family: "BT Condensed"; src: url("/fonts/BarlowCondensed-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "BT Condensed Italic"; src: url("/fonts/BarlowCondensed-SemiBoldItalic.ttf") format("truetype"); font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: "BT Technical"; src: url("/fonts/Rajdhani-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "BT Motorsport"; src: url("/fonts/RacingSansOne-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BT Heavy"; src: url("/fonts/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BT Minimal"; src: url("/fonts/Barlow-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "BT Industrial"; src: url("/fonts/BebasNeue-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BT Mono"; src: url("/fonts/ShareTechMono-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { LogoMark } from "./logo";
+import { Wordmark } from "./logo";
 
 interface StatusPageProps {
   code: string;
@@ -16,11 +16,8 @@ export function StatusPage({ code, title, description, actions = [], children }:
     <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-6 py-16">
       <div className="grid-fade pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative w-full max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-foreground" aria-label="BuildTag home">
-          <LogoMark />
-          <span className="font-display text-lg font-bold tracking-[0.08em] uppercase">
-            Build<span className="text-signal">Tag</span>
-          </span>
+        <Link href="/" className="inline-flex" aria-label="BuildTag home">
+          <Wordmark className="h-10" />
         </Link>
         <p className="eyebrow mt-10">{code}</p>
         <h1 className="mt-3 text-4xl sm:text-5xl">{title}</h1>

@@ -280,6 +280,135 @@ export interface TagDesignRow {
   updated_at: string;
 }
 
+export type OrderStatus =
+  | "draft"
+  | "awaiting_payment"
+  | "paid"
+  | "preparing_artwork"
+  | "submitted_to_printer"
+  | "in_production"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "production_error";
+export type PaymentStatus = "unpaid" | "pending" | "paid" | "refunded" | "failed";
+export type FulfillmentStatus = "not_started" | "queued" | "submitted" | "in_production" | "shipped" | "delivered" | "error";
+export type ValidationStatus = "passed" | "heuristic_only" | "failed";
+
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  draft: "Draft",
+  awaiting_payment: "Awaiting payment",
+  paid: "Paid",
+  preparing_artwork: "Preparing artwork",
+  submitted_to_printer: "Submitted to printer",
+  in_production: "In production",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+  production_error: "Production error",
+};
+
+export interface PrintSpecificationRow {
+  id: string;
+  name: string;
+  size_id: string;
+  width: number;
+  height: number;
+  units: "in" | "mm";
+  bleed: number;
+  safe_margin: number;
+  material: string;
+  finish: string;
+  cut_path_style: Json;
+  min_module_mm: number;
+  price_cents: number;
+  currency: string;
+  provider: string | null;
+  provider_sku: string | null;
+  available: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductionSnapshotRow {
+  id: string;
+  user_id: string;
+  tag_design_id: string | null;
+  vehicle_id: string | null;
+  qr_code_id: string | null;
+  print_specification_id: string | null;
+  configuration_json: Json;
+  width: number;
+  height: number;
+  units: "in" | "mm";
+  material: string;
+  finish: string;
+  quantity: number;
+  qr_destination_at_order: string;
+  svg_storage_path: string | null;
+  png_storage_path: string | null;
+  validation_status: ValidationStatus;
+  validation_report: Json;
+  created_at: string;
+}
+
+export interface OrderRow {
+  id: string;
+  order_number: string;
+  user_id: string;
+  status: OrderStatus;
+  payment_status: PaymentStatus;
+  fulfillment_status: FulfillmentStatus;
+  subtotal_cents: number;
+  shipping_cents: number;
+  tax_cents: number;
+  total_cents: number;
+  currency: string;
+  shipping_name: string;
+  shipping_line1: string;
+  shipping_line2: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_postal_code: string;
+  shipping_country: string;
+  shipping_phone: string;
+  customer_email: string;
+  payment_provider: string | null;
+  payment_reference: string | null;
+  fulfillment_provider: string | null;
+  provider_order_id: string | null;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  notes: string;
+  paid_at: string | null;
+  shipped_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderItemRow {
+  id: string;
+  order_id: string;
+  product_type: string;
+  production_snapshot_id: string | null;
+  print_specification_id: string | null;
+  description: string;
+  quantity: number;
+  unit_price_cents: number;
+  total_price_cents: number;
+  created_at: string;
+}
+
+export interface OrderEventRow {
+  id: number;
+  order_id: string;
+  status: OrderStatus;
+  note: string;
+  actor: string;
+  created_at: string;
+}
+
 export interface PublicBuildListRow {
   slug: string;
   year: number | null;
@@ -587,6 +716,56 @@ export interface Database {
         UpdateOf<TagDesignRow>,
         VehicleChild
       >;
+      print_specifications: Table<PrintSpecificationRow, InsertOf<PrintSpecificationRow>, UpdateOf<PrintSpecificationRow>>;
+      tag_production_snapshots: Table<
+        ProductionSnapshotRow,
+        InsertOf<
+          ProductionSnapshotRow,
+          "tag_design_id" | "vehicle_id" | "qr_code_id" | "print_specification_id" | "units" | "finish" | "quantity" | "svg_storage_path" | "png_storage_path" | "validation_report"
+        >,
+        Partial<Record<string, never>>,
+        VehicleChild
+      >;
+      orders: Table<
+        OrderRow,
+        InsertOf<
+          OrderRow,
+          | "order_number"
+          | "status"
+          | "payment_status"
+          | "fulfillment_status"
+          | "subtotal_cents"
+          | "shipping_cents"
+          | "tax_cents"
+          | "total_cents"
+          | "currency"
+          | "shipping_name"
+          | "shipping_line1"
+          | "shipping_line2"
+          | "shipping_city"
+          | "shipping_state"
+          | "shipping_postal_code"
+          | "shipping_country"
+          | "shipping_phone"
+          | "customer_email"
+          | "payment_provider"
+          | "payment_reference"
+          | "fulfillment_provider"
+          | "provider_order_id"
+          | "tracking_number"
+          | "tracking_url"
+          | "notes"
+          | "paid_at"
+          | "shipped_at"
+        >,
+        UpdateOf<OrderRow>
+      >;
+      order_items: Table<
+        OrderItemRow,
+        InsertOf<OrderItemRow, "product_type" | "production_snapshot_id" | "print_specification_id" | "description">,
+        UpdateOf<OrderItemRow>
+      >;
+      order_events: Table<OrderEventRow, InsertOf<OrderEventRow, "note" | "actor">, UpdateOf<OrderEventRow>>;
     };
     Views: {
       public_builds: { Row: { [K in keyof PublicBuildListRow]: PublicBuildListRow[K] }; Relationships: [] };
@@ -634,6 +813,18 @@ export interface Database {
         Args: { p_report_id: string; p_status: ReportStatus; p_note?: string | null };
         Returns: undefined;
       };
+      place_order: { Args: { p_snapshot_id: string; p_quantity: number; p_shipping: Json }; Returns: string };
+      admin_set_order_status: {
+        Args: {
+          p_order_id: string;
+          p_status: OrderStatus;
+          p_note?: string;
+          p_tracking_number?: string | null;
+          p_tracking_url?: string | null;
+          p_provider_order_id?: string | null;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       social_owner_type: SocialOwnerType;
@@ -650,6 +841,11 @@ export interface Database {
       plan: Plan;
       subscription_status: SubscriptionStatus;
       device_type: DeviceType;
+      order_status: OrderStatus;
+      payment_status: PaymentStatus;
+      fulfillment_status: FulfillmentStatus;
+      validation_status: ValidationStatus;
+      size_unit: "in" | "mm";
     };
     CompositeTypes: Record<never, never>;
   };

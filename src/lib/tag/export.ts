@@ -1,10 +1,15 @@
 "use client";
 
 import jsQR from "jsqr";
+import * as opentype from "opentype.js";
+
+import { FONTS } from "./fonts";
+import type { FontId, TextLine } from "./types";
 
 /**
- * Browser-side export + validation helpers for the designer.
- * Rasterization happens on a canvas from the exact SVG that gets downloaded.
+ * Browser-side export engine: fonts-to-paths, rasterization, multi-size
+ * decoding and image embedding. Everything starts from the exact SVG that
+ * renderTagSvg() produced.
  */
 
 export const PRINT_DPI = 300;
@@ -18,21 +23,16 @@ async function loadSvgImage(svg: string): Promise<HTMLImageElement> {
     const img = new Image();
     img.decoding = "async";
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Could not rasterize the decal preview."));
+    img.onerror = () => reject(new Error("Could not rasterize the decal artwork."));
     img.src = svgToDataUrl(svg);
   });
 }
 
-export async function rasterizeSvg(
-  svg: string,
-  widthPx: number,
-  heightPx: number,
-  background: string | null,
-): Promise<HTMLCanvasElement> {
+export async function rasterizeSvg(svg: string, widthPx: number, heightPx: number, background: string | null): Promise<HTMLCanvasElement> {
   const img = await loadSvgImage(svg);
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(widthPx);
-  canvas.height = Math.round(heightPx);
+  canvas.width = Math.max(1, Math.round(widthPx));
+  canvas.height = Math.max(1, Math.round(heightPx));
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available in this browser.");
   if (background) {
@@ -62,28 +62,100 @@ export function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
+/* ---------------------------------------------------------------------------
+ * Fonts to paths
+ * ------------------------------------------------------------------------- */
+
+const fontCache = new Map<FontId, Promise<opentype.Font>>();
+
+export function loadFont(id: FontId): Promise<opentype.Font> {
+  let p = fontCache.get(id);
+  if (!p) {
+    p = fetch(FONTS[id].file)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Font ${id} failed to load`);
+        return r.arrayBuffer();
+      })
+      .then((buf) => opentype.parse(buf));
+    fontCache.set(id, p);
+  }
+  return p;
+}
+
+/**
+ * Builds a textToPath callback for renderTagSvg() with every font the design
+ * needs already loaded. Anchors are honored by measuring the advance width.
+ */
+export async function makeTextToPath(fontIds: FontId[]): Promise<(line: TextLine) => string | null> {
+  const fonts = new Map<FontId, opentype.Font>();
+  await Promise.all([...new Set(fontIds)].map(async (id) => fonts.set(id, await loadFont(id))));
+  return (line) => {
+    const font = fonts.get(line.font);
+    if (!font) return null;
+    const opts = { letterSpacing: line.letterSpacing / line.fontSize, kerning: true };
+    const width = font.getAdvanceWidth(line.text, line.fontSize, opts);
+    const x = line.anchor === "middle" ? line.x - width / 2 : line.anchor === "end" ? line.x - width : line.x;
+    const path = font.getPath(line.text, x, line.y, line.fontSize, opts);
+    return path.toPathData(3);
+  };
+}
+
+/* ---------------------------------------------------------------------------
+ * Image embedding: production SVGs must not reference remote assets.
+ * ------------------------------------------------------------------------- */
+
+export async function embedRemoteImages(svg: string): Promise<string> {
+  const matches = [...svg.matchAll(/href="(https?:[^"]+)"/g)];
+  const unique = [...new Set(matches.map((m) => m[1]))];
+  let out = svg;
+  for (const url of unique) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+      out = out.split(`href="${url}"`).join(`href="${dataUrl}"`);
+    } catch {
+      // Leave the reference; the validation report will flag remote assets.
+    }
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------------------
+ * Decoder test
+ * ------------------------------------------------------------------------- */
+
 export interface DecodeResult {
   ok: boolean;
   decoded: string | null;
   expected: string;
+  widthPx: number;
 }
 
-/**
- * Programmatic scan test: rasterize the exact export at a modest size and
- * decode it with jsQR. A pass here plus a real phone test is the "READY TO
- * PRINT" bar.
- */
 export async function decodeQrFromSvg(svg: string, widthPx: number, heightPx: number, expected: string): Promise<DecodeResult> {
   try {
     const canvas = await rasterizeSvg(svg, widthPx, heightPx, "#FFFFFF");
     const ctx = canvas.getContext("2d");
-    if (!ctx) return { ok: false, decoded: null, expected };
+    if (!ctx) return { ok: false, decoded: null, expected, widthPx };
     const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const result =
-      jsQR(image.data, image.width, image.height, { inversionAttempts: "attemptBoth" }) ?? null;
+    const result = jsQR(image.data, image.width, image.height, { inversionAttempts: "attemptBoth" }) ?? null;
     const decoded = result?.data ?? null;
-    return { ok: decoded === expected, decoded, expected };
+    return { ok: decoded === expected, decoded, expected, widthPx };
   } catch {
-    return { ok: false, decoded: null, expected };
+    return { ok: false, decoded: null, expected, widthPx };
   }
+}
+
+/** Decode at several sizes; every size must read for a pass. */
+export async function decodeAtSizes(svg: string, aspect: number, expected: string, widths = [600, 1000, 1600]): Promise<{ ok: boolean; results: DecodeResult[] }> {
+  const results: DecodeResult[] = [];
+  for (const w of widths) {
+    results.push(await decodeQrFromSvg(svg, w, Math.round(w * aspect), expected));
+  }
+  return { ok: results.every((r) => r.ok), results };
 }

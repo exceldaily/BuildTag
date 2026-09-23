@@ -2,7 +2,13 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-/** Wordmark: a QR-corner mark plus condensed uppercase type. */
+/**
+ * Brand assets. The wordmark is the supplied BuildTag logo (car silhouette
+ * over italic type with a checkered streak), traced to a single-path SVG in
+ * /public/brand. The mark is a compact QR-corner glyph for favicons and
+ * tight spots.
+ */
+
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={cn("size-7", className)} aria-hidden="true" fill="none">
@@ -20,13 +26,24 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, href = "/" }: { className?: string; href?: string }) {
+/** The wordmark image, white on dark with a soft magenta glow. */
+export function Wordmark({ className, glow = true }: { className?: string; glow?: boolean }) {
   return (
-    <Link href={href} className={cn("inline-flex items-center gap-2 text-foreground", className)} aria-label="BuildTag home">
-      <LogoMark />
-      <span className="font-display text-xl font-bold tracking-[0.08em] uppercase">
-        Build<span className="text-signal">Tag</span>
-      </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand/logo-white.svg"
+      alt="BuildTag"
+      className={cn("h-9 w-auto select-none", glow && "drop-shadow-[0_0_14px_rgba(255,45,122,0.45)]", className)}
+      draggable={false}
+    />
+  );
+}
+
+export function Logo({ className, href = "/", size = "md" }: { className?: string; href?: string; size?: "sm" | "md" | "lg" }) {
+  const h = size === "sm" ? "h-7" : size === "lg" ? "h-14 sm:h-16" : "h-9 sm:h-10";
+  return (
+    <Link href={href} className={cn("inline-flex items-center", className)} aria-label="BuildTag home">
+      <Wordmark className={h} />
     </Link>
   );
 }

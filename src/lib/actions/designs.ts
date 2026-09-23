@@ -30,7 +30,7 @@ export async function saveTagDesignAction(input: {
     name: parsed.data.name,
     template: config.template,
     shape: config.shape,
-    style: config.style,
+    style: config.font,
     configuration_json: config as unknown as Json,
   };
 
@@ -77,4 +77,15 @@ export async function deleteTagDesignAction(id: string): Promise<ActionResult> {
   if (!data) return { ok: false, error: "Design not found." };
   revalidatePath(`/dashboard/vehicles/${data.vehicle_id}`, "layout");
   return { ok: true, data: undefined };
+}
+
+export async function renameTagDesignAction(id: string, name: string): Promise<ActionResult<TagDesignRow>> {
+  const parsed = z.object({ id: z.string().uuid(), name: z.string().trim().min(1).max(60) }).safeParse({ id, name });
+  if (!parsed.success) return { ok: false, error: "Invalid name." };
+  const { client } = await requireProfile();
+  const { data, error } = await client.from("tag_designs").update({ name: parsed.data.name }).eq("id", parsed.data.id).select("*").maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "Design not found." };
+  revalidatePath(`/dashboard/vehicles/${(data as TagDesignRow).vehicle_id}`, "layout");
+  return { ok: true, data: data as TagDesignRow };
 }

@@ -27,9 +27,10 @@ BuildTag gives a vehicle a digital build sheet connected to one permanent physic
 11. [Vercel deployment](#vercel-deployment)
 12. [QR architecture](#qr-architecture)
 13. [BuildTag Designer architecture](#buildtag-designer-architecture)
-14. [Security and privacy](#security-and-privacy)
-15. [Quality checks](#quality-checks)
-16. [Plans and future work](#plans-and-future-work)
+14. [Physical ordering](#physical-ordering)
+15. [Security and privacy](#security-and-privacy)
+16. [Quality checks](#quality-checks)
+17. [Plans and future work](#plans-and-future-work)
 
 ---
 
@@ -50,10 +51,10 @@ What an owner gets: a six-step onboarding wizard, a sectioned vehicle editor wit
 | Styling | Tailwind CSS v4, shadcn/ui primitives (base-ui), custom dark motorsport theme |
 | Data | Supabase Postgres, schema `buildtag`, Row Level Security everywhere |
 | Auth | Supabase Auth (email + password, PKCE callback at `/auth/callback`) |
-| Files | Supabase Storage buckets `buildtag-photos`, `buildtag-avatars` (public read, owner write) |
+| Files | Supabase Storage: `buildtag-photos`, `buildtag-avatars`, `buildtag-tag-assets` (public read, owner write); `buildtag-production` (private artwork) |
 | Images | `sharp` re-encodes uploads to WebP (strips EXIF/GPS), generates thumbnails |
 | Validation | Zod on every server action and route handler |
-| QR | `qrcode` (matrix generation, ECC level H), `jsqr` (decode test in the Designer) |
+| QR | `qrcode` (matrix generation, ECC level H), `jsqr` (decode test in the Designer and before every order), `opentype.js` (fonts to paths for print) |
 | Hosting | Vercel (`vercel.json` included) |
 | PWA | `app/manifest.ts`, `public/sw.js`, icons in `public/icons` |
 
@@ -67,9 +68,9 @@ src/
     build/[slug]/           public build page (+ metadata, JSON-LD)
     s/[code]/               permanent QR resolver (redirect)
     out/[slug]/part|social  outbound click tracking redirects
-    api/                    like, photo upload, avatar upload, part suggestions
-    dashboard/              owner area (garage, profile, vehicle editor, wizard, designer)
-    admin/                  moderation (search, reports)
+    api/                    like, photo/avatar/tag-asset uploads, part suggestions, production snapshots + artwork download
+    dashboard/              owner area (garage, profile, vehicle editor, wizard, designer, orders)
+    admin/                  moderation (search, reports) and the fulfillment queue
     scan/[state]/           invalid / disabled / private QR states
   components/
     build/                  public page components (hero, mods, socials, like, share, report, gallery)
@@ -79,13 +80,15 @@ src/
   lib/
     supabase/               server + browser clients (no service-role client in the app)
     db/                     data access (public read model, owner queries, plan)
-    actions/                server actions (auth, vehicles, mods, socials, photos, designs, admin, public)
+    actions/                server actions (auth, vehicles, mods, socials, photos, designs, admin, public, orders)
+    fulfillment/            FulfillmentProvider abstraction (manual queue provider included)
+    payments/               PaymentProvider abstraction (Stripe Checkout when configured)
     validation/             Zod schemas
-    qr/                     matrix generation, SVG path, contrast math
-    tag/                    Designer domain: types, styles, shapes, frames, templates, layout, render, checks, export
+    qr/                     matrix generation, styled module/finder renderer, contrast math, QR SAFE ENGINE
+    tag/                    Designer domain: types, templates, shapes, layouts, fonts, frames, backgrounds, palettes, sizes, render, export
     analytics/              visitor hashing, rate limiting, device classification
 supabase/
-  migrations/               0001 schema, 0002 functions, 0003 security
+  migrations/               0001 schema, 0002 functions, 0003 security, 0004 orders
   seed/                     demo vehicle
 scripts/                    RLS test, icon + demo image generation
 ```
@@ -132,7 +135,9 @@ See `.env.example`. Summary:
 | `BUILDTAG_VISITOR_SECRET` | server | HMAC secret for anonymous like/report keys |
 | `ADMIN_EMAILS` | server | comma-separated emails that see the Admin nav link (authorization is the `admins` table) |
 | `SUPABASE_SERVICE_ROLE_KEY` | scripts only | used by `pnpm rls:test`; never read by the app |
-| `STRIPE_*` | server, optional | reserved for future billing; nothing is charged |
+| `STRIPE_SECRET_KEY` | server, optional | when set, physical orders pay through Stripe Checkout; when empty, orders wait in `awaiting_payment` for an admin |
+| `FULFILLMENT_PROVIDER` | server, optional | `manual` (default). Name of the fulfillment provider registered in `src/lib/fulfillment` |
+| `STRIPE_*` (others) | server, optional | reserved for Pro subscription billing; nothing is charged |
 
 Service-role credentials are never referenced from client components; `src/lib/server-env.ts` imports `server-only`.
 
@@ -152,6 +157,7 @@ Files in `supabase/migrations/`, applied in order:
 | `0001_buildtag_schema.sql` | schema, enums, tables, indexes, triggers for `updated_at` |
 | `0002_buildtag_functions.sql` | authorization helpers, slug/QR triggers, counters, plan limits, the public read model (`public_builds`, `get_public_build`), scan/like/click/report functions, analytics, admin functions |
 | `0003_buildtag_security.sql` | RLS enablement + policies, storage buckets + policies, append-safe PostgREST exposure of the `buildtag` schema |
+| `0004_buildtag_orders.sql` | print specifications, immutable production snapshots, orders/items/events, production + tag-asset buckets, `place_order()` and `admin_set_order_status()` |
 
 Apply with the Supabase SQL editor, `psql`, the Supabase CLI (`supabase db push` after placing them in your project's migrations folder), or the Supabase MCP `apply_migration` tool. The exposure block in 0003 appends `buildtag` to `pgrst.db_schemas` without overwriting other schemas. If your project restricts the API through the dashboard instead, add `buildtag` under **Settings → API → Exposed schemas**.
 
@@ -163,6 +169,8 @@ Migration 0003 creates two **public-read** buckets:
 | --- | --- | --- |
 | `buildtag-photos` | `<vehicle_id>/<photo_id>/full.webp` and `thumb.webp` | 10 MB, JPEG/PNG/WebP |
 | `buildtag-avatars` | `<user_id>/avatar.webp` | 5 MB |
+| `buildtag-tag-assets` | `<user_id>/logo-*.png|svg`, `background-*.webp` | 5 MB, public read |
+| `buildtag-production` | `<user_id>/<snapshot_id>/artwork.svg|png` | 25 MB, private (owner + admin) |
 
 Writes are RLS-scoped: only the vehicle owner can write under their vehicle's folder. Uploads go through `/api/vehicles/[id]/photos`, which runs as the signed-in user, re-encodes with `sharp` (max 2000 px full, 640 px thumb, WebP) and inserts the `vehicle_photos` row.
 
@@ -222,19 +230,35 @@ Reliability rules in `src/lib/qr/generate.ts`: error correction level **H**, qui
 
 ## BuildTag Designer architecture
 
-`src/lib/tag/` is a pure, dependency-free rendering pipeline shared by the preview, the SVG export, the PNG rasterizer and the decode test:
+`src/lib/tag/` is a pure rendering pipeline shared by the live preview, control thumbnails, the decoder test, the SVG/PNG downloads and the production snapshot. One `TagConfig` in, one SVG out; nothing is re-created for print.
 
-- `types.ts`: `TagConfig` (template, shape, style, frame, size, colors, content toggles, CTA) and `TagData` (scan URL, year/make/model, nickname, power label, social handle) injected at render time so saved designs track the build.
-- `shapes.ts`: outer cut-line shapes (rectangle, rounded, square, circle, hex, shield, license plate, gauge, tire, performance badge) with a `contentRect` the layout may use.
-- `styles.ts`: automotive style presets (Minimal, OEM+, JDM, Euro, Muscle, Track, Off-Road, Carbon, Tech) with palettes, font stacks and decorations. Fonts are system font stacks so downloaded artwork renders identically in print software.
-- `frames.ts`: QR frames (tire, wheel, turbo, gauge, piston, hex, plate, carbon badge). Each declares `inner`, the fraction of its square that the QR block occupies; everything a frame draws stays outside that square.
-- `templates.ts`: Stealth, Power, Social, Spec, OEM starting points; `normalizeConfig()` coerces stored JSON.
-- `layout.ts`: places text and the QR block. The QR block is the **protected area** (code + quiet zone); text scales down before the QR is allowed to shrink below 42 % of the content width.
-- `render.ts`: `renderTagSvg(config, data, { guides, physical })` → SVG string with the cut-line clip path, style decoration, frame, opaque QR plate, vector QR path and text. `physical: true` writes real `in`/`mm` width and height for print.
-- `checks.ts`: contrast (WCAG luminance; < 3.5:1 blocks), printed module size (< 0.45 mm blocks, < 0.7 mm warns), QR presence.
-- `export.ts` (browser): rasterizes the exact export SVG to a canvas (PNG at 300 DPI, optional transparent background) and runs `jsqr` on it; the decoded string must equal the scan URL for the status to read **READY TO PRINT**. Downloads stay disabled until both the static checks and the decode test pass.
+- `types.ts`: `TagConfig` v2 (template, shape, layout, font, qr style, frame, colors, text, social, background, size, material, advanced) and `TagData` (scan URL, vehicle facts, socials) injected at render time. `templates.ts#normalizeConfig` migrates v1 designs.
+- `templates.ts`: 13 templates (Stealth, OEM+, JDM, Euro, Muscle, Track, Off-Road, Carbon, Tech Spec, Power, Social, Build Sheet, Minimal QR). Each sets shape, layout, font, palette, QR style, frame, background and text, so they differ structurally, not just in color.
+- `shapes.ts`: 12 cut-line shapes drawn into the physical W×H box (round shapes use the largest centered square) with a `contentRect` the layout may use.
+- `layouts.ts` + `layout.ts`: 9 curated layouts (stack or row) that assign text roles to slots, pick a hero role, fit text, and reserve the protected QR block. No freeform dragging, so every design stays printable.
+- `fonts.ts`: six OFL-licensed families in `/public/fonts` (licenses alongside) used both by the preview (`@font-face`) and the export (opentype.js text-to-path).
+- `../qr/render.ts`: styled QR renderer. 8 module styles and 6 finder presets change only how a dark module is drawn; the matrix and the 1:1:3:1:1 finder ratios are untouched. Optional center logo (BuildTag wordmark, owner upload, shop) on a backing plate with a clamped size (12–24 % of the code side).
+- `../qr/safety.ts`: QR SAFE ENGINE. Grades ECC, quiet zone, physical module size against the print spec, logo coverage, contrast, finder protection and decorative overlap into EXCELLENT / GOOD / RISKY / INVALID with reasons. It is labelled a design check; only the decoder can validate.
+- `frames.ts`: 10 automotive frames (tire, wheel, turbo, tachometer, piston, hex, race plate, license plate, carbon badge, engineering) drawn strictly outside the protected block.
+- `backgrounds.ts`: solid, transparent, carbon, grid, race stripe, honeycomb, brushed metal, owner photo (dimmed). The QR always keeps an opaque plate.
+- `render.ts`: `renderTagSvg(config, data, { mode, guides, physical, geometry, textToPath })`. Preview mode draws safe-zone guides (cut line, bleed, cut-safe, text-safe, protected QR block) and the material treatment; export mode adds bleed geometry, physical `in` dimensions and a named cut-path layer (`CutContour` by default, configurable per print spec).
+- `export.ts` (browser): rasterization, PNG at 300 DPI, `decodeAtSizes` (jsQR at 600/1000/1600 px, all must read), `makeTextToPath` (opentype.js) and `embedRemoteImages` so production SVGs never depend on fonts or remote assets.
 
-Saved designs live in `tag_designs.configuration_json`; a vehicle can hold many designs, all sharing the same permanent QR. Pro-labelled styles/shapes/frames are visible and usable in the MVP because billing is not live (`PRO_LOCKED = false` in `designer-controls.tsx`).
+Designer UI (`src/components/designer/`): desktop is controls / large preview / info-and-order columns; on phones the preview comes first with the controls underneath as expandable sections (Template, Shape, Layout, QR Style, Frame, Colors, Text, Vehicle Data, Social, Background, Size, Material Preview, Advanced). The preview switches between flat artwork and an approximate on-car placement (rear window, quarter window, bumper, body panel; dark or light car).
+
+## Physical ordering
+
+1. **Approve proof** in the designer: fonts are converted to paths, remote images embedded, the production SVG is re-decoded, a 300 DPI PNG is rasterized, and both are uploaded to the private `buildtag-production` bucket.
+2. `POST /api/snapshots` inserts an immutable `tag_production_snapshots` row (configuration, dimensions, material, quantity, frozen QR destination URL, storage paths, validation status and report). A database trigger rejects updates.
+3. **Checkout** (`/dashboard/orders/new?snapshot=…`) collects the shipping address; `buildtag.place_order()` prices the item from `print_specifications` (never from the client), refuses failed artwork or preview-only materials, and creates `orders`, `order_items` and an `order_events` entry in one transaction.
+4. **Payment**: `src/lib/payments` picks Stripe when `STRIPE_SECRET_KEY` is set (Checkout Session via the REST API); otherwise orders wait in `awaiting_payment` and an admin marks them paid.
+5. **Fulfillment**: `src/lib/fulfillment` is a provider abstraction. The default `manual` provider is the admin queue at `/admin/orders` (download artwork, submit, update status, tracking). A printer API plugs in by implementing `FulfillmentProvider` and setting `provider`/`provider_sku` on the relevant print specifications.
+
+Order statuses: draft, awaiting_payment, paid, preparing_artwork, submitted_to_printer, in_production, shipped, delivered, cancelled, production_error. Customers see a timeline at `/dashboard/orders/[id]`.
+
+Print specifications (`print_specifications`) hold size, bleed, safe margin, cut-path style, minimum module size, price and provider SKU. Sizes ship as Small 3×3, Standard 4×4, Wide 5×3 and Large 5×5 in; Gloss and Matte are orderable, Transparent/Reflective/Holographic are preview-only until a SKU is configured.
+
+`pnpm qr:validate` renders every template × shape × frame plus every module × finder style (with and without a center logo) through the export pipeline and decodes them with jsQR at two sizes.
 
 ## Security and privacy
 

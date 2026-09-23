@@ -64,17 +64,21 @@ export default async function HomePage() {
 
   // A real decal, rendered by the same code the Designer exports.
   const decal = renderTagSvg(
-    { ...TEMPLATES.power.build(), shape: "rounded", style: "muscle" },
+    TEMPLATES.power.build(),
     {
       scanUrl: scanUrl(siteUrl(), "GHS7K2P9"),
       year: 2022,
       make: "Toyota",
       model: "GR Supra",
+      trim: "3.0 Premium",
       nickname: "GHOST",
       powerLabel: "612 WHP",
-      socialHandle: "@ghost_supra",
+      torqueLabel: "574 WTQ",
+      modCount: 24,
+      username: "buildtag_demo",
+      socials: [{ public_id: "demo", platform: "instagram", handle: "ghost_supra", source: "vehicle" }],
     },
-    { idPrefix: "home-decal" },
+    { idPrefix: "home-decal", material: false },
   ).svg;
 
   return (

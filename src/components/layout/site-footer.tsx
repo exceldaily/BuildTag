@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { LogoMark } from "./logo";
+import { Wordmark } from "./logo";
 
 const COLUMNS = [
   {
@@ -33,12 +33,7 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-line bg-[#070708]">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <div className="flex items-center gap-2">
-            <LogoMark />
-            <span className="font-display text-xl font-bold tracking-[0.08em] uppercase">
-              Build<span className="text-signal">Tag</span>
-            </span>
-          </div>
+          <Wordmark className="h-10" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             A digital build sheet for your car, connected to one permanent QR decal. Scan the build.
           </p>

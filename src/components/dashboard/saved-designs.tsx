@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { deleteTagDesignAction, duplicateTagDesignAction } from "@/lib/actions/designs";
-import { SHAPES, STYLES, TEMPLATES } from "@/lib/tag";
+import { deleteTagDesignAction, duplicateTagDesignAction, renameTagDesignAction } from "@/lib/actions/designs";
+import { FONTS, SHAPES, TEMPLATES } from "@/lib/tag";
 import type { TagDesignRow } from "@/lib/types";
 
 export function SavedDesigns({ vehicleId, designs: initial }: { vehicleId: string; designs: TagDesignRow[] }) {
@@ -29,12 +29,28 @@ export function SavedDesigns({ vehicleId, designs: initial }: { vehicleId: strin
                 <p className="truncate font-medium">{d.name}</p>
                 <p className="text-xs text-muted-foreground">
                   {TEMPLATES[d.template as keyof typeof TEMPLATES]?.name ?? d.template} · {SHAPES[d.shape as keyof typeof SHAPES]?.name ?? d.shape} ·{" "}
-                  {STYLES[d.style as keyof typeof STYLES]?.name ?? d.style} · {new Date(d.updated_at).toLocaleDateString()}
+                  {FONTS[d.style as keyof typeof FONTS]?.name ?? d.style} · {new Date(d.updated_at).toLocaleDateString()}
                 </p>
               </div>
               <Link href={`/dashboard/vehicles/${vehicleId}/tag-designer?design=${d.id}`} className="btn-ghost btn-small">
                 Edit
               </Link>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  const next = window.prompt("Rename design", d.name)?.trim();
+                  if (!next || next === d.name) return;
+                  start(async () => {
+                    const res = await renameTagDesignAction(d.id, next);
+                    if (!res.ok) toast.error(res.error);
+                    else setDesigns((x) => x.map((y) => (y.id === d.id ? { ...y, name: res.data.name } : y)));
+                  });
+                }}
+                className="btn-ghost btn-small"
+              >
+                Rename
+              </button>
               <button
                 type="button"
                 disabled={pending}

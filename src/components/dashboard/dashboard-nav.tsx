@@ -9,6 +9,7 @@ export function DashboardNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const items = [
     { href: "/dashboard", label: "Garage", active: pathname === "/dashboard" || pathname.startsWith("/dashboard/vehicles") },
+    { href: "/dashboard/orders", label: "Orders", active: pathname.startsWith("/dashboard/orders") },
     { href: "/dashboard/profile", label: "Profile", active: pathname.startsWith("/dashboard/profile") },
     { href: "/explore", label: "Explore", active: false },
     ...(isAdmin ? [{ href: "/admin", label: "Admin", active: pathname.startsWith("/admin") }] : []),

@@ -1,9 +1,12 @@
 export * from "./types";
-export { STYLES, STYLE_LIST, SAFE_QR_PAIRS } from "./styles";
+export { FONTS, FONT_LIST, fontFamilyCss } from "./fonts";
+export { PALETTES, PALETTE_BY_ID, SAFE_QR_PAIRS } from "./palettes";
+export { SIZE_PRESETS, MATERIALS, MATERIAL_BY_ID, sizeFromPreset, toInches, formatSize } from "./sizes";
 export { SHAPES, SHAPE_LIST } from "./shapes";
 export { FRAMES, FRAME_LIST } from "./frames";
-export { TEMPLATES, TEMPLATE_LIST, SIZE_PRESETS, DEFAULT_CTA, normalizeConfig } from "./templates";
-export { layoutTag, physicalSize, moduleSizeMm, LAYOUT_WIDTH } from "./layout";
-export { renderTagSvg, escapeXml } from "./render";
-export { runDesignChecks, overallStatus } from "./checks";
-export type { DesignCheck, CheckLevel } from "./checks";
+export { LAYOUTS, LAYOUT_LIST } from "./layouts";
+export { BACKGROUND_OPTIONS } from "./backgrounds";
+export { TEMPLATES, TEMPLATE_LIST, CTA_PRESETS, ctaText, normalizeConfig } from "./templates";
+export { layoutTag, moduleSizeMm, resolveSocial, LAYOUT_WIDTH } from "./layout";
+export { renderTagSvg, escapeXml, DEFAULT_PRINT_GEOMETRY } from "./render";
+export type { RenderOptions, RenderResult, PrintGeometry } from "./render";

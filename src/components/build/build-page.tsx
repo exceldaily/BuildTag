@@ -3,7 +3,7 @@ import Link from "next/link";
 import { photoUrl } from "@/lib/storage";
 import type { PublicBuild } from "@/lib/types";
 import { formatCount, formatMoney, powerLabel, torqueLabel, vehicleTitle } from "@/lib/utils";
-import { LogoMark } from "@/components/layout/logo";
+import { LogoMark, Wordmark } from "@/components/layout/logo";
 
 import { Gallery } from "./gallery";
 import { LikeButton } from "./like-button";
@@ -30,11 +30,8 @@ export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; lik
     <main className="min-h-dvh bg-background">
       {/* Top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-white drop-shadow" aria-label="BuildTag home">
-          <LogoMark />
-          <span className="font-display text-base font-bold tracking-[0.1em] uppercase">
-            Build<span className="text-signal">Tag</span>
-          </span>
+        <Link href="/" className="inline-flex" aria-label="BuildTag home">
+          <Wordmark className="h-8 sm:h-9" />
         </Link>
         <ShareButton slug={b.slug} title={`${power ? `${power} ` : ""}${title}`} compact />
       </header>

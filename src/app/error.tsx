@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
-import { LogoMark } from "@/components/layout/logo";
+import { Wordmark } from "@/components/layout/logo";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
@@ -12,11 +12,8 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center px-6 py-16 text-center">
-      <Link href="/" className="inline-flex items-center gap-2" aria-label="BuildTag home">
-        <LogoMark />
-        <span className="font-display text-lg font-bold tracking-[0.08em] uppercase">
-          Build<span className="text-signal">Tag</span>
-        </span>
+      <Link href="/" className="inline-flex" aria-label="BuildTag home">
+        <Wordmark className="h-10" />
       </Link>
       <p className="eyebrow mt-10">ERROR</p>
       <h1 className="mt-3 text-4xl">Something misfired</h1>
