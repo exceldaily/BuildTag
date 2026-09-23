@@ -37,6 +37,15 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
     return { ok: false, error: error.message };
   }
 
+  // Supabase returns a user with no identities (and sends no email) when the
+  // address already has an account. Say so instead of promising an email.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return {
+      ok: false,
+      error: "An account with this email already exists. Sign in instead, or use Forgot password to reset it.",
+    };
+  }
+
   // Email confirmation on: no session yet.
   if (!data.session) {
     redirect(`/login?check_email=1&email=${encodeURIComponent(parsed.data.email)}`);
