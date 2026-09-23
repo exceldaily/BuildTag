@@ -12,8 +12,8 @@ export const metadata: Metadata = { title: "BuildTag", robots: { index: false } 
 
 export default async function BuildTagPage({ params }: PageProps<"/dashboard/vehicles/[id]/buildtag">) {
   const { id } = await params;
-  const { client } = await requireProfile();
-  const [vehicle, qr, designs] = await Promise.all([getOwnedVehicle(client, id), getVehicleQr(client, id), listTagDesigns(client, id)]);
+  const { client, user } = await requireProfile();
+  const [vehicle, qr, designs] = await Promise.all([getOwnedVehicle(client, id, user.id), getVehicleQr(client, id), listTagDesigns(client, id)]);
 
   if (!qr) {
     return (

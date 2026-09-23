@@ -17,7 +17,7 @@ export default async function TagDesignerPage({ params, searchParams }: PageProp
   const sp = await searchParams;
   const { client, user } = await requireProfile();
   const [vehicle, qr, socials, designs, plan] = await Promise.all([
-    getOwnedVehicle(client, id),
+    getOwnedVehicle(client, id, user.id),
     getVehicleQr(client, id),
     listSocialLinks(client, "vehicle", id),
     listTagDesigns(client, id),

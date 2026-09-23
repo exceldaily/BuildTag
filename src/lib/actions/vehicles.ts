@@ -101,11 +101,12 @@ export async function setProfilePhotoAction(id: string, url: string | null): Pro
 }
 
 export async function deleteVehicleAction(id: string): Promise<ActionResult> {
-  const { client } = await requireProfile();
-  const { data: vehicle } = await client.from("vehicles").select("slug").eq("id", id).maybeSingle();
-  const { error } = await client.from("vehicles").delete().eq("id", id);
-  if (error) return { ok: false, error: error.message };
-  // Storage objects are removed best-effort; RLS scopes the listing to the owner.
+  const { client, user } = await requireProfile();
+  const { data: vehicle } = await client.from("vehicles").select("slug").eq("id", id).eq("owner_id", user.id).maybeSingle();
+  if (!vehicle) return { ok: false, error: "Vehicle not found." };
+
+  // Storage objects first: the storage policies check vehicle ownership, so
+  // they must be removed while the vehicle row still exists.
   const { data: objects } = await client.storage.from("buildtag-photos").list(id, { limit: 1000 });
   if (objects?.length) {
     const paths: string[] = [];
@@ -115,7 +116,10 @@ export async function deleteVehicleAction(id: string): Promise<ActionResult> {
     }
     if (paths.length) await client.storage.from("buildtag-photos").remove(paths);
   }
+
+  const { error } = await client.from("vehicles").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/dashboard");
-  if (vehicle?.slug) revalidatePath(`/build/${vehicle.slug}`);
+  revalidatePath(`/build/${vehicle.slug}`);
   redirect("/dashboard");
 }

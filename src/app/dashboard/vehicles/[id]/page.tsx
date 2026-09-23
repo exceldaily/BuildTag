@@ -8,8 +8,8 @@ export const metadata: Metadata = { title: "Overview", robots: { index: false } 
 
 export default async function OverviewPage({ params }: PageProps<"/dashboard/vehicles/[id]">) {
   const { id } = await params;
-  const { client } = await requireProfile();
-  const vehicle = await getOwnedVehicle(client, id);
+  const { client, user } = await requireProfile();
+  const vehicle = await getOwnedVehicle(client, id, user.id);
   return (
     <div className="max-w-2xl">
       <OverviewForm vehicle={vehicle} />

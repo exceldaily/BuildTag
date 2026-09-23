@@ -7,8 +7,8 @@ import { VehicleSectionNav } from "@/components/dashboard/vehicle-section-nav";
 
 export default async function VehicleLayout({ children, params }: LayoutProps<"/dashboard/vehicles/[id]">) {
   const { id } = await params;
-  const { client } = await requireProfile(`/dashboard/vehicles/${id}`);
-  const vehicle = await getOwnedVehicle(client, id);
+  const { client, user } = await requireProfile(`/dashboard/vehicles/${id}`);
+  const vehicle = await getOwnedVehicle(client, id, user.id);
 
   return (
     <div>

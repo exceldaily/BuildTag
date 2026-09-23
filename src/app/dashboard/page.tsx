@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Garage", robots: { index: false } };
 export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
   const sp = await searchParams;
   const { client, user, profile } = await requireProfile("/dashboard");
-  const [vehicles, statsRes, plan] = await Promise.all([listGarage(client), client.rpc("dashboard_stats"), getUserPlan(client, user.id)]);
+  const [vehicles, statsRes, plan] = await Promise.all([listGarage(client, user.id), client.rpc("dashboard_stats"), getUserPlan(client, user.id)]);
   const stats = (statsRes.data ?? { vehicles: 0, scans: 0, likes: 0, clicks: 0 }) as unknown as DashboardStats;
   const limit = PLAN_LIMITS[plan].vehicles;
   const canAdd = vehicles.length < limit;

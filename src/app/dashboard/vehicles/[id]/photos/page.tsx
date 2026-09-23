@@ -10,6 +10,6 @@ export const metadata: Metadata = { title: "Photos", robots: { index: false } };
 export default async function PhotosPage({ params }: PageProps<"/dashboard/vehicles/[id]/photos">) {
   const { id } = await params;
   const { client, user } = await requireProfile();
-  const [vehicle, photos, plan] = await Promise.all([getOwnedVehicle(client, id), listPhotos(client, id), getUserPlan(client, user.id)]);
+  const [vehicle, photos, plan] = await Promise.all([getOwnedVehicle(client, id, user.id), listPhotos(client, id), getUserPlan(client, user.id)]);
   return <PhotoManager vehicle={vehicle} photos={photos} limit={PLAN_LIMITS[plan].photos} />;
 }

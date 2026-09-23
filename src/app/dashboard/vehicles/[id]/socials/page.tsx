@@ -11,7 +11,7 @@ export default async function SocialsPage({ params }: PageProps<"/dashboard/vehi
   const { id } = await params;
   const { client, user } = await requireProfile();
   const [vehicle, vehicleLinks, ownerLinks] = await Promise.all([
-    getOwnedVehicle(client, id),
+    getOwnedVehicle(client, id, user.id),
     listSocialLinks(client, "vehicle", id),
     listSocialLinks(client, "profile", user.id),
   ]);

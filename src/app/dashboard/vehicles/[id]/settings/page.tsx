@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "Settings", robots: { index: false } 
 
 export default async function SettingsPage({ params }: PageProps<"/dashboard/vehicles/[id]/settings">) {
   const { id } = await params;
-  const { client } = await requireProfile();
-  const vehicle = await getOwnedVehicle(client, id);
+  const { client, user } = await requireProfile();
+  const vehicle = await getOwnedVehicle(client, id, user.id);
   return (
     <div className="max-w-2xl">
       <SettingsForm vehicle={vehicle} siteUrl={siteUrl()} />

@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Add vehicle", robots: { index: false
 
 export default async function NewVehiclePage() {
   const { client, user } = await requireProfile("/dashboard/vehicles/new");
-  const [vehicles, plan] = await Promise.all([listGarage(client), getUserPlan(client, user.id)]);
+  const [vehicles, plan] = await Promise.all([listGarage(client, user.id), getUserPlan(client, user.id)]);
   const limit = PLAN_LIMITS[plan].vehicles;
 
   return (

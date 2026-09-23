@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "Analytics", robots: { index: false }
 
 export default async function AnalyticsPage({ params }: PageProps<"/dashboard/vehicles/[id]/analytics">) {
   const { id } = await params;
-  const { client } = await requireProfile();
-  const vehicle = await getOwnedVehicle(client, id);
+  const { client, user } = await requireProfile();
+  const vehicle = await getOwnedVehicle(client, id, user.id);
   const { data, error } = await client.rpc("vehicle_analytics", { p_vehicle_id: vehicle.id });
   if (error || !data) {
     return (

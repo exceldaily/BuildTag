@@ -22,19 +22,24 @@ export interface GarageVehicle extends VehicleRow {
   qr_codes: Pick<QrCodeRow, "code" | "status">[];
 }
 
-export async function listGarage(client: BuildTagClient): Promise<GarageVehicle[]> {
+/**
+ * The signed-in user's own vehicles. Filtered by owner explicitly: the RLS
+ * select policy also admits admins, and an admin's garage must stay theirs.
+ */
+export async function listGarage(client: BuildTagClient, ownerId: string): Promise<GarageVehicle[]> {
   const { data, error } = await client
     .from("vehicles")
     .select("*, qr_codes(code, status)")
+    .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as GarageVehicle[];
 }
 
-/** Vehicle by id, scoped by RLS. 404s when missing or not owned. */
-export async function getOwnedVehicle(client: BuildTagClient, id: string): Promise<VehicleRow> {
+/** Vehicle by id, owned by the caller. 404s when missing or not owned (even for admins). */
+export async function getOwnedVehicle(client: BuildTagClient, id: string, ownerId: string): Promise<VehicleRow> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const { data, error } = await client.from("vehicles").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await client.from("vehicles").select("*").eq("id", id).eq("owner_id", ownerId).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) notFound();
   return data as VehicleRow;

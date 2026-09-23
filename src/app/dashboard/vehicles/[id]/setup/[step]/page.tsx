@@ -30,7 +30,7 @@ export default async function SetupStepPage({ params }: PageProps<"/dashboard/ve
   if (idx <= 0) notFound();
 
   const { client, user } = await requireProfile();
-  const vehicle = await getOwnedVehicle(client, id);
+  const vehicle = await getOwnedVehicle(client, id, user.id);
   const base = `/dashboard/vehicles/${vehicle.id}`;
   const next = WIZARD_STEPS[idx + 1];
   const nextHref = next ? `${base}/setup/${next.id}` : `${base}/buildtag`;
