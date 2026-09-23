@@ -70,7 +70,9 @@ export async function POST(request: NextRequest) {
         if (userId) await upsert(db, token, userId, sub);
       }
     } else if (event.type.startsWith("customer.subscription.")) {
-      const sub = event.data.object as StripeSubscription;
+      // Re-read through our pinned API version: newer endpoint versions shape
+      // the subscription object differently (period fields moved to items).
+      const sub = await getSubscription((event.data.object as { id: string }).id);
       let userId: string | null = sub.metadata?.user_id ?? null;
       if (!userId) {
         const { data } = await db.rpc("billing_user_for_customer", { p_token: token, p_customer_id: sub.customer });
