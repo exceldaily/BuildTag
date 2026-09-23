@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-40 border-b border-line bg-background">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-[1720px] items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-16">
           <Logo href="/dashboard" />
           <DashboardNav isAdmin={isAdmin} />
           <div className="flex items-center gap-2">
@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </header>
       <main className="flex-1">
-        <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10">{children}</div>
+        <div className="mx-auto w-full max-w-[1720px] px-4 py-8 sm:px-6 lg:px-10 2xl:px-16 md:py-10">{children}</div>
       </main>
     </div>
   );

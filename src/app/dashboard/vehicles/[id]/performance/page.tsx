@@ -11,7 +11,7 @@ export default async function PerformancePage({ params }: PageProps<"/dashboard/
   const { client, user } = await requireProfile();
   const vehicle = await getOwnedVehicle(client, id, user.id);
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl xl:max-w-4xl">
       <PerformanceForm vehicle={vehicle} />
     </div>
   );

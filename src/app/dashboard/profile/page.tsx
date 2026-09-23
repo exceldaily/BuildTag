@@ -14,7 +14,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="grid gap-12 lg:grid-cols-[1fr_320px]">
-      <div className="max-w-2xl space-y-12">
+      <div className="max-w-2xl xl:max-w-4xl space-y-12">
         <ProfileForm profile={profile} />
         <SocialsManager
           ownerType="profile"

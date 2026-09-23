@@ -261,7 +261,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
       </div>
 
       {/* Workspace */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)_300px] lg:items-start">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)_300px] xl:grid-cols-[380px_minmax(0,1fr)_340px] 2xl:grid-cols-[440px_minmax(0,1fr)_400px] 2xl:gap-6 lg:items-start">
         {/* Center preview: first on mobile */}
         <div className="order-1 lg:order-2 lg:sticky lg:top-20">
           <DesignerPreview

@@ -93,17 +93,17 @@ export default async function HomePage() {
           <div className="streaks absolute inset-x-0 bottom-0 h-1/2 opacity-70" />
           <div className="scanlines absolute inset-0" />
         </div>
-        <div className="relative mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 md:pt-32 md:pb-36">
-          <div className="max-w-2xl">
+        <div className="relative mx-auto max-w-[1720px] px-4 pt-20 pb-24 sm:px-6 lg:px-10 2xl:px-16 md:pt-32 md:pb-36 xl:pt-40 xl:pb-44">
+          <div className="max-w-2xl xl:max-w-4xl">
             <p className="eyebrow neon-text animate-flicker">Scan the build.</p>
-            <h1 className="mt-5 text-[3.1rem] leading-[0.88] font-extrabold sm:text-6xl md:text-7xl lg:text-[6.5rem]">
+            <h1 className="mt-5 text-[3.1rem] leading-[0.88] font-extrabold sm:text-6xl md:text-7xl lg:text-[6.5rem] xl:text-[7.5rem] 2xl:text-[8.5rem]">
               <span className="speed-heading">Your build</span>
               <br />
               <span className="speed-heading">deserves</span>
               <br />
               <span className="speed-heading chrome-text">a spec sheet.</span>
             </h1>
-            <p className="mt-7 max-w-lg text-base text-foreground/85 sm:text-lg">
+            <p className="mt-7 max-w-lg text-base text-foreground/85 sm:text-lg xl:max-w-xl xl:text-xl">
               Create your digital build sheet. Stick your BuildTag on your car. Let anyone scan to see what&apos;s done
               to it.
             </p>
@@ -135,7 +135,7 @@ export default async function HomePage() {
 
       {/* SHOW BUILDTAG */}
       <section className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <ShowBuildTag decalSvg={decal} />
         </div>
       </section>
@@ -143,9 +143,9 @@ export default async function HomePage() {
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="relative overflow-hidden border-b border-line">
         <NightCity />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="relative mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <p className="eyebrow">How it works</p>
-          <h2 className="mt-3 text-4xl sm:text-5xl">
+          <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
             <span className="speed-heading">Three steps. One decal.</span>
           </h2>
           <ol className="mt-10 grid gap-5 md:grid-cols-3">
@@ -170,11 +170,11 @@ export default async function HomePage() {
       {/* FEATURES */}
       <section className="relative border-b border-line bg-[#080712]">
         <div className="absolute inset-0 grid-fade" aria-hidden="true" />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="relative mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-end">
             <div>
               <p className="eyebrow">What you get</p>
-              <h2 className="mt-3 text-4xl sm:text-5xl">
+              <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
                 <span className="speed-heading">Built for people who build.</span>
               </h2>
             </div>
@@ -183,7 +183,7 @@ export default async function HomePage() {
               it.
             </p>
           </div>
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:gap-6">
             {FEATURES.map((f, i) => (
               <li key={f.title} className="neon-card p-6">
                 <span className="label-tech">{String(i + 1).padStart(2, "0")}</span>
@@ -197,11 +197,11 @@ export default async function HomePage() {
 
       {/* STREET GALLERY */}
       <section className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="eyebrow">Wherever the car goes</p>
-              <h2 className="mt-3 text-4xl sm:text-5xl">
+              <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
                 <span className="speed-heading">The tag goes too.</span>
               </h2>
             </div>
@@ -227,11 +227,11 @@ export default async function HomePage() {
       {/* FEATURED */}
       {featured.length > 0 && (
         <section className="border-b border-line">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+          <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="eyebrow">Most scanned</p>
-                <h2 className="mt-3 text-4xl sm:text-5xl">
+                <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
                   <span className="speed-heading">On the streets tonight.</span>
                 </h2>
               </div>
@@ -239,7 +239,7 @@ export default async function HomePage() {
                 Explore all
               </Link>
             </div>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:gap-7">
               {featured.map((b) => (
                 <BuildCard key={b.slug} build={b} />
               ))}
@@ -253,9 +253,9 @@ export default async function HomePage() {
 
       {/* PRICING */}
       <section id="pricing" className="border-b border-line bg-[#080712]">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <p className="eyebrow">Plans</p>
-          <h2 className="mt-3 text-4xl sm:text-5xl">
+          <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
             <span className="speed-heading">Free is the real thing.</span>
           </h2>
           <div className="mt-10">
@@ -266,9 +266,9 @@ export default async function HomePage() {
 
       {/* FAQ */}
       <section className="border-b border-line">
-        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto max-w-3xl xl:max-w-4xl px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <p className="eyebrow">Questions</p>
-          <h2 className="mt-3 text-4xl sm:text-5xl">
+          <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
             <span className="speed-heading">Before you print.</span>
           </h2>
           <div className="mt-10">
@@ -285,7 +285,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(6,5,13,0.9),rgba(6,5,13,0.55),rgba(6,5,13,0.95))]" />
           <div className="streaks absolute inset-0 opacity-60" />
         </div>
-        <div className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:px-6 md:py-32">
+        <div className="relative mx-auto max-w-[1720px] px-4 py-24 text-center sm:px-6 lg:px-10 2xl:px-16 md:py-32">
           <h2 className="neon-text text-5xl sm:text-7xl md:text-8xl">
             <span className="speed-heading">What&apos;s done to it?</span>
           </h2>

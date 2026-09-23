@@ -31,7 +31,7 @@ const SOCIALS = [
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line bg-[#070708]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-[1720px] gap-10 px-4 py-14 sm:px-6 lg:px-10 2xl:px-16 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Wordmark className="h-10" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
@@ -68,7 +68,7 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="mx-auto flex max-w-[1720px] flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10 2xl:px-16">
           <span>
             © {new Date().getFullYear()} BuildTag. All rights reserved. Photography via{" "}
             <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer" className="underline">

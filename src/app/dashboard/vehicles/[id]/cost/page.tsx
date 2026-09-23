@@ -12,7 +12,7 @@ export default async function CostPage({ params }: PageProps<"/dashboard/vehicle
   const [vehicle, mods] = await Promise.all([getOwnedVehicle(client, id, user.id), listModifications(client, id)]);
   const modTotal = mods.reduce((sum, m) => sum + (m.price ?? 0), 0);
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl xl:max-w-4xl">
       <CostForm vehicle={vehicle} modTotal={modTotal} />
     </div>
   );

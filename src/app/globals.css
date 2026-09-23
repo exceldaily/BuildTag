@@ -295,3 +295,15 @@
 @font-face { font-family: "BT Minimal"; src: url("/fonts/Barlow-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "BT Industrial"; src: url("/fonts/BebasNeue-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BT Mono"; src: url("/fonts/ShareTechMono-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+
+/* Big monitors: scale the whole rem grid up a touch so pages feel full, not crunched. */
+@media (min-width: 1536px) {
+  html {
+    font-size: 17px;
+  }
+}
+@media (min-width: 1920px) {
+  html {
+    font-size: 18px;
+  }
+}

@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-40 border-b border-signal/40 bg-background">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-[1720px] items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-16">
           <div className="flex items-center gap-4">
             <Logo href="/admin" />
             <span className="rounded bg-signal px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-white uppercase">Admin</span>
@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </nav>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+      <main className="mx-auto w-full max-w-[1720px] flex-1 px-4 py-8 sm:px-6 lg:px-10 2xl:px-16">{children}</main>
     </div>
   );
 }

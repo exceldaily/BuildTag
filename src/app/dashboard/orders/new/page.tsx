@@ -24,7 +24,7 @@ export default async function NewOrderPage({ searchParams }: PageProps<"/dashboa
   const { data: lastOrder } = await client.from("orders").select("shipping_name, shipping_line1, shipping_line2, shipping_city, shipping_state, shipping_postal_code, shipping_country, shipping_phone").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl xl:max-w-6xl">
       <Link href="/dashboard/orders" className="label-tech hover:text-foreground">
         ← Orders
       </Link>

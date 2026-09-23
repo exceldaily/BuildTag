@@ -30,7 +30,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const stepIndex = ORDER_PIPELINE.indexOf(order.status);
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl xl:max-w-6xl">
       <Link href="/dashboard/orders" className="label-tech hover:text-foreground">
         ← Orders
       </Link>

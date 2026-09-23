@@ -55,9 +55,9 @@ export default async function ExplorePage({ searchParams }: PageProps<"/explore"
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14">
+    <div className="mx-auto max-w-[1720px] px-4 py-10 sm:px-6 lg:px-10 2xl:px-16 md:py-14">
       <p className="eyebrow">Explore</p>
-      <h1 className="mt-3 text-4xl sm:text-5xl">Public builds</h1>
+      <h1 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">Public builds</h1>
 
       <form className="mt-8 grid gap-3 rounded-lg border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_120px_120px_160px_auto]" action="/explore" method="get">
         <div>
@@ -113,7 +113,7 @@ export default async function ExplorePage({ searchParams }: PageProps<"/explore"
       </p>
 
       {result.builds.length > 0 && (
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {result.builds.map((b) => (
             <BuildCard key={b.slug} build={b} />
           ))}

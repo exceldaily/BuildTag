@@ -16,7 +16,7 @@ export default async function SocialsPage({ params }: PageProps<"/dashboard/vehi
     listSocialLinks(client, "profile", user.id),
   ]);
   return (
-    <div className="max-w-2xl space-y-12">
+    <div className="max-w-2xl xl:max-w-4xl space-y-12">
       <SocialsManager
         ownerType="vehicle"
         ownerId={vehicle.id}

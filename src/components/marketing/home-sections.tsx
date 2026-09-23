@@ -42,7 +42,7 @@ export function ShowBuildTag({ decalSvg }: { decalSvg: string }) {
 
       <div>
         <p className="eyebrow">Show BuildTag</p>
-        <h2 className="mt-3 text-4xl sm:text-5xl">
+        <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
           <span className="speed-heading">Sticker on the quarter panel.</span>
           <br />
           <span className="speed-heading chrome-text">Whole build on their phone.</span>

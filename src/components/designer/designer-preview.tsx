@@ -67,7 +67,7 @@ export function DesignerPreview({ svg, layout, config, guides, onToggleGuides, m
       </div>
 
       {mockup === "flat" ? (
-        <div className="mx-auto max-w-[560px]">
+        <div className="mx-auto max-w-[560px] xl:max-w-[720px] 2xl:max-w-[880px]">
           <div
             className="w-full rounded-md p-4"
             style={{

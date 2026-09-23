@@ -17,7 +17,7 @@ export function AdminOrderRow({ order, items }: { order: OrderRow; items: OrderI
   const [pending, start] = useTransition();
 
   return (
-    <li className="grid gap-3 px-4 py-4 lg:grid-cols-[1fr_360px]">
+    <li className="grid gap-3 px-4 py-4 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_480px]">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-3">
           <span className="font-mono text-sm">{order.order_number}</span>

@@ -14,7 +14,7 @@ export default async function NewVehiclePage() {
   const limit = PLAN_LIMITS[plan].vehicles;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-2xl xl:max-w-4xl">
       <WizardSteps current="vehicle" />
       <p className="eyebrow mt-8">Step 1 of 6</p>
       <h1 className="mt-2 text-4xl sm:text-5xl">Your vehicle</h1>

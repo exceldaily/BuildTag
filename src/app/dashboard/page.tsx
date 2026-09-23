@@ -30,7 +30,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">{plan === "pro" ? "Pro" : "Free plan"}</p>
-          <h1 className="mt-2 text-4xl sm:text-5xl">Welcome back, {profile.display_name.split(" ")[0] || profile.username}</h1>
+          <h1 className="mt-2 text-4xl sm:text-5xl xl:text-6xl">Welcome back, {profile.display_name.split(" ")[0] || profile.username}</h1>
         </div>
         {canAdd ? (
           <Link href="/dashboard/vehicles/new" className="btn-signal">
@@ -71,7 +71,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
             </Link>
           </div>
         ) : (
-          <div className="mt-4 grid gap-5 md:grid-cols-2">
+          <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {vehicles.map((v) => (
               <VehicleCard key={v.id} vehicle={v} />
             ))}

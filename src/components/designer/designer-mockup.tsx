@@ -26,7 +26,7 @@ export function CarMockup({ svg, aspect, placement, tone, widthIn }: { svg: stri
   const ground = tone === "dark" ? "#0b0916" : "#d3d0dc";
 
   return (
-    <div className="relative mx-auto max-w-[680px] overflow-hidden rounded-md" style={{ background: tone === "dark" ? "radial-gradient(ellipse at 50% 30%, #1d1836, #06050d 70%)" : "radial-gradient(ellipse at 50% 30%, #ffffff, #cfcbdc 70%)" }}>
+    <div className="relative mx-auto max-w-[680px] xl:max-w-[860px] 2xl:max-w-[1000px] overflow-hidden rounded-md" style={{ background: tone === "dark" ? "radial-gradient(ellipse at 50% 30%, #1d1836, #06050d 70%)" : "radial-gradient(ellipse at 50% 30%, #ffffff, #cfcbdc 70%)" }}>
       <svg viewBox="0 0 1000 360" className="w-full" role="img" aria-label={`Decal placed on the ${p.label.toLowerCase()} of a coupe`}>
         <rect x="0" y="300" width="1000" height="60" fill={ground} />
         {/* body: rear three-quarter-ish side profile, rear on the left */}

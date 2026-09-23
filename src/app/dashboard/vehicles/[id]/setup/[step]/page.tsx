@@ -75,7 +75,7 @@ export default async function SetupStepPage({ params }: PageProps<"/dashboard/ve
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl xl:max-w-5xl">
       <WizardSteps current={stepId} />
       <p className="eyebrow mt-8">
         Step {idx + 1} of {WIZARD_STEPS.length}

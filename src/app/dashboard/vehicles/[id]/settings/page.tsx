@@ -12,7 +12,7 @@ export default async function SettingsPage({ params }: PageProps<"/dashboard/veh
   const { client, user } = await requireProfile();
   const vehicle = await getOwnedVehicle(client, id, user.id);
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl xl:max-w-4xl">
       <SettingsForm vehicle={vehicle} siteUrl={siteUrl()} />
     </div>
   );

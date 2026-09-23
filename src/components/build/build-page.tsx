@@ -29,7 +29,7 @@ export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; lik
   return (
     <main className="min-h-dvh bg-background">
       {/* Top bar */}
-      <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-4 sm:px-6">
+      <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-4 sm:px-6 lg:px-10 2xl:px-14">
         <Link href="/" className="inline-flex" aria-label="BuildTag home">
           <Wordmark className="h-8 sm:h-9" />
         </Link>
@@ -50,7 +50,7 @@ export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; lik
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
         </div>
 
-        <div className="relative mx-auto -mt-32 max-w-5xl px-4 sm:-mt-40 sm:px-6">
+        <div className="relative mx-auto -mt-32 max-w-[1500px] px-4 sm:-mt-40 sm:px-6 lg:px-10 2xl:px-14">
           <div className="animate-rise">
             <p className="eyebrow">{viaTag ? "Scanned from a BuildTag" : "BuildTag build sheet"}</p>
             <p className="mt-2 font-display text-xl font-semibold tracking-[0.08em] text-foreground/80 uppercase sm:text-2xl">
@@ -90,9 +90,9 @@ export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; lik
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="mx-auto max-w-[1500px] px-4 sm:px-6 lg:px-10 2xl:px-14">
         {/* ABOUT + SPECS */}
-        <section className="mt-14 grid gap-10 md:grid-cols-[1.2fr_0.8fr]">
+        <section className="mt-14 grid gap-10 md:grid-cols-[1.2fr_0.8fr] xl:grid-cols-[1.35fr_0.65fr] xl:gap-16">
           <div>
             <h2 className="text-2xl">About the build</h2>
             {b.description ? (
