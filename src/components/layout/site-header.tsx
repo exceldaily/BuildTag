@@ -14,7 +14,7 @@ export async function SiteHeader() {
   const ctx = await getOptionalUser();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line/80 bg-background">
+    <header className="sticky top-0 z-40 border-b border-line/80 bg-background pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-16 max-w-[1720px] items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-16">
         <Logo />
         <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">

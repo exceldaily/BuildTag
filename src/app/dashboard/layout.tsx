@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-line bg-background">
+      <header className="sticky top-0 z-40 border-b border-line bg-background pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex h-16 max-w-[1720px] items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-16">
           <Logo href="/dashboard" />
           <DashboardNav isAdmin={isAdmin} />

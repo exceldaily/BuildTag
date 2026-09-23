@@ -44,7 +44,7 @@ export function SiteFooter() {
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="label-tech hover:text-foreground"
+                className="label-tech inline-block py-2 hover:text-foreground"
                 aria-label={`BuildTag on ${s.label} (placeholder)`}
               >
                 {s.label}
@@ -58,7 +58,7 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-2.5">
               {col.links.map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="text-sm text-foreground/80 transition-colors hover:text-foreground">
+                  <Link href={l.href} className="inline-block py-1.5 text-sm text-foreground/80 transition-colors hover:text-foreground">
                     {l.label}
                   </Link>
                 </li>
