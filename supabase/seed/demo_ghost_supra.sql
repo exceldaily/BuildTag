@@ -64,7 +64,7 @@ begin
     demo_user, 'ghost-2022-toyota-gr-supra', 2022, 'Toyota', 'GR Supra', '3.0 Premium', 'GHOST',
     E'Daily-driven, track-capable B58 build. The goal was a car that does 600+ to the wheels on pump E30, pulls clean to redline, and still idles like stock in a drive-thru.\n\nPure800 turbo with supporting fuel, cooling and a full bootmod3 custom tune. Suspension is KW V3 on TE37s for weekend track days. Next up: rear seat delete and a proper half cage.',
     '/demo/ghost-1/full.webp', '/demo/ghost-1/full.webp', 'Orlando, FL',
-    null, 'WHP', null, 'LB_FT', 24300, 'MI',
+    540, 'WHP', 520, 'LB_FT', 24300, 'MI',
     2022, 26420, true, 'Mustang AWD-500', 'public', 'active', true
   ) returning id into v_id;
 
