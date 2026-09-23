@@ -205,7 +205,7 @@ export function Faq() {
  * ------------------------------------------------------------------------- */
 export function BrandChip({ text }: { text: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded bg-background/80 px-2 py-1 backdrop-blur">
+    <span className="inline-flex items-center gap-2 rounded bg-background/80 px-2 py-1">
       <LogoMark className="size-4" />
       <span className="font-display text-[11px] font-bold tracking-[0.2em] uppercase">{text}</span>
     </span>

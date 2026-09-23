@@ -126,7 +126,7 @@ export function TagDesigner({ vehicleId, code, data, plan, initialDesign, savedD
 
       <div className="mt-4 grid gap-0 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-6">
         {/* Preview: sticky on top for phones, right column on desktop */}
-        <div className="sticky top-16 z-20 order-1 bg-background/95 px-4 pb-3 backdrop-blur sm:px-0 lg:static lg:order-2 lg:bg-transparent lg:pb-0">
+        <div className="sticky top-16 z-20 order-1 bg-background/95 px-4 pb-3 sm:px-0 lg:static lg:order-2 lg:bg-transparent lg:pb-0">
           <DesignerPreview
             svg={rendered.svg}
             layout={rendered.layout}

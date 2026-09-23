@@ -8,7 +8,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireAdmin();
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-signal/40 bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-signal/40 bg-background">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-4">
             <Logo href="/admin" />

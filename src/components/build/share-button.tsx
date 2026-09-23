@@ -25,7 +25,7 @@ export function ShareButton({ slug, title, compact = false }: { slug: string; ti
 
   if (compact) {
     return (
-      <button type="button" onClick={share} className="inline-flex size-10 items-center justify-center rounded-md bg-background/60 text-white backdrop-blur transition-colors hover:bg-background/90" aria-label="Share build">
+      <button type="button" onClick={share} className="inline-flex size-10 items-center justify-center rounded-md bg-background/60 text-white transition-colors hover:bg-background/90" aria-label="Share build">
         <Share2 className="size-4" aria-hidden="true" />
       </button>
     );

@@ -21,7 +21,7 @@ export function VehicleCard({ vehicle: v }: { vehicle: GarageVehicle }) {
           </Link>
         )}
         <div className="absolute top-3 left-3 flex gap-2">
-          {v.visibility !== "public" && <span className="rounded bg-background/85 px-2 py-1 font-display text-xs font-bold tracking-wider uppercase backdrop-blur">{v.visibility}</span>}
+          {v.visibility !== "public" && <span className="rounded bg-background/85 px-2 py-1 font-display text-xs font-bold tracking-wider uppercase">{v.visibility}</span>}
           {v.status === "disabled" && <span className="rounded bg-destructive px-2 py-1 font-display text-xs font-bold tracking-wider text-white uppercase">Disabled</span>}
         </div>
       </div>

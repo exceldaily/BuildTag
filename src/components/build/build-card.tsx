@@ -28,7 +28,7 @@ export function BuildCard({ build }: { build: PublicBuildListRow }) {
           </div>
         )}
         {power && (
-          <span className="absolute top-3 left-3 rounded bg-background/85 px-2 py-1 font-display text-sm font-bold tracking-wider backdrop-blur">
+          <span className="absolute top-3 left-3 rounded bg-background/85 px-2 py-1 font-display text-sm font-bold tracking-wider">
             {power}
           </span>
         )}

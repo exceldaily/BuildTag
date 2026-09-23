@@ -117,7 +117,7 @@ export default async function HomePage() {
                 ["Vector", "print export", "border-neon-cyan/50 text-neon-cyan"],
                 ["Free", "to start", "border-neon-amber/50 text-neon-amber"],
               ].map(([a, b, cls]) => (
-                <div key={a} className={`rounded-md border bg-background/60 px-3 py-2 backdrop-blur ${cls}`}>
+                <div key={a} className={`rounded-md border bg-background/60 px-3 py-2 ${cls}`}>
                   <dt className="font-display text-lg leading-none font-bold uppercase">{a}</dt>
                   <dd className="label-tech mt-1">{b}</dd>
                 </div>
