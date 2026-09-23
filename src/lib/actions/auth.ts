@@ -29,7 +29,7 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      emailRedirectTo: `${siteUrl()}/auth/callback?next=/dashboard`,
+      emailRedirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent("/dashboard?welcome=1")}`,
       data: { username: parsed.data.username, display_name: parsed.data.display_name, app: "buildtag" },
     },
   });

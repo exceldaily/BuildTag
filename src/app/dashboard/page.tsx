@@ -9,6 +9,7 @@ import type { DashboardStats } from "@/lib/types";
 import { formatCount } from "@/lib/utils";
 import { StatTile } from "@/components/dashboard/stat-tile";
 import { VehicleCard } from "@/components/dashboard/vehicle-card";
+import { InstallAppPrompt } from "@/components/layout/install-app";
 
 export const metadata: Metadata = { title: "Garage", robots: { index: false } };
 
@@ -27,6 +28,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           You do not have access to that area.
         </p>
       )}
+      <InstallAppPrompt welcome={sp.welcome === "1"} className="mb-8" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">{plan === "pro" ? "Pro" : "Free plan"}</p>
