@@ -37,8 +37,15 @@ export const metadata: Metadata = {
     title: "BuildTag | Scan the build.",
     description:
       "Your build deserves a spec sheet. Stick your BuildTag on your car and let anyone scan to see what is done to it.",
+    url: "/",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "BuildTag. Your build deserves a spec sheet." }],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    title: "BuildTag | Scan the build.",
+    description: "Your build deserves a spec sheet. Stick your BuildTag on your car and let anyone scan to see what is done to it.",
+    images: ["/og.png"],
+  },
   icons: { icon: "/icons/icon.svg", apple: "/icons/apple-touch-icon.png" },
 };
 

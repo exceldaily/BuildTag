@@ -46,13 +46,13 @@ export async function generateMetadata({ params }: PageProps<"/build/[slug]">): 
       url: canonical,
       title: `${title} | BuildTag`,
       description,
-      images: image ? [{ url: image, alt: vehicleTitle(b) }] : undefined,
+      images: image ? [{ url: image, alt: vehicleTitle(b) }] : [{ url: "/og.png", width: 1200, height: 630, alt: "BuildTag" }],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: `${title} | BuildTag`,
       description,
-      images: image ? [image] : undefined,
+      images: image ? [image] : ["/og.png"],
     },
   };
 }

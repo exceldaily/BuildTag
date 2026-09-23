@@ -72,6 +72,9 @@ export async function POST(request: NextRequest) {
   const pngPath = `${base}/artwork.png`;
 
   const svgText = await svgFile.text();
+  if (/<text[\s>]/.test(svgText) || svgText.includes("NaN")) {
+    return NextResponse.json({ ok: false, error: "Artwork still contains live text or broken outlines. Re-open the designer and approve again." }, { status: 422 });
+  }
   if (!svgText.startsWith("<svg")) return NextResponse.json({ ok: false, error: "Invalid SVG artwork." }, { status: 400 });
 
   const uploads = await Promise.all([

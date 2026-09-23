@@ -95,8 +95,9 @@ export async function makeTextToPath(fontIds: FontId[]): Promise<(line: TextLine
     const opts = { letterSpacing: line.letterSpacing / line.fontSize, kerning: true };
     const width = font.getAdvanceWidth(line.text, line.fontSize, opts);
     const x = line.anchor === "middle" ? line.x - width / 2 : line.anchor === "end" ? line.x - width : line.x;
-    const path = font.getPath(line.text, x, line.y, line.fontSize, opts);
-    return path.toPathData(3);
+    const d = font.getPath(line.text, x, line.y, line.fontSize, opts).toPathData(3);
+    if (d.includes("NaN")) throw new Error(`Font outline failed for "${line.text}". Try another font or report this.`);
+    return d;
   };
 }
 
