@@ -260,7 +260,7 @@ function EditModForm({ mod, shops, onSaved }: { mod: ModificationRow; shops: Sho
           <input name="price" type="number" inputMode="decimal" min={0} step="0.01" defaultValue={mod.price ?? ""} className="field" />
         </Field>
         <label className="flex items-center gap-2 self-end pb-3 text-sm">
-          <input type="checkbox" name="price_public" defaultChecked={mod.price_public} className="size-4 accent-[#e4162b]" />
+          <input type="checkbox" name="price_public" defaultChecked={mod.price_public} className="size-4 accent-[#ff2d7a]" />
           Show price publicly
         </label>
       </div>

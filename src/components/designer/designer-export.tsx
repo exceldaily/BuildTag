@@ -114,7 +114,7 @@ export function DesignerExport({ config, svg, layout, checks, status, decode, re
           <Info label="Resolution" value={`${PRINT_DPI} DPI`} />
         </dl>
         <label className="mt-4 flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={transparent} onChange={(e) => setTransparent(e.target.checked)} className="size-4 accent-[#e4162b]" />
+          <input type="checkbox" checked={transparent} onChange={(e) => setTransparent(e.target.checked)} className="size-4 accent-[#ff2d7a]" />
           Transparent background outside the cut line (PNG)
         </label>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">

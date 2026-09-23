@@ -42,7 +42,7 @@ export function SettingsForm({ vehicle, siteUrl }: { vehicle: VehicleRow; siteUr
               { v: "private", t: "Private", d: "Only you. Scans show a private notice." },
             ].map((o) => (
               <label key={o.v} className="flex cursor-pointer gap-3 rounded-md border border-line p-3 has-checked:border-signal">
-                <input type="radio" name="visibility" value={o.v} defaultChecked={vehicle.visibility === o.v} className="mt-1 accent-[#e4162b]" />
+                <input type="radio" name="visibility" value={o.v} defaultChecked={vehicle.visibility === o.v} className="mt-1 accent-[#ff2d7a]" />
                 <span>
                   <span className="block font-display text-sm font-bold tracking-wider uppercase">{o.t}</span>
                   <span className="block text-xs text-muted-foreground">{o.d}</span>
@@ -53,7 +53,7 @@ export function SettingsForm({ vehicle, siteUrl }: { vehicle: VehicleRow; siteUr
         </fieldset>
 
         <label className="flex items-center gap-3 rounded-md border border-line px-4 py-3 text-sm">
-          <input type="checkbox" name="show_owner_section" defaultChecked={vehicle.show_owner_section} className="size-4 accent-[#e4162b]" />
+          <input type="checkbox" name="show_owner_section" defaultChecked={vehicle.show_owner_section} className="size-4 accent-[#ff2d7a]" />
           Show the owner section (your name, bio and personal socials) on this build
         </label>
 

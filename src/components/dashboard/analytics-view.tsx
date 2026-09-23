@@ -37,7 +37,7 @@ export function AnalyticsView({ data }: { data: VehicleAnalytics }) {
             {series.map((d, i) => {
               const h = (d.count / max) * 90;
               return (
-                <rect key={d.day} x={i * 12 + 2} y={100 - h} width={8} height={h} rx={1} fill={d.count ? "#e4162b" : "#2b2b31"}>
+                <rect key={d.day} x={i * 12 + 2} y={100 - h} width={8} height={h} rx={1} fill={d.count ? "#ff2d7a" : "#2b2b31"}>
                   <title>{`${fmtDay(d.day)}: ${d.count} scans`}</title>
                 </rect>
               );

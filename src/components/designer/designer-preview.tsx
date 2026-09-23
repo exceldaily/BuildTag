@@ -55,7 +55,7 @@ export function DesignerPreview({ svg, layout, config, guides, onToggleGuides, s
             {statusLabel}
           </span>
           <label className="flex items-center gap-1.5 text-muted-foreground">
-            <input type="checkbox" checked={guides} onChange={onToggleGuides} className="size-3.5 accent-[#e4162b]" />
+            <input type="checkbox" checked={guides} onChange={onToggleGuides} className="size-3.5 accent-[#ff2d7a]" />
             Guides
           </label>
         </div>

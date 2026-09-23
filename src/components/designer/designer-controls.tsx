@@ -141,7 +141,7 @@ export function DesignerControls({ panel, config, data, plan, onChange }: Props)
             {rows.map((r) => (
               <li key={r.key}>
                 <label className={cn("flex items-center gap-3 px-3 py-2.5 text-sm", r.disabled && "opacity-50")}>
-                  <input type="checkbox" checked={Boolean(c[r.key])} disabled={r.disabled} onChange={() => toggle(r.key)} className="size-4 accent-[#e4162b]" />
+                  <input type="checkbox" checked={Boolean(c[r.key])} disabled={r.disabled} onChange={() => toggle(r.key)} className="size-4 accent-[#ff2d7a]" />
                   <span className="flex-1">{r.label}</span>
                   {r.value !== undefined && <span className="truncate text-xs text-muted-foreground">{r.value || "not set"}</span>}
                 </label>

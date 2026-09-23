@@ -34,7 +34,7 @@ export function ReportDialog({ slug }: { slug: string }) {
                 <div className="space-y-2">
                   {REPORT_REASONS.map((r) => (
                     <label key={r.value} className="flex items-center gap-2 text-sm">
-                      <input type="radio" name="reason" value={r.value} required className="accent-[#e4162b]" />
+                      <input type="radio" name="reason" value={r.value} required className="accent-[#ff2d7a]" />
                       {r.label}
                     </label>
                   ))}

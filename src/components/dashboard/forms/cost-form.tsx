@@ -41,7 +41,7 @@ export function CostForm({ vehicle, modTotal }: { vehicle: VehicleRow; modTotal:
         </div>
         <div className="flex items-end">
           <label className="flex items-center gap-3 rounded-md border border-line px-4 py-3 text-sm">
-            <input type="checkbox" name="build_cost_public" defaultChecked={vehicle.build_cost_public} className="size-4 accent-[#e4162b]" />
+            <input type="checkbox" name="build_cost_public" defaultChecked={vehicle.build_cost_public} className="size-4 accent-[#ff2d7a]" />
             Show the total on the public build page
           </label>
         </div>
