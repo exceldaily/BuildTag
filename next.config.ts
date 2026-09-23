@@ -17,6 +17,17 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  async redirects() {
+    // Old Vercel address and www both land on the canonical domain.
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "buildtag.vercel.app" }],
+        destination: "https://buildtags.app/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
