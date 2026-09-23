@@ -135,9 +135,11 @@ See `.env.example`. Summary:
 | `BUILDTAG_VISITOR_SECRET` | server | HMAC secret for anonymous like/report keys |
 | `ADMIN_EMAILS` | server | comma-separated emails that see the Admin nav link (authorization is the `admins` table) |
 | `SUPABASE_SERVICE_ROLE_KEY` | scripts only | used by `pnpm rls:test`; never read by the app |
-| `STRIPE_SECRET_KEY` | server, optional | when set, physical orders pay through Stripe Checkout; when empty, orders wait in `awaiting_payment` for an admin |
+| `STRIPE_SECRET_KEY` | server | turns on Stripe Checkout for decal orders and Pro |
+| `STRIPE_WEBHOOK_SECRET` | server | signing secret of the endpoint registered at `/api/stripe/webhook` |
+| `STRIPE_PRICE_PRO_MONTHLY` / `STRIPE_PRICE_PRO_YEARLY` | server | recurring Stripe prices ($5/mo, $50/yr); both must be set for Pro checkout to show |
+| `BUILDTAG_INTERNAL_TOKEN` | server | random string that must equal `buildtag.private_settings.billing_token`; lets the webhook write orders and subscriptions without a service-role key |
 | `FULFILLMENT_PROVIDER` | server, optional | `manual` (default). Name of the fulfillment provider registered in `src/lib/fulfillment` |
-| `STRIPE_*` (others) | server, optional | reserved for Pro subscription billing; nothing is charged |
 
 Service-role credentials are never referenced from client components; `src/lib/server-env.ts` imports `server-only`.
 
@@ -160,6 +162,7 @@ Files in `supabase/migrations/`, applied in order:
 | `0004_buildtag_orders.sql` | print specifications, immutable production snapshots, orders/items/events, production + tag-asset buckets, `place_order()` and `admin_set_order_status()` |
 | `0005_buildtag_ensure_profile_race.sql` | `ensure_profile()` tolerates concurrent first-visit inserts |
 | `0006_buildtag_affiliate.sql` | public payload flags affiliate parts (`is_affiliate`, `has_affiliate_links`); analytics report affiliate clicks and monetized parts |
+| `0007_buildtag_billing.sql` | `private_settings` (billing token), token-gated `billing_*` functions the Stripe webhook writes through, `billing_remember_customer()` |
 
 Apply with the Supabase SQL editor, `psql`, the Supabase CLI (`supabase db push` after placing them in your project's migrations folder), or the Supabase MCP `apply_migration` tool. The exposure block in 0003 appends `buildtag` to `pgrst.db_schemas` without overwriting other schemas. If your project restricts the API through the dashboard instead, add `buildtag` under **Settings → API → Exposed schemas**.
 
@@ -270,6 +273,13 @@ Every modification can carry an owner's own affiliate link. Nothing is brokered 
 - Editor (`src/components/dashboard/affiliate-panel.tsx`): monetization summary and progress at the top of the modifications page, an **Earning / Link / + Earn** badge on every part, and an "Earn from this part" block in the part dialog that auto-fills the program.
 - Public page: `View part` goes through `/out/<slug>/part/<id>` (affiliate URL preferred, click recorded, `rel="nofollow sponsored"`) and the modifications section shows the affiliate disclosure whenever the build has any affiliate link.
 - Analytics: affiliate clicks (all time and 30 days), monetized vs linked vs total parts, and an **Earning** marker on the most-clicked parts.
+
+## Billing (Stripe)
+
+- **Pro subscription**: `$5/month` or `$50/year`. The profile page shows a plan panel with both options; `startProCheckoutAction` opens Stripe Checkout in subscription mode with `client_reference_id` = user id and `subscription_data.metadata.user_id`. `openBillingPortalAction` opens the Stripe customer portal (change plan, card, cancel).
+- **Decal orders**: `startCheckoutAction` opens Checkout in payment mode with `metadata.order_id`.
+- **Webhook** (`/api/stripe/webhook`): verifies `Stripe-Signature` (HMAC v1, 5 minute tolerance), then calls `billing_mark_order_paid` or `billing_upsert_subscription`. Those are security-definer functions gated by `BUILDTAG_INTERNAL_TOKEN`, so the app still holds no service-role key. Events to subscribe: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`.
+- `buildtag.user_plan()` reads the subscription row, and the database enforces plan limits (vehicles, photos, designs) through `plan_limits()`.
 
 ## Security and privacy
 

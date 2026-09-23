@@ -139,20 +139,26 @@ export function Pricing() {
       <div className="neon-card border-signal/50 p-6 sm:p-8">
         <div className="flex items-center justify-between">
           <p className="label-tech text-signal">Pro</p>
-          <span className="rounded border border-neon-amber/60 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-neon-amber uppercase">Coming soon</span>
+          <span className="rounded border border-neon-cyan/60 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-neon-cyan uppercase">2 months free yearly</span>
         </div>
         <p className="mt-2 font-display text-5xl font-extrabold uppercase">
-          Garage <span className="text-lg text-muted-foreground">tier</span>
+          $5 <span className="text-lg text-muted-foreground">a month</span>
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          or <span className="font-display text-xl font-bold text-foreground">$50</span> a year
         </p>
         <ul className="mt-6 space-y-2 text-sm text-foreground/85">
-          {["Up to 10 vehicles", "60 photos per vehicle", "Premium decal styles and QR frames", "Custom colors and branding", "Advanced analytics", "Build cost tools"].map((f) => (
+          {["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Every template, frame and material preview", "Affiliate earnings analytics", "Priority support"].map((f) => (
             <li key={f} className="flex gap-2">
               <span className="mt-2 size-1.5 shrink-0 rounded-full bg-signal" />
               {f}
             </li>
           ))}
         </ul>
-        <p className="mt-8 text-xs text-muted-foreground">Everything Pro-labelled is unlocked for everyone while BuildTag is in early access.</p>
+        <Link href="/signup?plan=pro" className="btn-ghost mt-8 w-full border-signal/60">
+          Go Pro
+        </Link>
+        <p className="mt-3 text-center text-xs text-muted-foreground">Secure checkout by Stripe. Cancel any time.</p>
       </div>
     </div>
   );

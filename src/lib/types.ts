@@ -823,6 +823,13 @@ export interface Database {
         Returns: undefined;
       };
       place_order: { Args: { p_snapshot_id: string; p_quantity: number; p_shipping: Json }; Returns: string };
+      billing_mark_order_paid: { Args: { p_token: string; p_order_id: string; p_reference: string | null }; Returns: boolean };
+      billing_upsert_subscription: {
+        Args: { p_token: string; p_user_id: string; p_plan: Plan; p_status: SubscriptionStatus; p_customer_id: string | null; p_subscription_id: string | null; p_period_end: string | null };
+        Returns: undefined;
+      };
+      billing_user_for_customer: { Args: { p_token: string; p_customer_id: string }; Returns: string | null };
+      billing_remember_customer: { Args: { p_customer_id: string }; Returns: undefined };
       admin_set_order_status: {
         Args: {
           p_order_id: string;

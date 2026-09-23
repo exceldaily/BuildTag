@@ -14,10 +14,13 @@ const serverSchema = z.object({
   ADMIN_EMAILS: z.string().default(""),
   /** Optional. Only used by scripts (RLS tests, demo seeding). Never by the app. */
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
-  /** Future billing. Presence does not enable checkout. */
+  /** Stripe. The secret key turns on decal checkout; the two prices turn on Pro. */
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PRICE_PRO_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_PRO_YEARLY: z.string().optional(),
+  /** Shared secret between the Stripe webhook route and the billing_* database functions. */
+  BUILDTAG_INTERNAL_TOKEN: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -33,6 +36,8 @@ export function serverEnv(): ServerEnv {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || undefined,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || undefined,
     STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY || undefined,
+    STRIPE_PRICE_PRO_YEARLY: process.env.STRIPE_PRICE_PRO_YEARLY || undefined,
+    BUILDTAG_INTERNAL_TOKEN: process.env.BUILDTAG_INTERNAL_TOKEN || undefined,
   });
   if (!parsed.success) {
     throw new Error(
