@@ -17,7 +17,7 @@ import { SocialButtons } from "./social-buttons";
  * The scanned build page. Server-rendered, image-first, minimal JS: only
  * like, share, report and gallery are client components.
  */
-export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; liked: boolean; viaTag: boolean }) {
+export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build: PublicBuild; liked: boolean; viaTag: boolean; ownerPro?: boolean }) {
   const title = vehicleTitle(b);
   const power = powerLabel(b.horsepower, b.horsepower_type);
   const torque = torqueLabel(b.torque, b.torque_unit, b.horsepower_type);
@@ -140,7 +140,7 @@ export function BuildPage({ build: b, liked, viaTag }: { build: PublicBuild; lik
         {/* OWNER */}
         {b.show_owner_section && (
           <section id="owner" className="mt-14 scroll-mt-20">
-            <OwnerSection slug={b.slug} owner={b.owner} extraSocials={extraOwnerSocials} />
+            <OwnerSection slug={b.slug} owner={b.owner} extraSocials={extraOwnerSocials} pro={ownerPro} />
           </section>
         )}
 

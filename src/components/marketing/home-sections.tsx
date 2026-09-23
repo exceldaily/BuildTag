@@ -148,7 +148,7 @@ export function Pricing() {
           or <span className="font-display text-xl font-bold text-foreground">$50</span> a year
         </p>
         <ul className="mt-6 space-y-2 text-sm text-foreground/85">
-          {["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Every template, frame and material preview", "Affiliate earnings analytics", "Priority support"].map((f) => (
+          {["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Pro badge on your build page", "Priority support"].map((f) => (
             <li key={f} className="flex gap-2">
               <span className="mt-2 size-1.5 shrink-0 rounded-full bg-signal" />
               {f}

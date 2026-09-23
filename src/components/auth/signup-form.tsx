@@ -5,12 +5,13 @@ import { useActionState } from "react";
 import { signUpAction } from "@/lib/actions/auth";
 import type { ActionResult } from "@/lib/validation/common";
 
-export function SignupForm() {
+export function SignupForm({ plan }: { plan?: "pro" }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(signUpAction, null);
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
   return (
     <form action={action} className="space-y-4" noValidate>
+      {plan && <input type="hidden" name="plan" value={plan} />}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="display_name" className="field-label">

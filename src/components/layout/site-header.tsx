@@ -6,6 +6,7 @@ import { Logo } from "./logo";
 
 const NAV = [
   { href: "/explore", label: "Explore" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/build/ghost-2022-toyota-gr-supra", label: "Example" },
   { href: "/#how-it-works", label: "How it works" },
 ];

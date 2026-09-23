@@ -7,6 +7,7 @@ BuildTag gives a vehicle a digital build sheet connected to one permanent physic
 - Public build page: `/build/<slug>`
 - Permanent scan endpoint encoded in every decal: `/s/<CODE>`
 - Explore: `/explore`
+- Scan leaderboard: `/leaderboard` (all time, this month, this week, today)
 - Owner dashboard: `/dashboard`
 - Admin: `/admin`
 
@@ -163,6 +164,7 @@ Files in `supabase/migrations/`, applied in order:
 | `0005_buildtag_ensure_profile_race.sql` | `ensure_profile()` tolerates concurrent first-visit inserts |
 | `0006_buildtag_affiliate.sql` | public payload flags affiliate parts (`is_affiliate`, `has_affiliate_links`); analytics report affiliate clicks and monetized parts |
 | `0007_buildtag_billing.sql` | `private_settings` (billing token), token-gated `billing_*` functions the Stripe webhook writes through, `billing_remember_customer()` |
+| `0008_buildtag_leaderboard.sql` | `scan_leaderboard(period, limit)` for `/leaderboard` (all time, month, week, day) and `build_owner_plan()` for the Pro badge |
 
 Apply with the Supabase SQL editor, `psql`, the Supabase CLI (`supabase db push` after placing them in your project's migrations folder), or the Supabase MCP `apply_migration` tool. The exposure block in 0003 appends `buildtag` to `pgrst.db_schemas` without overwriting other schemas. If your project restricts the API through the dashboard instead, add `buildtag` under **Settings → API → Exposed schemas**.
 

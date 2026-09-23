@@ -2,7 +2,7 @@ import type { PublicOwner, PublicSocial } from "@/lib/types";
 
 import { SocialButtons } from "./social-buttons";
 
-export function OwnerSection({ slug, owner, extraSocials }: { slug: string; owner: PublicOwner; extraSocials: PublicSocial[] }) {
+export function OwnerSection({ slug, owner, extraSocials, pro = false }: { slug: string; owner: PublicOwner; extraSocials: PublicSocial[]; pro?: boolean }) {
   const socials = owner.socials ?? [];
   return (
     <div className="panel p-5 sm:p-6">
@@ -19,7 +19,14 @@ export function OwnerSection({ slug, owner, extraSocials }: { slug: string; owne
           )}
         </div>
         <div className="min-w-0">
-          <p className="text-2xl leading-tight font-bold font-display uppercase">{owner.display_name || owner.username}</p>
+          <p className="flex flex-wrap items-center gap-2 text-2xl leading-tight font-bold font-display uppercase">
+            {owner.display_name || owner.username}
+            {pro && (
+              <span className="rounded border border-signal/60 bg-signal/10 px-1.5 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-signal" title="BuildTag Pro member">
+                PRO
+              </span>
+            )}
+          </p>
           <p className="text-sm text-muted-foreground">
             @{owner.username}
             {owner.location_text ? ` · ${owner.location_text}` : ""}

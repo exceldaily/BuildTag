@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 import { publicEnv } from "@/lib/env";
-import type { Database, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
+import type { Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -103,4 +103,19 @@ export async function featuredBuilds(limit = 6): Promise<PublicBuildListRow[]> {
   const client = anonClient();
   const { data } = await client.from("public_builds").select("*").order("scan_count", { ascending: false }).limit(limit);
   return (data ?? []) as PublicBuildListRow[];
+}
+
+export type LeaderboardPeriod = "all" | "month" | "week" | "day";
+
+/** Most scanned public builds for a period. Cache-friendly (anon client). */
+export async function scanLeaderboard(period: LeaderboardPeriod, limit = 25): Promise<LeaderboardRow[]> {
+  const { data, error } = await anonClient().rpc("scan_leaderboard", { p_period: period, p_limit: limit });
+  if (error || !Array.isArray(data)) return [];
+  return data as unknown as LeaderboardRow[];
+}
+
+/** Plan of a build's owner, for the Pro badge on the public page. */
+export async function buildOwnerPlan(slug: string): Promise<Plan> {
+  const { data } = await anonClient().rpc("build_owner_plan", { p_slug: slug.toLowerCase() });
+  return (data as Plan | null) ?? "free";
 }

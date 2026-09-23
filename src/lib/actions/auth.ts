@@ -19,6 +19,8 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
     return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
   }
   const client = await createServerSupabaseClient();
+  const wantsPro = form.get("plan") === "pro";
+  const landing = wantsPro ? "/dashboard/profile?plan=pro" : "/dashboard?welcome=1";
 
   const { data: available } = await client.rpc("username_available", { p_username: parsed.data.username });
   if (available === false) {
@@ -29,7 +31,7 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      emailRedirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent("/dashboard?welcome=1")}`,
+      emailRedirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent(landing)}`,
       data: { username: parsed.data.username, display_name: parsed.data.display_name, app: "buildtag" },
     },
   });
@@ -50,7 +52,7 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
   if (!data.session) {
     redirect(`/login?check_email=1&email=${encodeURIComponent(parsed.data.email)}`);
   }
-  redirect("/dashboard?welcome=1");
+  redirect(landing);
 }
 
 export async function signInAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {

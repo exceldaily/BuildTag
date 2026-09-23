@@ -8,6 +8,7 @@ const COLUMNS = [
     links: [
       { href: "/signup", label: "Create Your Build" },
       { href: "/explore", label: "Explore Builds" },
+      { href: "/leaderboard", label: "Scan Leaderboard" },
       { href: "/about", label: "About" },
     ],
   },
@@ -22,11 +23,7 @@ const COLUMNS = [
   },
 ];
 
-const SOCIALS = [
-  { label: "Instagram", href: "https://instagram.com/" },
-  { label: "TikTok", href: "https://www.tiktok.com/" },
-  { label: "YouTube", href: "https://www.youtube.com/" },
-];
+const SOCIALS = [{ label: "Instagram", handle: "@buildtags.app", href: "https://www.instagram.com/buildtags.app" }];
 
 export function SiteFooter() {
   return (
@@ -45,9 +42,9 @@ export function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="label-tech inline-block py-2 hover:text-foreground"
-                aria-label={`BuildTag on ${s.label} (placeholder)`}
+                aria-label={`BuildTag on ${s.label}: ${s.handle}`}
               >
-                {s.label}
+                {s.label} <span className="normal-case tracking-normal text-foreground/70">{s.handle}</span>
               </a>
             ))}
           </div>

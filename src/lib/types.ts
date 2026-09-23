@@ -106,6 +106,22 @@ export const REPORT_REASONS: { value: ReportReason; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+export interface LeaderboardRow {
+  slug: string;
+  year: number | null;
+  make: string;
+  model: string;
+  trim: string;
+  nickname: string;
+  hero_image_url: string | null;
+  owner_username: string;
+  like_count: number;
+  mod_count: number;
+  horsepower: number | null;
+  horsepower_type: HorsepowerType;
+  scans: number;
+}
+
 /* ---------------------------------------------------------------------------
  * Row types
  * ------------------------------------------------------------------------- */
@@ -830,6 +846,8 @@ export interface Database {
       };
       billing_user_for_customer: { Args: { p_token: string; p_customer_id: string }; Returns: string | null };
       billing_remember_customer: { Args: { p_customer_id: string }; Returns: undefined };
+      scan_leaderboard: { Args: { p_period?: string; p_limit?: number }; Returns: Json };
+      build_owner_plan: { Args: { p_slug: string }; Returns: Plan };
       admin_set_order_status: {
         Args: {
           p_order_id: string;
