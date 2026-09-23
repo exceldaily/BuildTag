@@ -25,7 +25,7 @@ export function vehicleTitle(v: { year: number | null; make: string; model: stri
   return [v.year, v.make, v.model].filter(Boolean).join(" ");
 }
 
-/** Power label like "612 WHP" or "" when unset. */
+/** Power label like "450 WHP" or "" when unset. */
 export function powerLabel(
   hp: number | null | undefined,
   type: "HP" | "WHP" | null | undefined,
@@ -34,7 +34,7 @@ export function powerLabel(
   return `${formatCount(hp)} ${type ?? "HP"}`;
 }
 
-/** Torque label like "574 WTQ" / "574 LB-FT" / "700 NM". */
+/** Torque label like "400 WTQ" / "400 LB-FT" / "540 NM". */
 export function torqueLabel(
   torque: number | null | undefined,
   unit: "LB_FT" | "NM" | null | undefined,

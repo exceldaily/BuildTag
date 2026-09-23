@@ -344,7 +344,7 @@ function TextSection({ config, onChange }: { config: TagConfig; onChange: Props[
         {FONT_LIST.map((f) => (
           <button key={f.id} type="button" onClick={() => onChange({ font: f.id })} aria-pressed={config.font === f.id} className={cn("rounded-md border px-2 py-2 text-left", config.font === f.id ? "border-signal bg-signal/10" : "border-line hover:border-foreground/40")}>
             <span className="block text-lg leading-none uppercase" style={{ fontFamily: `'${f.family}', ${f.fallback}` }}>
-              612 WHP
+              BUILDTAG
             </span>
             <span className="mt-1 block text-[10px] text-muted-foreground">{f.name}</span>
           </button>

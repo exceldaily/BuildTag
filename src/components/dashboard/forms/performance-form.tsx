@@ -34,7 +34,7 @@ export function PerformanceForm({ vehicle, compact = false }: { vehicle: Vehicle
             Power
           </label>
           <div className="flex gap-2">
-            <input id="horsepower" name="horsepower" type="number" inputMode="numeric" min={0} max={10000} placeholder="612" defaultValue={vehicle.horsepower ?? ""} className="field" />
+            <input id="horsepower" name="horsepower" type="number" inputMode="numeric" min={0} max={10000} placeholder="450" defaultValue={vehicle.horsepower ?? ""} className="field" />
             <select name="horsepower_type" defaultValue={vehicle.horsepower_type} className="field w-28" aria-label="Power unit">
               <option value="WHP">WHP</option>
               <option value="HP">HP</option>
@@ -47,7 +47,7 @@ export function PerformanceForm({ vehicle, compact = false }: { vehicle: Vehicle
             Torque
           </label>
           <div className="flex gap-2">
-            <input id="torque" name="torque" type="number" inputMode="numeric" min={0} max={20000} placeholder="574" defaultValue={vehicle.torque ?? ""} className="field" />
+            <input id="torque" name="torque" type="number" inputMode="numeric" min={0} max={20000} placeholder="400" defaultValue={vehicle.torque ?? ""} className="field" />
             <select name="torque_unit" defaultValue={vehicle.torque_unit} className="field w-28" aria-label="Torque unit">
               <option value="LB_FT">LB-FT</option>
               <option value="NM">NM</option>

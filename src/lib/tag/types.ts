@@ -187,9 +187,9 @@ export interface TagData {
   model: string;
   trim: string;
   nickname: string;
-  /** e.g. "612 WHP" or "" */
+  /** e.g. "450 WHP" or "" */
   powerLabel: string;
-  /** e.g. "574 WTQ" or "" */
+  /** e.g. "400 WTQ" or "" */
   torqueLabel: string;
   modCount: number;
   username: string;

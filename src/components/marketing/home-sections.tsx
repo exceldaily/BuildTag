@@ -5,7 +5,7 @@ import { LogoMark } from "@/components/layout/logo";
 /* ---------------------------------------------------------------------------
  * Ticker: the neon marquee strip between hero and content.
  * ------------------------------------------------------------------------- */
-const TICKER = ["Scan the build", "What's done to it?", "612 WHP", "One permanent QR", "Print-ready decals", "Vehicle socials", "Part links"];
+const TICKER = ["Scan the build", "What's done to it?", "One permanent QR", "Print-ready decals", "Vehicle socials", "Part links"];
 
 export function Ticker() {
   const items = [...TICKER, ...TICKER];
@@ -71,9 +71,9 @@ function PhoneMock() {
             <p className="font-display text-[18px] leading-none font-bold uppercase">Ghost</p>
             <div className="grid grid-cols-3 gap-1 pt-1">
               {[
-                ["612", "WHP"],
-                ["574", "WTQ"],
                 ["24", "MODS"],
+                ["1.2K", "LIKES"],
+                ["3", "SOCIALS"],
               ].map(([v, l]) => (
                 <div key={l} className="rounded bg-[#06050d] px-1 py-1 text-center">
                   <p className="font-display text-[12px] leading-none font-bold text-neon-cyan">{v}</p>
