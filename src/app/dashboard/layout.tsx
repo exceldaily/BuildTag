@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/supabase/server";
 import { signOutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/layout/logo";
-import { DashboardNav } from "@/components/dashboard/dashboard-nav";
+import { DashboardNav, DashboardTabBar } from "@/components/dashboard/dashboard-nav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { profile, isAdmin } = await requireProfile("/dashboard");
@@ -15,8 +15,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Logo href="/dashboard" />
           <DashboardNav isAdmin={isAdmin} />
           <div className="flex items-center gap-2">
-            <Link href="/dashboard/profile" className="hidden items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-white/5 sm:inline-flex">
-              <span className="flex size-7 items-center justify-center overflow-hidden rounded-full bg-surface-2 font-display text-xs font-bold uppercase">
+            <Link href="/dashboard/profile" className="inline-flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-white/5" aria-label="Your profile">
+              <span className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-surface-2 font-display text-xs font-bold uppercase">
                 {profile.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={profile.avatar_url} alt="" className="size-full object-cover" />
@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   profile.display_name.slice(0, 1) || profile.username.slice(0, 1)
                 )}
               </span>
-              <span className="max-w-32 truncate text-muted-foreground">@{profile.username}</span>
+              <span className="hidden max-w-32 truncate text-muted-foreground sm:inline">@{profile.username}</span>
             </Link>
             <form action={signOutAction}>
               <button type="submit" className="btn-ghost btn-small">
@@ -35,8 +35,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </header>
       <main className="flex-1">
-        <div className="mx-auto w-full max-w-[1720px] px-4 py-8 sm:px-6 lg:px-10 2xl:px-16 md:py-10">{children}</div>
+        <div className="mx-auto w-full max-w-[1720px] px-4 py-8 pb-24 sm:px-6 lg:px-10 2xl:px-16 md:py-10 md:pb-10">{children}</div>
       </main>
+      <DashboardTabBar isAdmin={isAdmin} avatarUrl={profile.avatar_url} initial={(profile.display_name.slice(0, 1) || profile.username.slice(0, 1)).toUpperCase()} />
     </div>
   );
 }

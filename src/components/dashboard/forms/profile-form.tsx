@@ -1,34 +1,15 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { toast } from "sonner";
+import { useActionState } from "react";
 
 import { saveProfileAction } from "@/lib/actions/profile";
 import type { ProfileRow } from "@/lib/types";
 import type { ActionResult } from "@/lib/validation/common";
+import { AvatarPicker } from "@/components/dashboard/avatar-picker";
 
 export function ProfileForm({ profile }: { profile: ProfileRow }) {
   const [state, action, pending] = useActionState<ActionResult<ProfileRow> | null, FormData>(saveProfileAction, null);
-  const [avatar, setAvatar] = useState(profile.avatar_url);
-  const [uploading, setUploading] = useState(false);
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
-
-  const uploadAvatar = async (file: File) => {
-    setUploading(true);
-    try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/profile/avatar", { method: "POST", body });
-      const data = (await res.json()) as { ok: boolean; url?: string; error?: string };
-      if (!res.ok || !data.ok || !data.url) throw new Error(data.error ?? "Upload failed");
-      setAvatar(data.url);
-      toast.success("Avatar updated");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   return (
     <form action={action} className="space-y-5" noValidate>
@@ -37,29 +18,7 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
         {state?.ok && <span className="label-tech text-emerald-400">Saved</span>}
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="size-20 overflow-hidden rounded-full bg-surface-2">
-          {avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt="" className="size-full object-cover" />
-          ) : (
-            <div className="flex size-full items-center justify-center font-display text-2xl font-bold uppercase">{profile.display_name.slice(0, 1) || profile.username.slice(0, 1)}</div>
-          )}
-        </div>
-        <label className="btn-ghost btn-small cursor-pointer">
-          {uploading ? "Uploading…" : "Change avatar"}
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void uploadAvatar(f);
-              e.target.value = "";
-            }}
-          />
-        </label>
-      </div>
+      <AvatarPicker avatarUrl={profile.avatar_url} initial={profile.display_name.slice(0, 1) || profile.username.slice(0, 1)} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
