@@ -16,7 +16,7 @@ import type { Plan, PrintSpecificationRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { DesignerControls } from "./designer-controls";
-import { DesignerPreview, type MockupPlacement, type MockupTone } from "./designer-preview";
+import { DesignerPreview } from "./designer-preview";
 import { QualityPanel } from "./quality-panel";
 
 interface Props {
@@ -59,9 +59,6 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
   const [autosave, setAutosave] = useState(true);
   const [saving, startSave] = useTransition();
   const [guides, setGuides] = useState(true);
-  const [mockup, setMockup] = useState<"flat" | "car">("flat");
-  const [placement, setPlacement] = useState<MockupPlacement>("rear-window");
-  const [tone, setTone] = useState<MockupTone>("dark");
   const [decoded, setDecoded] = useState<DecodeRecord | null>(null);
   const [approving, setApproving] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -293,12 +290,6 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
             config={config}
             guides={guides}
             onToggleGuides={() => setGuides((g) => !g)}
-            mockup={mockup}
-            onMockup={setMockup}
-            placement={placement}
-            onPlacement={setPlacement}
-            tone={tone}
-            onTone={setTone}
             code={code}
             safety={safety}
             decode={decode}
