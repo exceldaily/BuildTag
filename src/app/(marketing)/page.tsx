@@ -7,6 +7,7 @@ import { qrSvg } from "@/lib/qr/generate";
 import type { PublicBuild } from "@/lib/types";
 import { vehicleTitle } from "@/lib/utils";
 import { FAQ_ENTRIES, Faq, Pricing } from "@/components/marketing/home-sections";
+import { Hero } from "@/components/marketing/hero";
 import { Container, SectionHead } from "@/components/marketing/landing-ui";
 import {
   Benefits,
@@ -14,7 +15,6 @@ import {
   Crews,
   DesignerShowcase,
   FinalCta,
-  Hero,
   HowItWorks,
   ProductReveal,
   RealBuilds,

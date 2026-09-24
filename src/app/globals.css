@@ -383,22 +383,6 @@
  * Hero studio: the vehicle photo dissolves into a near-black studio with a
  * floor, a grounding shadow and a faint wet-floor reflection.
  * ------------------------------------------------------------------------- */
-.hero-vehicle {
-  --hv-radial: radial-gradient(ellipse 64% 60% at 50% 52%, #000 42%, transparent 100%);
-  --hv-vertical: linear-gradient(to bottom, transparent 0%, #000 26%, #000 80%, transparent 100%);
-  --hv-sides: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
-  -webkit-mask-image: var(--hv-radial), var(--hv-vertical), var(--hv-sides);
-  -webkit-mask-composite: source-in, source-in;
-  mask-image: var(--hv-radial), var(--hv-vertical), var(--hv-sides);
-  mask-composite: intersect;
-}
-.hero-reflection {
-  transform: scaleY(-1);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 56%, rgba(0, 0, 0, 0.55) 71.5%, transparent 72%);
-  mask-image: linear-gradient(to bottom, transparent 56%, rgba(0, 0, 0, 0.55) 71.5%, transparent 72%);
-  filter: blur(1.5px) saturate(0.8);
-  opacity: 0.35;
-}
 .hero-light-bar {
   height: 2px;
   border-radius: 9999px;
@@ -407,4 +391,170 @@
 }
 .hero-light-spill {
   background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 70%);
+}
+
+/* ---------------------------------------------------------------------------
+ * Editorial hero: depth planes, physical BuildTag, annotations, entrance.
+ * ------------------------------------------------------------------------- */
+.depth {
+  /* --d: pointer travel, --ds: scroll factor. Set per layer. */
+  translate: calc(var(--dx, 0) * var(--d, 0px)) calc(var(--dy, 0) * var(--d, 0px) + var(--sy, 0px) * var(--ds, 0));
+}
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+.eng-paper {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.017) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.017) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+}
+.ghost-type {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-style: italic;
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.car-rim {
+  -webkit-mask-image: url("/images/home/ghost-cutout.webp");
+  mask-image: url("/images/home/ghost-cutout.webp");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  background:
+    linear-gradient(to left, rgba(255, 45, 122, 0.42), rgba(255, 45, 122, 0.08) 22%, transparent 38%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07), transparent 22%);
+  mix-blend-mode: screen;
+}
+.car-reflection {
+  transform: scaleY(-1);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.32), transparent 34%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.32), transparent 34%);
+  filter: blur(1.5px) saturate(0.7) brightness(0.8);
+}
+/* A decal you could pick up: slight perspective, vinyl thickness, contact shadow. */
+.tag-physical {
+  transform: perspective(1100px) rotateX(7deg) rotateY(-11deg) rotateZ(-3deg);
+  transform-origin: 50% 60%;
+}
+.tag-physical img {
+  filter:
+    drop-shadow(0 1.5px 0 #2d2a36)
+    drop-shadow(0 1.5px 0 #17151d)
+    drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 26px 30px rgba(0, 0, 0, 0.4));
+}
+.tag-sheen {
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  background:
+    linear-gradient(116deg, transparent 34%, rgba(255, 255, 255, 0.2) 46%, rgba(255, 255, 255, 0.05) 54%, transparent 64%),
+    linear-gradient(to left, rgba(255, 45, 122, 0.2), transparent 30%);
+  mix-blend-mode: screen;
+}
+/* Buttons with a clipped corner and a physical press. */
+.btn-hero,
+.btn-hero-ghost {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 3rem;
+  padding: 0 1.35rem 0 1.2rem;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: translate 0.14s ease, filter 0.14s ease;
+}
+.btn-hero {
+  color: #fff;
+  filter: drop-shadow(0 8px 14px rgba(255, 45, 122, 0.26));
+}
+.btn-hero::before,
+.btn-hero-ghost::before,
+.btn-hero-ghost::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+.btn-hero::before {
+  inset: 0;
+  background: var(--signal);
+}
+.btn-hero-ghost {
+  color: var(--foreground);
+}
+.btn-hero-ghost::before {
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.14s ease;
+}
+.btn-hero-ghost::after {
+  inset: 1px;
+  background: #07060c;
+  clip-path: polygon(0 0, calc(100% - 11.6px) 0, 100% 11.6px, 100% 100%, 0 100%);
+}
+.btn-hero:hover,
+.btn-hero-ghost:hover {
+  translate: 0 -2px;
+}
+.btn-hero:hover {
+  filter: drop-shadow(0 12px 18px rgba(255, 45, 122, 0.42));
+}
+.btn-hero-ghost:hover::before {
+  background: rgba(255, 45, 122, 0.75);
+}
+.btn-hero:active,
+.btn-hero-ghost:active {
+  translate: 0 1px;
+}
+.btn-hero:focus-visible,
+.btn-hero-ghost:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+/* Entrance: car, then lines draw, then the tag, the scan path and the phone. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-in {
+    animation: hero-in 620ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .hero-fade {
+    animation: hero-fade 500ms ease-out both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .hero-grow-x {
+    animation: hero-grow-x 560ms cubic-bezier(0.3, 0.6, 0.2, 1) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .hero-grow-y {
+    animation: hero-grow-y 420ms cubic-bezier(0.3, 0.6, 0.2, 1) both;
+    animation-delay: var(--delay, 0ms);
+  }
+}
+@keyframes hero-grow-x {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+@keyframes hero-grow-y {
+  from { transform: scaleY(0); }
+  to { transform: none; }
+}
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hero-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
