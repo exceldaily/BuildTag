@@ -49,6 +49,8 @@ describe("legal config", () => {
   it("operator line is built from one place and flags placeholders", () => {
     assert.match(LEGAL.operator.description, /doing business as BuildTags$/);
     assert.equal(LEGAL_HAS_PLACEHOLDERS, /\[[A-Z ]+\]/.test(LEGAL.operator.description));
+    // Never ship a placeholder operator ("[OWNER FULL LEGAL NAME]", "[LLC FORMATION STATE]").
+    assert.equal(LEGAL_HAS_PLACEHOLDERS, false, `legal operator still has a placeholder: ${LEGAL.operator.description}`);
     assert.equal(LEGAL.email, "customersupport@buildtags.app");
     assert.equal(LEGAL.governingState, "Florida");
     assert.equal(LEGAL.venueCounty, "Escambia County");

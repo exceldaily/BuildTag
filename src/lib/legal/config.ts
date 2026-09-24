@@ -20,13 +20,13 @@
 export type OperatorKind = "sole_proprietor" | "llc";
 
 // ---------------------------------------------------------------------------
-// Operator. TODO(legal): replace the owner placeholder with the full legal
-// name, or switch to the LLC once it is formed. Never publish a placeholder
-// to production without deciding which one applies.
+// Operator. Sole proprietor today. The LLC name below is TENTATIVE and not
+// formed yet: switch OPERATOR_KIND only after the owner confirms the final
+// registered name and state. Never publish a placeholder to production.
 // ---------------------------------------------------------------------------
 const OPERATOR_KIND: OperatorKind = "sole_proprietor";
-const OWNER_FULL_LEGAL_NAME = "[OWNER FULL LEGAL NAME]";
-const LLC_LEGAL_NAME = "Rywin Ventures LLC";
+const OWNER_FULL_LEGAL_NAME = "Bradley Harvey";
+const LLC_LEGAL_NAME = "Rywin Ventures LLC"; // tentative, may change
 /** State the LLC is organized in, e.g. "Florida". Only used when OPERATOR_KIND is "llc". */
 const LLC_FORMATION_STATE = "[LLC FORMATION STATE]";
 
