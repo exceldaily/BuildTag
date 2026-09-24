@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 
+import { setLocaleCookie } from "@/lib/i18n/server";
+
 import { siteUrl } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { fieldErrors, formToObject, type ActionResult } from "@/lib/validation/common";
@@ -32,7 +34,7 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent(landing)}`,
-      data: { username: parsed.data.username, display_name: parsed.data.display_name, app: "buildtag" },
+      data: { username: parsed.data.username, display_name: parsed.data.display_name, locale: parsed.data.locale, region: parsed.data.region, app: "buildtag" },
     },
   });
   if (error) {
@@ -47,6 +49,8 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
       error: "An account with this email already exists. Sign in instead, or use Forgot password to reset it.",
     };
   }
+
+  await setLocaleCookie(parsed.data.locale);
 
   // Email confirmation on: no session yet.
   if (!data.session) {
@@ -68,6 +72,13 @@ export async function signInAction(_prev: ActionResult | null, form: FormData): 
   if (error) {
     return { ok: false, error: "Wrong email or password." };
   }
+  // Follow the account's saved language from the first page after sign-in.
+  const { data: prof } = await client.rpc("ensure_profile");
+  const savedLocale = (prof as { locale?: string } | null)?.locale;
+  if (savedLocale === "en" || savedLocale === "fr" || savedLocale === "de" || savedLocale === "es" || savedLocale === "th") {
+    await setLocaleCookie(savedLocale);
+  }
+
   redirect(safeNext(form.get("next")));
 }
 

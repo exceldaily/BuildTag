@@ -10,6 +10,7 @@ import { formatCount } from "@/lib/utils";
 import { StatTile } from "@/components/dashboard/stat-tile";
 import { VehicleCard } from "@/components/dashboard/vehicle-card";
 import { InstallAppPrompt } from "@/components/layout/install-app";
+import { t } from "@/lib/i18n/dictionary";
 
 export const metadata: Metadata = { title: "Garage", robots: { index: false } };
 
@@ -20,6 +21,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const stats = (statsRes.data ?? { vehicles: 0, scans: 0, likes: 0, clicks: 0 }) as unknown as DashboardStats;
   const limit = PLAN_LIMITS[plan].vehicles;
   const canAdd = vehicles.length < limit;
+  const L = profile.locale;
 
   return (
     <div>
@@ -31,13 +33,13 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <InstallAppPrompt welcome={sp.welcome === "1"} className="mb-8" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">{plan === "pro" ? "Pro" : "Free plan"}</p>
-          <h1 className="mt-2 text-4xl sm:text-5xl xl:text-6xl">Welcome back, {profile.display_name.split(" ")[0] || profile.username}</h1>
+          <p className="eyebrow">{plan === "pro" ? t(L, "garage_pro_plan") : t(L, "garage_free_plan")}</p>
+          <h1 className="mt-2 text-4xl sm:text-5xl xl:text-6xl">{t(L, "garage_welcome", { name: profile.display_name.split(" ")[0] || profile.username })}</h1>
         </div>
         {canAdd ? (
           <Link href="/dashboard/vehicles/new" className="btn-signal">
             <Plus className="size-4" aria-hidden="true" />
-            Add vehicle
+            {t(L, "garage_add_vehicle")}
           </Link>
         ) : (
           <span className="btn-ghost cursor-not-allowed opacity-70" title={`Your plan allows ${limit} vehicle${limit === 1 ? "" : "s"}`}>
@@ -47,15 +49,15 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       </div>
 
       <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line md:grid-cols-4">
-        <StatTile label="Vehicles" value={formatCount(stats.vehicles)} />
-        <StatTile label="Total scans" value={formatCount(stats.scans)} />
-        <StatTile label="Total likes" value={formatCount(stats.likes)} />
-        <StatTile label="Product clicks" value={formatCount(stats.clicks)} />
+        <StatTile label={t(L, "garage_vehicles")} value={formatCount(stats.vehicles)} />
+        <StatTile label={t(L, "garage_total_scans")} value={formatCount(stats.scans)} />
+        <StatTile label={t(L, "garage_total_likes")} value={formatCount(stats.likes)} />
+        <StatTile label={t(L, "garage_product_clicks")} value={formatCount(stats.clicks)} />
       </dl>
 
       <section className="mt-12">
         <div className="flex items-end justify-between">
-          <h2 className="text-2xl">My garage</h2>
+          <h2 className="text-2xl">{t(L, "garage_my_garage")}</h2>
           <span className="label-tech">
             {vehicles.length} / {limit}
           </span>
@@ -63,13 +65,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
         {vehicles.length === 0 ? (
           <div className="panel mt-4 flex flex-col items-center px-6 py-16 text-center">
-            <p className="text-2xl font-display uppercase">Your garage is empty</p>
-            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-              Add your first vehicle. You get a permanent BuildTag the moment it exists.
-            </p>
+            <p className="text-2xl font-display uppercase">{t(L, "garage_empty_title")}</p>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">{t(L, "garage_empty_body")}</p>
             <Link href="/dashboard/vehicles/new" className="btn-signal mt-6">
               <Plus className="size-4" aria-hidden="true" />
-              Add vehicle
+              {t(L, "garage_add_vehicle")}
             </Link>
           </div>
         ) : (

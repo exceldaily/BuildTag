@@ -134,8 +134,31 @@ export interface ProfileRow {
   bio: string;
   location_text: string;
   website_url: string | null;
+  locale: "en" | "fr" | "de" | "es" | "th";
+  region: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface CrewMember {
+  user_id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  role: "owner" | "member";
+  joined_at: string;
+}
+
+export interface Crew {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  created_at: string;
+  owner_username: string;
+  members: CrewMember[];
+  builds: PublicBuildListRow[];
+  total_scans: number;
 }
 
 export interface SubscriptionRow {
@@ -847,6 +870,14 @@ export interface Database {
       billing_user_for_customer: { Args: { p_token: string; p_customer_id: string }; Returns: string | null };
       billing_remember_customer: { Args: { p_customer_id: string }; Returns: undefined };
       scan_leaderboard: { Args: { p_period?: string; p_limit?: number }; Returns: Json };
+      create_crew: { Args: { p_name: string; p_tagline?: string }; Returns: Json };
+      update_crew: { Args: { p_name: string; p_tagline: string }; Returns: Json };
+      crew_add_member: { Args: { p_username: string }; Returns: undefined };
+      crew_remove_member: { Args: { p_user_id: string }; Returns: undefined };
+      delete_crew: { Args: Record<never, never>; Returns: undefined };
+      get_crew: { Args: { p_slug: string }; Returns: Json };
+      build_crew: { Args: { p_slug: string }; Returns: Json };
+      my_crew: { Args: Record<never, never>; Returns: Json };
       build_owner_plan: { Args: { p_slug: string }; Returns: Plan };
       admin_set_order_status: {
         Args: {

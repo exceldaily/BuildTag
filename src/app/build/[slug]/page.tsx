@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getVisitorKey } from "@/lib/analytics/visitor";
-import { buildOwnerPlan, getPublicBuild } from "@/lib/db/public";
+import { buildCrew, buildOwnerPlan, getPublicBuild } from "@/lib/db/public";
+import { getLocale } from "@/lib/i18n/server";
 import { siteUrl } from "@/lib/env";
 import { photoUrl } from "@/lib/storage";
 import { powerLabel, vehicleTitle } from "@/lib/utils";
@@ -61,7 +62,7 @@ export default async function BuildRoute({ params, searchParams }: PageProps<"/b
   const { slug } = await params;
   const sp = await searchParams;
   const visitorKey = await getVisitorKey();
-  const [result, ownerPlan] = await Promise.all([getPublicBuild(normalizeSlug(slug), visitorKey), buildOwnerPlan(normalizeSlug(slug))]);
+  const [result, ownerPlan, crew, locale] = await Promise.all([getPublicBuild(normalizeSlug(slug), visitorKey), buildOwnerPlan(normalizeSlug(slug)), buildCrew(normalizeSlug(slug)), getLocale()]);
 
   if (result.access === "not_found") notFound();
 
@@ -131,7 +132,7 @@ export default async function BuildRoute({ params, searchParams }: PageProps<"/b
           )}
         </div>
       )}
-      <BuildPage build={b} liked={result.liked} viaTag={sp.via === "tag"} ownerPro={ownerPlan === "pro"} />
+      <BuildPage build={b} liked={result.liked} viaTag={sp.via === "tag"} ownerPro={ownerPlan === "pro"} crew={crew} locale={locale} />
     </>
   );
 }

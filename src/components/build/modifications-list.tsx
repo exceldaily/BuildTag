@@ -1,16 +1,17 @@
 import { ArrowUpRight } from "lucide-react";
 
 import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, type ModCategory, type PublicModification } from "@/lib/types";
-import { AFFILIATE_DISCLOSURE } from "@/lib/affiliate";
+import { t } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils";
 
 /**
  * Categorized modifications. Native <details> keeps sections collapsible on
  * mobile with zero JavaScript; sections start open on larger screens via CSS.
  */
-export function ModificationsList({ slug, modifications, hasAffiliateLinks = false }: { slug: string; modifications: PublicModification[]; hasAffiliateLinks?: boolean }) {
+export function ModificationsList({ slug, modifications, hasAffiliateLinks = false, locale = "en" }: { slug: string; modifications: PublicModification[]; hasAffiliateLinks?: boolean; locale?: Locale }) {
   if (modifications.length === 0) {
-    return <p className="mt-4 text-sm text-muted-foreground">No modifications listed yet. Stock for now.</p>;
+    return <p className="mt-4 text-sm text-muted-foreground">{t(locale, "build_no_mods")}</p>;
   }
 
   const grouped = new Map<ModCategory, PublicModification[]>();
@@ -25,7 +26,7 @@ export function ModificationsList({ slug, modifications, hasAffiliateLinks = fal
     <>
     {hasAffiliateLinks && (
       <p className="mt-3 text-xs text-muted-foreground" id="affiliate-disclosure">
-        {AFFILIATE_DISCLOSURE}
+        {t(locale, "build_affiliate_disclosure")}
       </p>
     )}
     <div className="mt-4 divide-y divide-line rounded-lg border border-line">
@@ -51,7 +52,7 @@ export function ModificationsList({ slug, modifications, hasAffiliateLinks = fal
                       {m.part_name}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {[m.part_number ? `#${m.part_number}` : null, m.price !== null ? formatMoney(m.price) : null, m.shop ? `Installed by ${m.shop.name}` : m.installed_by_text ? `Installed by ${m.installed_by_text}` : null]
+                      {[m.part_number ? `#${m.part_number}` : null, m.price !== null ? formatMoney(m.price) : null, m.shop ? t(locale, "build_installed_by", { name: m.shop.name }) : m.installed_by_text ? t(locale, "build_installed_by", { name: m.installed_by_text }) : null]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
@@ -64,7 +65,7 @@ export function ModificationsList({ slug, modifications, hasAffiliateLinks = fal
                       rel="noopener noreferrer nofollow sponsored"
                       className="inline-flex shrink-0 items-center gap-1 rounded-md border border-line px-2.5 py-1.5 font-display text-xs font-bold tracking-[0.12em] uppercase transition-colors hover:border-foreground/40 hover:bg-white/5"
                     >
-                      View part
+                      {t(locale, "build_view_part")}
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
                     </a>
                   )}

@@ -164,6 +164,8 @@ Files in `supabase/migrations/`, applied in order:
 | `0005_buildtag_ensure_profile_race.sql` | `ensure_profile()` tolerates concurrent first-visit inserts |
 | `0006_buildtag_affiliate.sql` | public payload flags affiliate parts (`is_affiliate`, `has_affiliate_links`); analytics report affiliate clicks and monetized parts |
 | `0007_buildtag_billing.sql` | `private_settings` (billing token), token-gated `billing_*` functions the Stripe webhook writes through, `billing_remember_customer()` |
+| `0008_buildtag_leaderboard.sql` | `scan_leaderboard(period, limit)` for the public leaderboard, `build_owner_plan()` for the Pro badge |
+| `0009_buildtag_locale_crews.sql` | `profiles.locale` / `profiles.region` (seeded from sign-up metadata), crews tables + `create_crew`, `crew_add_member`, `crew_remove_member`, `delete_crew`, `get_crew`, `build_crew`, `my_crew` |
 | `0008_buildtag_leaderboard.sql` | `scan_leaderboard(period, limit)` for `/leaderboard` (all time, month, week, day) and `build_owner_plan()` for the Pro badge |
 
 Apply with the Supabase SQL editor, `psql`, the Supabase CLI (`supabase db push` after placing them in your project's migrations folder), or the Supabase MCP `apply_migration` tool. The exposure block in 0003 appends `buildtag` to `pgrst.db_schemas` without overwriting other schemas. If your project restricts the API through the dashboard instead, add `buildtag` under **Settings → API → Exposed schemas**.
@@ -282,6 +284,12 @@ Every modification can carry an owner's own affiliate link. Nothing is brokered 
 - **Decal orders**: `startCheckoutAction` opens Checkout in payment mode with `metadata.order_id`.
 - **Webhook** (`/api/stripe/webhook`): verifies `Stripe-Signature` (HMAC v1, 5 minute tolerance), then calls `billing_mark_order_paid` or `billing_upsert_subscription`. Those are security-definer functions gated by `BUILDTAG_INTERNAL_TOKEN`, so the app still holds no service-role key. Events to subscribe: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`.
 - `buildtag.user_plan()` reads the subscription row, and the database enforces plan limits (vehicles, photos, designs) through `plan_limits()`.
+
+## Language, region and crews
+
+- **Language + region** are chosen at sign-up (English, French, German, Spanish, Thai; regions US, CA, GB, EU, AU/NZ, TH, Asia, Latin America, other) and editable on the profile page. They live on `profiles.locale` / `profiles.region`; the language is mirrored in the `bt_locale` cookie so `<html lang>`, the marketing header and public build pages follow it for signed-out visitors too. Strings are in `src/lib/i18n/dictionary.ts` and cover navigation, the garage, profile basics and the public build page. Data-heavy screens (designer, orders, analytics, admin) are English for now.
+- **Crews** (`/dashboard/crew`, public page `/crew/<slug>`): a Pro member creates one crew and adds members by username (members do not need Pro; one crew per person; 25 max). The crew page lists every member's public builds and their combined scans; each member's build page shows a crew badge. All writes go through security-definer functions that enforce the Pro check and ownership.
+- **Scan leaderboard** (`/leaderboard`): most scanned public builds all time, this month, this week and today (calendar periods, server time zone), via `scan_leaderboard()`.
 
 ## Security and privacy
 

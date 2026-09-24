@@ -2,12 +2,22 @@ import { z } from "zod";
 
 import { optionalUrl, trimmed, usernameSchema } from "./common";
 
+export const localeSchema = z.enum(["en", "fr", "de", "es", "th"]).default("en");
+export const regionSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z]{2,8}$/, "Pick a region")
+  .default("US");
+
 export const profileSchema = z.object({
   username: usernameSchema,
   display_name: z.string().trim().min(1, "Display name is required").max(60),
   bio: trimmed(600),
   location_text: trimmed(80),
   website_url: optionalUrl,
+  locale: localeSchema,
+  region: regionSchema,
 });
 
 export const signupSchema = z.object({
@@ -15,6 +25,8 @@ export const signupSchema = z.object({
   password: z.string().min(8, "At least 8 characters").max(72),
   username: usernameSchema,
   display_name: z.string().trim().min(1).max(60),
+  locale: localeSchema,
+  region: regionSchema,
 });
 
 export const loginSchema = z.object({

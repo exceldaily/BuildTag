@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 import { publicEnv } from "@/lib/env";
-import type { Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
+import type { Crew, Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -118,4 +118,17 @@ export async function scanLeaderboard(period: LeaderboardPeriod, limit = 25): Pr
 export async function buildOwnerPlan(slug: string): Promise<Plan> {
   const { data } = await anonClient().rpc("build_owner_plan", { p_slug: slug.toLowerCase() });
   return (data as Plan | null) ?? "free";
+}
+
+/** Public crew page payload. */
+export async function getCrew(slug: string): Promise<Crew | null> {
+  const { data, error } = await anonClient().rpc("get_crew", { p_slug: slug.toLowerCase() });
+  if (error || !data) return null;
+  return data as unknown as Crew;
+}
+
+/** Crew badge for a build page, if the owner rides with one. */
+export async function buildCrew(slug: string): Promise<{ name: string; slug: string } | null> {
+  const { data } = await anonClient().rpc("build_crew", { p_slug: slug.toLowerCase() });
+  return (data as { name: string; slug: string } | null) ?? null;
 }

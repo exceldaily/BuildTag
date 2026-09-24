@@ -7,6 +7,7 @@ import { siteUrl } from "@/lib/env";
 import "./globals.css";
 
 import { PwaRegister } from "@/components/layout/pwa-register";
+import { getLocale } from "@/lib/i18n/server";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,7 +47,13 @@ export const metadata: Metadata = {
     description: "Your build deserves a spec sheet. Stick your BuildTag on your car and let anyone scan to see what is done to it.",
     images: ["/og.png"],
   },
-  icons: { icon: "/icons/icon.svg", apple: "/icons/apple-touch-icon.png" },
+  icons: {
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -56,9 +63,10 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
   return (
-    <html lang="en" className={`dark ${inter.variable} ${barlow.variable} h-full`}>
+    <html lang={locale} className={`dark ${inter.variable} ${barlow.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         {children}
         <Toaster theme="dark" position="bottom-center" richColors closeButton />

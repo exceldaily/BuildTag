@@ -3,12 +3,17 @@ import Link from "next/link";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignupForm } from "@/components/auth/signup-form";
+import { getLocale } from "@/lib/i18n/server";
+import { regionFromLocaleTag } from "@/lib/i18n";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = { title: "Create your build", robots: { index: false } };
 
 export default async function SignupPage({ searchParams }: PageProps<"/signup">) {
   const sp = await searchParams;
   const plan = sp.plan === "pro" ? "pro" : undefined;
+  const [locale, h] = await Promise.all([getLocale(), headers()]);
+  const region = regionFromLocaleTag(h.get("accept-language")?.split(",")[0]);
   return (
     <AuthShell
       title="Create your build"
@@ -22,7 +27,7 @@ export default async function SignupPage({ searchParams }: PageProps<"/signup">)
         </>
       }
     >
-      <SignupForm plan={plan} />
+      <SignupForm plan={plan} defaultLocale={locale} defaultRegion={region} />
     </AuthShell>
   );
 }

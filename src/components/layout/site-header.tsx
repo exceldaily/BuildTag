@@ -3,16 +3,17 @@ import Link from "next/link";
 import { getOptionalUser } from "@/lib/supabase/server";
 
 import { Logo } from "./logo";
-
-const NAV = [
-  { href: "/explore", label: "Explore" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/build/ghost-2022-toyota-gr-supra", label: "Example" },
-  { href: "/#how-it-works", label: "How it works" },
-];
+import { getLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/dictionary";
 
 export async function SiteHeader() {
-  const ctx = await getOptionalUser();
+  const [ctx, locale] = await Promise.all([getOptionalUser(), getLocale()]);
+  const NAV = [
+    { href: "/explore", label: t(locale, "nav_explore") },
+    { href: "/leaderboard", label: t(locale, "nav_leaderboard") },
+    { href: "/build/ghost-2022-toyota-gr-supra", label: "Example" },
+    { href: "/#how-it-works", label: "How it works" },
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-background pt-[env(safe-area-inset-top)]">
@@ -32,7 +33,7 @@ export async function SiteHeader() {
         <div className="flex items-center gap-2">
           {ctx ? (
             <Link href="/dashboard" className="btn-ghost btn-small">
-              Garage
+              {t(locale, "nav_garage")}
             </Link>
           ) : (
             <>

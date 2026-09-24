@@ -3,9 +3,10 @@
 import { useActionState } from "react";
 
 import { signUpAction } from "@/lib/actions/auth";
+import { LOCALES, LOCALE_LABEL, REGIONS, type Locale, type RegionCode } from "@/lib/i18n";
 import type { ActionResult } from "@/lib/validation/common";
 
-export function SignupForm({ plan }: { plan?: "pro" }) {
+export function SignupForm({ plan, defaultLocale = "en", defaultRegion = "US" }: { plan?: "pro"; defaultLocale?: Locale; defaultRegion?: RegionCode }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(signUpAction, null);
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
@@ -55,6 +56,34 @@ export function SignupForm({ plan }: { plan?: "pro" }) {
         </label>
         <input id="password" name="password" type="password" autoComplete="new-password" required minLength={8} className="field" aria-invalid={Boolean(errors.password)} />
         {errors.password ? <p className="field-error">{errors.password}</p> : <p className="mt-1 text-xs text-muted-foreground">At least 8 characters.</p>}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="locale" className="field-label">
+            Language
+          </label>
+          <select id="locale" name="locale" defaultValue={defaultLocale} className="field">
+            {LOCALES.map((l) => (
+              <option key={l} value={l}>
+                {LOCALE_LABEL[l]}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-muted-foreground">Menus and your build page in this language.</p>
+        </div>
+        <div>
+          <label htmlFor="region" className="field-label">
+            Region
+          </label>
+          <select id="region" name="region" defaultValue={defaultRegion} className="field">
+            {REGIONS.map((r) => (
+              <option key={r.code} value={r.code}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-muted-foreground">Sets default units and formats.</p>
+        </div>
       </div>
       {state && !state.ok && !state.fieldErrors && (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">

@@ -9,6 +9,8 @@ import { Gallery } from "./gallery";
 import { LikeButton } from "./like-button";
 import { ModificationsList } from "./modifications-list";
 import { OwnerSection } from "./owner-section";
+import { t } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n";
 import { ReportDialog } from "./report-dialog";
 import { ShareButton } from "./share-button";
 import { SocialButtons } from "./social-buttons";
@@ -17,7 +19,8 @@ import { SocialButtons } from "./social-buttons";
  * The scanned build page. Server-rendered, image-first, minimal JS: only
  * like, share, report and gallery are client components.
  */
-export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build: PublicBuild; liked: boolean; viaTag: boolean; ownerPro?: boolean }) {
+export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = null, locale = "en" }: { build: PublicBuild; liked: boolean; viaTag: boolean; ownerPro?: boolean; crew?: { name: string; slug: string } | null; locale?: Locale }) {
+  const L = locale;
   const title = vehicleTitle(b);
   const power = powerLabel(b.horsepower, b.horsepower_type);
   const torque = torqueLabel(b.torque, b.torque_unit, b.horsepower_type);
@@ -44,7 +47,7 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build
             <img src={hero} alt={`${title}${b.nickname ? ` "${b.nickname}"` : ""}`} fetchPriority="high" decoding="async" className="size-full object-cover" />
           ) : (
             <div className="flex size-full items-center justify-center">
-              <span className="label-tech">No photos yet</span>
+              <span className="label-tech">{t(L, "build_no_photos")}</span>
             </div>
           )}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
@@ -52,7 +55,7 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build
 
         <div className="relative mx-auto -mt-32 max-w-[1500px] px-4 sm:-mt-40 sm:px-6 lg:px-10 2xl:px-14">
           <div className="animate-rise">
-            <p className="eyebrow">{viaTag ? "Scanned from a BuildTag" : "BuildTag build sheet"}</p>
+            <p className="eyebrow">{viaTag ? "Scanned from a BuildTag" : t(L, "build_sheet")}</p>
             <p className="mt-2 font-display text-xl font-semibold tracking-[0.08em] text-foreground/80 uppercase sm:text-2xl">
               {title}
               {b.trim ? <span className="text-muted-foreground"> {b.trim}</span> : null}
@@ -69,9 +72,14 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <Link href={`/build/${b.slug}#owner`} className="label-tech hover:text-foreground">
-              Owner @{b.owner.username}
+              {t(L, "build_owner")} @{b.owner.username}
             </Link>
             {b.location_text && <span className="label-tech">· {b.location_text}</span>}
+            {crew && (
+              <Link href={`/crew/${crew.slug}`} className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/50 bg-neon-cyan/10 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] text-neon-cyan uppercase hover:bg-neon-cyan/20">
+                {t(L, "build_crew")} · {crew.name}
+              </Link>
+            )}
           </div>
 
           {b.vehicle_socials.length > 0 && (
@@ -84,7 +92,7 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build
             <LikeButton slug={b.slug} initialCount={b.like_count} initialLiked={liked} />
             <ShareButton slug={b.slug} title={`${power ? `${power} ` : ""}${title}`} />
             <a href="#mods" className="btn-ghost">
-              See the mods
+              {t(L, "build_see_mods")}
             </a>
           </div>
         </div>
@@ -113,7 +121,7 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build
             </dl>
             {b.build_cost_public && b.build_cost !== null && (
               <div className="mt-4 rounded-lg border border-signal/40 bg-signal/10 p-4">
-                <p className="label-tech">Total build</p>
+                <p className="label-tech">{t(L, "build_total_build")}</p>
                 <p className="stat-number mt-1">{formatMoney(b.build_cost)}</p>
               </div>
             )}
@@ -131,10 +139,10 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false }: { build
         {/* MODS */}
         <section id="mods" className="mt-14 scroll-mt-20">
           <div className="flex items-end justify-between">
-            <h2 className="text-2xl">Modifications</h2>
-            <span className="label-tech">{formatCount(b.mod_count)} total</span>
+            <h2 className="text-2xl">{t(L, "build_modifications")}</h2>
+            <span className="label-tech">{t(L, "build_total", { n: formatCount(b.mod_count) })}</span>
           </div>
-          <ModificationsList slug={b.slug} modifications={b.modifications} hasAffiliateLinks={b.has_affiliate_links} />
+          <ModificationsList slug={b.slug} modifications={b.modifications} hasAffiliateLinks={b.has_affiliate_links} locale={L} />
         </section>
 
         {/* OWNER */}

@@ -5,20 +5,39 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-function useItems(isAdmin: boolean) {
+export interface NavLabels {
+  garage: string;
+  orders: string;
+  crew: string;
+  profile: string;
+  explore: string;
+  admin: string;
+}
+
+const EN: NavLabels = { garage: "Garage", orders: "Orders", crew: "Crew", profile: "Profile", explore: "Explore", admin: "Admin" };
+
+function useItems(isAdmin: boolean, labels: NavLabels) {
   const pathname = usePathname();
   return [
-    { href: "/dashboard", label: "Garage", active: pathname === "/dashboard" || pathname.startsWith("/dashboard/vehicles") },
-    { href: "/dashboard/orders", label: "Orders", active: pathname.startsWith("/dashboard/orders") },
-    { href: "/dashboard/profile", label: "Profile", active: pathname.startsWith("/dashboard/profile") },
-    { href: "/explore", label: "Explore", active: false },
-    ...(isAdmin ? [{ href: "/admin", label: "Admin", active: pathname.startsWith("/admin") }] : []),
+    { key: "Garage", href: "/dashboard", label: labels.garage, active: pathname === "/dashboard" || pathname.startsWith("/dashboard/vehicles") },
+    { key: "Orders", href: "/dashboard/orders", label: labels.orders, active: pathname.startsWith("/dashboard/orders") },
+    { key: "Crew", href: "/dashboard/crew", label: labels.crew, active: pathname.startsWith("/dashboard/crew") },
+    { key: "Profile", href: "/dashboard/profile", label: labels.profile, active: pathname.startsWith("/dashboard/profile") },
+    { key: "Explore", href: "/explore", label: labels.explore, active: false },
+    ...(isAdmin ? [{ key: "Admin", href: "/admin", label: labels.admin, active: pathname.startsWith("/admin") }] : []),
   ];
 }
 
 const ICONS: Record<string, React.ReactNode> = {
   Garage: <path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
   Orders: <path d="M4 7h16l-1.5 12h-13zM9 7V5a3 3 0 0 1 6 0v2" />,
+  Crew: (
+    <>
+      <circle cx="9" cy="8" r="3.5" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0M15 19.5a5 5 0 0 1 6.5-4.5" />
+    </>
+  ),
   Profile: (
     <>
       <circle cx="12" cy="8" r="4" />
@@ -35,8 +54,8 @@ const ICONS: Record<string, React.ReactNode> = {
 };
 
 /** Desktop links in the header. */
-export function DashboardNav({ isAdmin }: { isAdmin: boolean }) {
-  const items = useItems(isAdmin);
+export function DashboardNav({ isAdmin, labels = EN }: { isAdmin: boolean; labels?: NavLabels }) {
+  const items = useItems(isAdmin, labels);
   return (
     <nav className="hidden items-center gap-6 md:flex" aria-label="Dashboard">
       {items.map((i) => (
@@ -57,8 +76,8 @@ export function DashboardNav({ isAdmin }: { isAdmin: boolean }) {
 }
 
 /** Phone: fixed bottom tab bar so every dashboard area is one tap away. */
-export function DashboardTabBar({ isAdmin, avatarUrl, initial }: { isAdmin: boolean; avatarUrl: string | null; initial: string }) {
-  const items = useItems(isAdmin);
+export function DashboardTabBar({ isAdmin, avatarUrl, initial, labels = EN }: { isAdmin: boolean; avatarUrl: string | null; initial: string; labels?: NavLabels }) {
+  const items = useItems(isAdmin, labels);
   return (
     <nav
       aria-label="Dashboard"
@@ -75,7 +94,7 @@ export function DashboardTabBar({ isAdmin, avatarUrl, initial }: { isAdmin: bool
                 i.active ? "text-signal" : "text-muted-foreground",
               )}
             >
-              {i.label === "Profile" ? (
+              {i.key === "Profile" ? (
                 <span className={cn("flex size-6 items-center justify-center overflow-hidden rounded-full bg-surface-2 text-[11px] ring-2", i.active ? "ring-signal" : "ring-transparent")}>
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -86,7 +105,7 @@ export function DashboardTabBar({ isAdmin, avatarUrl, initial }: { isAdmin: bool
                 </span>
               ) : (
                 <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  {ICONS[i.label]}
+                  {ICONS[i.key]}
                 </svg>
               )}
               {i.label}

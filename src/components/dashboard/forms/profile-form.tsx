@@ -6,6 +6,8 @@ import { saveProfileAction } from "@/lib/actions/profile";
 import type { ProfileRow } from "@/lib/types";
 import type { ActionResult } from "@/lib/validation/common";
 import { AvatarPicker } from "@/components/dashboard/avatar-picker";
+import { LOCALES, LOCALE_LABEL, REGIONS } from "@/lib/i18n";
+import { t } from "@/lib/i18n/dictionary";
 
 export function ProfileForm({ profile }: { profile: ProfileRow }) {
   const [state, action, pending] = useActionState<ActionResult<ProfileRow> | null, FormData>(saveProfileAction, null);
@@ -15,7 +17,7 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
     <form action={action} className="space-y-5" noValidate>
       <div className="flex items-center justify-between">
         <h2 className="text-2xl">Profile</h2>
-        {state?.ok && <span className="label-tech text-emerald-400">Saved</span>}
+        {state?.ok && <span className="label-tech text-emerald-400">{t(profile.locale, "account_saved")}</span>}
       </div>
 
       <AvatarPicker avatarUrl={profile.avatar_url} initial={profile.display_name.slice(0, 1) || profile.username.slice(0, 1)} />
@@ -60,13 +62,41 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
           {errors.website_url && <p className="field-error">{errors.website_url}</p>}
         </div>
       </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="locale" className="field-label">
+            {t(profile.locale, "account_language")}
+          </label>
+          <select id="locale" name="locale" defaultValue={profile.locale} className="field">
+            {LOCALES.map((l) => (
+              <option key={l} value={l}>
+                {LOCALE_LABEL[l]}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-muted-foreground">{t(profile.locale, "account_language_hint")}</p>
+        </div>
+        <div>
+          <label htmlFor="region" className="field-label">
+            {t(profile.locale, "account_region")}
+          </label>
+          <select id="region" name="region" defaultValue={profile.region} className="field">
+            {REGIONS.map((r) => (
+              <option key={r.code} value={r.code}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-muted-foreground">{t(profile.locale, "account_region_hint")}</p>
+        </div>
+      </div>
       {state && !state.ok && !state.fieldErrors && (
         <p className="text-sm text-destructive" role="alert">
           {state.error}
         </p>
       )}
       <button type="submit" className="btn-signal" disabled={pending}>
-        {pending ? "Saving…" : "Save profile"}
+        {pending ? "…" : t(profile.locale, "account_save")}
       </button>
     </form>
   );
