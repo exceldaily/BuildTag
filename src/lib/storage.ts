@@ -5,6 +5,7 @@
 
 export const PHOTO_BUCKET = "buildtag-photos";
 export const AVATAR_BUCKET = "buildtag-avatars";
+export const PROOF_BUCKET = "buildtag-proofs";
 
 export type PhotoVariant = "full" | "thumb";
 
@@ -21,6 +22,11 @@ export function photoUrl(storagePath: string, variant: PhotoVariant = "full"): s
     return `/${storagePath}/${variant}.webp`;
   }
   return `${storageOrigin()}/storage/v1/object/public/${PHOTO_BUCKET}/${storagePath}/${variant}.webp`;
+}
+
+/** Customer-safe proof preview (public bucket, unguessable path). Never the production file. */
+export function proofUrl(storagePath: string): string {
+  return `${storageOrigin()}/storage/v1/object/public/${PROOF_BUCKET}/${storagePath}`;
 }
 
 export function avatarUrl(userId: string, version?: string | number): string {

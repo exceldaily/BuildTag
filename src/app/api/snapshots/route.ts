@@ -1,4 +1,8 @@
+import { createHash } from "node:crypto";
+
+import jsQR from "jsqr";
 import { NextResponse, type NextRequest } from "next/server";
+import sharp from "sharp";
 import { z } from "zod";
 
 import { scanUrl } from "@/lib/qr/generate";
@@ -13,6 +17,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const BUCKET = "buildtag-production";
+const PROOF_BUCKET = "buildtag-proofs";
 
 const metaSchema = z.object({
   vehicleId: z.string().uuid(),
@@ -26,12 +31,34 @@ const metaSchema = z.object({
 });
 
 /**
+ * Authoritative QR check: rasterize the production SVG on the server and
+ * decode it. The browser's result is advisory; this one decides whether the
+ * snapshot may be ordered.
+ */
+async function serverDecode(svg: string, expected: string): Promise<{ ok: boolean; decoded: string | null; width: number; error?: string }[]> {
+  const out: { ok: boolean; decoded: string | null; width: number; error?: string }[] = [];
+  for (const width of [700, 1200]) {
+    try {
+      const { data, info } = await sharp(Buffer.from(svg), { density: 300 }).resize({ width }).flatten({ background: "#ffffff" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      const result = jsQR(new Uint8ClampedArray(data.buffer, data.byteOffset, data.byteLength), info.width, info.height, { inversionAttempts: "attemptBoth" });
+      const decoded = result?.data ?? null;
+      out.push({ ok: decoded === expected, decoded, width });
+    } catch (err) {
+      out.push({ ok: false, decoded: null, width, error: err instanceof Error ? err.message : "rasterize failed" });
+    }
+  }
+  return out;
+}
+
+/**
  * PRODUCTION SNAPSHOT
  *
  * Called when the owner approves a proof. Receives the exact SVG and PNG the
  * browser rendered from the design (fonts converted to paths, images
- * embedded), stores them privately, and freezes configuration, dimensions,
- * material and the QR destination. Rows are immutable at the database level.
+ * embedded), re-validates the QR on the server, stores the files privately,
+ * publishes a small customer-safe proof image, and freezes configuration,
+ * dimensions, material, checksum and the QR destination. Rows are immutable
+ * at the database level.
  */
 export async function POST(request: NextRequest) {
   const ctx = await getOptionalUser();
@@ -78,6 +105,7 @@ export async function POST(request: NextRequest) {
   const base = `${user.id}/${snapshotId}`;
   const svgPath = `${base}/artwork.svg`;
   const pngPath = `${base}/artwork.png`;
+  const proofPath = `${base}/proof.png`;
 
   const svgText = await svgFile.text();
   if (/<text[\s>]/.test(svgText) || svgText.includes("NaN")) {
@@ -85,12 +113,30 @@ export async function POST(request: NextRequest) {
   }
   if (!svgText.startsWith("<svg")) return NextResponse.json({ ok: false, error: "Invalid SVG artwork." }, { status: 400 });
 
+  // Authoritative server-side QR validation on the exact production file.
+  const expected = scanUrl(siteUrl(), qr.code);
+  const serverChecks = await serverDecode(svgText, expected);
+  const serverOk = serverChecks.every((c) => c.ok);
+  const validationStatus: ProductionSnapshotRow["validation_status"] = !serverOk ? "failed" : meta.validationStatus === "failed" ? "failed" : meta.validationStatus;
+  const report = { ...meta.validationReport, server: { ok: serverOk, expected, checks: serverChecks, checkedAt: new Date().toISOString() } };
+  const sha256 = createHash("sha256").update(svgText, "utf8").digest("hex");
+
+  const pngBuffer = Buffer.from(await pngFile.arrayBuffer());
+  let proofBuffer: Buffer | null = null;
+  try {
+    proofBuffer = await sharp(pngBuffer).resize({ width: 900, withoutEnlargement: true }).png({ compressionLevel: 9 }).toBuffer();
+  } catch {
+    proofBuffer = null;
+  }
+
   const uploads = await Promise.all([
     client.storage.from(BUCKET).upload(svgPath, Buffer.from(svgText, "utf8"), { contentType: "image/svg+xml", upsert: false }),
-    client.storage.from(BUCKET).upload(pngPath, Buffer.from(await pngFile.arrayBuffer()), { contentType: "image/png", upsert: false }),
+    client.storage.from(BUCKET).upload(pngPath, pngBuffer, { contentType: "image/png", upsert: false }),
+    proofBuffer ? client.storage.from(PROOF_BUCKET).upload(proofPath, proofBuffer, { contentType: "image/png", upsert: false }) : Promise.resolve({ error: null }),
   ]);
-  const uploadError = uploads.find((u) => u.error)?.error;
+  const uploadError = uploads.slice(0, 2).find((u) => u.error)?.error;
   if (uploadError) return NextResponse.json({ ok: false, error: `Artwork upload failed: ${uploadError.message}` }, { status: 500 });
+  const proofStored = proofBuffer !== null && !uploads[2].error;
 
   const { data, error } = await client
     .from("tag_production_snapshots")
@@ -108,19 +154,22 @@ export async function POST(request: NextRequest) {
       material: spec.material,
       finish: spec.finish,
       quantity: meta.quantity,
-      qr_destination_at_order: scanUrl(siteUrl(), qr.code),
+      qr_destination_at_order: expected,
       svg_storage_path: svgPath,
       png_storage_path: pngPath,
-      validation_status: meta.validationStatus,
-      validation_report: meta.validationReport as Json,
+      proof_storage_path: proofStored ? proofPath : null,
+      artwork_sha256: sha256,
+      validation_status: validationStatus,
+      validation_report: report as Json,
     })
     .select("*")
     .single();
 
   if (error || !data) {
     await client.storage.from(BUCKET).remove([svgPath, pngPath]);
+    if (proofStored) await client.storage.from(PROOF_BUCKET).remove([proofPath]);
     return NextResponse.json({ ok: false, error: error?.message ?? "Could not save the snapshot." }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, snapshot: data as ProductionSnapshotRow });
+  return NextResponse.json({ ok: true, snapshot: data as ProductionSnapshotRow, serverValidation: { ok: serverOk, checks: serverChecks } });
 }

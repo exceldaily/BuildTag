@@ -388,6 +388,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
             {validated && spec && !specOrderable && <p className="mt-2 text-xs text-neon-amber">{material.name} is preview only until a print partner carries it. Gloss and Matte ship today.</p>}
           </section>
 
+          {admin && (
           <section className="panel p-4">
             <p className="label-tech">Digital export</p>
             <p className="mt-1 text-xs text-muted-foreground">Print-ready files for your own shop: vector SVG with fonts converted to paths, bleed and a named cut path, plus a {PRINT_DPI} DPI PNG.</p>
@@ -400,6 +401,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
               </button>
             </div>
           </section>
+          )}
 
           {!admin && savedDesigns.length > 0 && (
             <section className="panel p-4">

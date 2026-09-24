@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireProfile } from "@/lib/supabase/server";
-import { ORDER_STATUS_LABEL, type OrderRow } from "@/lib/types";
+import { CUSTOMER_STATUS_LABEL } from "@/lib/orders/status";
+import type { OrderRow } from "@/lib/types";
 import { OrderStatusBadge } from "@/components/orders/status-badge";
 
 export const metadata: Metadata = { title: "Orders", robots: { index: false } };
@@ -37,7 +38,7 @@ export default async function OrdersPage() {
                   <OrderStatusBadge status={o.status} />
                   <span className="font-display text-lg font-bold tabular-nums">${(o.total_cents / 100).toFixed(2)}</span>
                 </div>
-                <span className="sr-only">{ORDER_STATUS_LABEL[o.status]}</span>
+                <span className="sr-only">{CUSTOMER_STATUS_LABEL[o.status]}</span>
               </Link>
             </li>
           ))}

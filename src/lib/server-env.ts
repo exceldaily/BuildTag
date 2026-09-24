@@ -21,6 +21,12 @@ const serverSchema = z.object({
   STRIPE_PRICE_PRO_YEARLY: z.string().optional(),
   /** Shared secret between the Stripe webhook route and the billing_* database functions. */
   BUILDTAG_INTERNAL_TOKEN: z.string().optional(),
+  /** Transactional email (Resend). Missing values disable sending; orders never fail because of email. */
+  RESEND_API_KEY: z.string().optional(),
+  FROM_EMAIL: z.string().optional(),
+  ORDER_NOTIFICATION_EMAIL: z.string().optional(),
+  /** Reserved: automatic manufacturer submission. Keep false while orders are reviewed by hand. */
+  AUTO_SUBMIT_TO_FULFILLMENT: z.enum(["true", "false"]).default("false"),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -38,6 +44,10 @@ export function serverEnv(): ServerEnv {
     STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY || undefined,
     STRIPE_PRICE_PRO_YEARLY: process.env.STRIPE_PRICE_PRO_YEARLY || undefined,
     BUILDTAG_INTERNAL_TOKEN: process.env.BUILDTAG_INTERNAL_TOKEN || undefined,
+    RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
+    FROM_EMAIL: process.env.FROM_EMAIL || undefined,
+    ORDER_NOTIFICATION_EMAIL: process.env.ORDER_NOTIFICATION_EMAIL || undefined,
+    AUTO_SUBMIT_TO_FULFILLMENT: process.env.AUTO_SUBMIT_TO_FULFILLMENT === "true" ? "true" : "false",
   });
   if (!parsed.success) {
     throw new Error(

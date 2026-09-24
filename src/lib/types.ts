@@ -335,29 +335,41 @@ export interface TagDesignRow {
 export type OrderStatus =
   | "draft"
   | "awaiting_payment"
+  | "payment_processing"
   | "paid"
+  | "needs_review"
+  | "artwork_approved"
+  | "artwork_issue"
   | "preparing_artwork"
   | "submitted_to_printer"
+  | "sent_to_maker"
   | "in_production"
   | "shipped"
   | "delivered"
   | "cancelled"
+  | "refunded"
   | "production_error";
-export type PaymentStatus = "unpaid" | "pending" | "paid" | "refunded" | "failed";
+export type PaymentStatus = "unpaid" | "pending" | "processing" | "paid" | "refunded" | "failed";
 export type FulfillmentStatus = "not_started" | "queued" | "submitted" | "in_production" | "shipped" | "delivered" | "error";
 export type ValidationStatus = "passed" | "heuristic_only" | "failed";
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   draft: "Draft",
   awaiting_payment: "Awaiting payment",
+  payment_processing: "Payment processing",
   paid: "Paid",
+  needs_review: "Needs review",
+  artwork_approved: "Artwork approved",
+  artwork_issue: "Artwork issue",
   preparing_artwork: "Preparing artwork",
-  submitted_to_printer: "Submitted to printer",
+  submitted_to_printer: "Sent to maker",
+  sent_to_maker: "Sent to maker",
   in_production: "In production",
   shipped: "Shipped",
   delivered: "Delivered",
   cancelled: "Cancelled",
-  production_error: "Production error",
+  refunded: "Refunded",
+  production_error: "Production issue",
 };
 
 export interface PrintSpecificationRow {
@@ -377,6 +389,9 @@ export interface PrintSpecificationRow {
   currency: string;
   provider: string | null;
   provider_sku: string | null;
+  sku: string | null;
+  product_name: string;
+  product_type: string;
   available: boolean;
   sort_order: number;
   created_at: string;
@@ -402,6 +417,8 @@ export interface ProductionSnapshotRow {
   png_storage_path: string | null;
   validation_status: ValidationStatus;
   validation_report: Json;
+  artwork_sha256: string | null;
+  proof_storage_path: string | null;
   created_at: string;
 }
 
@@ -435,6 +452,21 @@ export interface OrderRow {
   notes: string;
   paid_at: string | null;
   shipped_at: string | null;
+  shipping_company: string;
+  shipping_carrier: string | null;
+  customer_notes: string;
+  admin_notes: string;
+  discount_cents: number;
+  payment_provider_payment_id: string | null;
+  proof_approved_at: string | null;
+  artwork_issue_reason: string | null;
+  reviewed_at: string | null;
+  approved_at: string | null;
+  sent_to_maker_at: string | null;
+  production_started_at: string | null;
+  delivered_at: string | null;
+  cancelled_at: string | null;
+  refunded_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -449,16 +481,40 @@ export interface OrderItemRow {
   quantity: number;
   unit_price_cents: number;
   total_price_cents: number;
+  product_sku: string | null;
+  product_name: string | null;
+  width: number | null;
+  height: number | null;
+  units: "in" | "mm" | null;
+  material: string | null;
+  finish: string | null;
   created_at: string;
 }
 
 export interface OrderEventRow {
   id: number;
   order_id: string;
+  previous_status: OrderStatus | null;
   status: OrderStatus;
   note: string;
   actor: string;
+  actor_user_id: string | null;
+  metadata: Json;
   created_at: string;
+}
+
+export interface NotificationEventRow {
+  id: string;
+  order_id: string | null;
+  type: string;
+  recipient: string;
+  provider: string;
+  provider_message_id: string | null;
+  status: "sent" | "failed" | "skipped";
+  attempts: number;
+  last_error: string | null;
+  created_at: string;
+  sent_at: string | null;
 }
 
 export interface PublicBuildListRow {
@@ -672,6 +728,7 @@ export interface Database {
       >;
       admins: Table<{ user_id: string; created_at: string }, { user_id: string; created_at?: string }, Partial<{ user_id: string }>>;
       subscriptions: Table<SubscriptionRow, InsertOf<SubscriptionRow>, UpdateOf<SubscriptionRow>>;
+      notification_events: Table<NotificationEventRow, InsertOf<NotificationEventRow>, UpdateOf<NotificationEventRow>>;
       shops: Table<
         ShopRow,
         InsertOf<ShopRow, "owner_id" | "logo_url" | "description" | "website_url" | "location_text" | "instagram_handle" | "verified">,
@@ -877,8 +934,18 @@ export interface Database {
         Args: { p_report_id: string; p_status: ReportStatus; p_note?: string | null };
         Returns: undefined;
       };
-      place_order: { Args: { p_snapshot_id: string; p_quantity: number; p_shipping: Json }; Returns: string };
-      billing_mark_order_paid: { Args: { p_token: string; p_order_id: string; p_reference: string | null }; Returns: boolean };
+      place_order: { Args: { p_snapshot_id: string; p_quantity: number; p_shipping: Json; p_proof_approved?: boolean }; Returns: string };
+      billing_mark_order_paid: { Args: { p_token: string; p_order_id: string; p_reference: string | null; p_payment_id?: string | null }; Returns: boolean };
+      billing_record_event: { Args: { p_token: string; p_event_id: string; p_event_type: string; p_order_id?: string | null }; Returns: boolean };
+      billing_order_summary: { Args: { p_token: string; p_order_id: string }; Returns: Json };
+      admin_order_summary: { Args: { p_order_id: string }; Returns: Json };
+      record_notification: {
+        Args: { p_token: string | null; p_order_id: string | null; p_type: string; p_recipient: string; p_provider: string; p_provider_message_id: string | null; p_status: string; p_error: string | null };
+        Returns: undefined;
+      };
+      order_mark_payment_processing: { Args: { p_order_id: string; p_reference: string }; Returns: undefined };
+      admin_set_order_notes: { Args: { p_order_id: string; p_notes: string }; Returns: undefined };
+      customer_cancel_order: { Args: { p_order_id: string }; Returns: undefined };
       billing_upsert_subscription: {
         Args: { p_token: string; p_user_id: string; p_plan: Plan; p_status: SubscriptionStatus; p_customer_id: string | null; p_subscription_id: string | null; p_period_end: string | null };
         Returns: undefined;
@@ -904,6 +971,8 @@ export interface Database {
           p_tracking_number?: string | null;
           p_tracking_url?: string | null;
           p_provider_order_id?: string | null;
+          p_carrier?: string | null;
+          p_reason?: string | null;
         };
         Returns: undefined;
       };

@@ -166,6 +166,10 @@ Files in `supabase/migrations/`, applied in order:
 | `0007_buildtag_billing.sql` | `private_settings` (billing token), token-gated `billing_*` functions the Stripe webhook writes through, `billing_remember_customer()` |
 | `0008_buildtag_leaderboard.sql` | `scan_leaderboard(period, limit)` for the public leaderboard, `build_owner_plan()` for the Pro badge |
 | `0009_buildtag_locale_crews.sql` | `profiles.locale` / `profiles.region` (seeded from sign-up metadata), crews tables + `create_crew`, `crew_add_member`, `crew_remove_member`, `delete_crew`, `get_crew`, `build_crew`, `my_crew` |
+| `0010_buildtag_comp_plans.sql` | complimentary Pro (`admin_set_plan`), expiry-aware `user_plan()`, `admin_list_members` |
+| `0011_buildtag_free_tags.sql` | admin free-tag orders (`admin_place_comp_order`) |
+| `0012_buildtag_crew_leaderboard.sql` | `crew_leaderboard()` |
+| `0013_buildtag_order_operations.sql` | sequential order numbers, production statuses + guarded transitions, frozen order-item product facts, status events with actor/metadata, Stripe event idempotency, notification log, proofs bucket, server QR validation + checksum on snapshots, `customer_cancel_order` |
 | `0008_buildtag_leaderboard.sql` | `scan_leaderboard(period, limit)` for `/leaderboard` (all time, month, week, day) and `build_owner_plan()` for the Pro badge |
 
 Apply with the Supabase SQL editor, `psql`, the Supabase CLI (`supabase db push` after placing them in your project's migrations folder), or the Supabase MCP `apply_migration` tool. The exposure block in 0003 appends `buildtag` to `pgrst.db_schemas` without overwriting other schemas. If your project restricts the API through the dashboard instead, add `buildtag` under **Settings → API → Exposed schemas**.
@@ -290,6 +294,40 @@ Every modification can carry an owner's own affiliate link. Nothing is brokered 
 - **Language + region** are chosen at sign-up (English, French, German, Spanish, Thai; regions US, CA, GB, EU, AU/NZ, TH, Asia, Latin America, other) and editable on the profile page. They live on `profiles.locale` / `profiles.region`; the language is mirrored in the `bt_locale` cookie so `<html lang>`, the marketing header and public build pages follow it for signed-out visitors too. Strings are in `src/lib/i18n/dictionary.ts` and cover navigation, the garage, profile basics and the public build page. Data-heavy screens (designer, orders, analytics, admin) are English for now.
 - **Crews** (`/dashboard/crew`, public page `/crew/<slug>`): a Pro member creates one crew and adds members by username (members do not need Pro; one crew per person; 25 max). The crew page lists every member's public builds and their combined scans; each member's build page shows a crew badge. All writes go through security-definer functions that enforce the Pro check and ownership.
 - **Scan leaderboard** (`/leaderboard`): most scanned public builds all time, this month, this week and today (calendar periods, server time zone), via `scan_leaderboard()`.
+
+## BuildTags order operations
+
+Manual fulfillment, built so a printer API can replace the manual steps later without touching checkout.
+
+**Flow.** Designer → Approve proof (browser export, fonts to paths) → `POST /api/snapshots` re-decodes the QR on the server, stores the SVG/PNG privately, publishes a small proof image, records a SHA-256 → Final proof page (`/dashboard/orders/new`) with the required approval checkbox → `place_order()` freezes product/price on the order item → Stripe Checkout → **the webhook alone marks it paid** → status `needs_review` → admin emails + customer confirmation → `/admin/orders` queue → approve / issue / sent to maker / in production / tracking → shipped email → delivered.
+
+**Environment**
+
+| Variable | Purpose |
+| --- | --- |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | card checkout + signed webhook (`/api/stripe/webhook`, events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.*`) |
+| `BUILDTAG_INTERNAL_TOKEN` | equals `buildtag.private_settings.billing_token`; lets the webhook write through `billing_*` functions with no service-role key |
+| `RESEND_API_KEY`, `FROM_EMAIL` | transactional email (Resend REST). Missing values = emails are logged as `skipped`, orders are unaffected |
+| `ORDER_NOTIFICATION_EMAIL` | where new-order and artwork-issue alerts go |
+| `AUTO_SUBMIT_TO_FULFILLMENT` | reserved, keep `false`: every order is reviewed by a human |
+
+**Order numbers.** `BT-000001` style from `buildtag.order_number_seq` via `next_order_number()` (default on `orders.order_number`). UUIDs stay the primary key.
+
+**Statuses.** `draft → awaiting_payment → payment_processing → needs_review → artwork_approved | artwork_issue → sent_to_maker → in_production → shipped → delivered`, plus `cancelled`, `refunded`, `production_error`. `admin_set_order_status()` enforces the allowed transitions, stamps `reviewed_at / approved_at / sent_to_maker_at / production_started_at / shipped_at / delivered_at / cancelled_at / refunded_at`, and writes an `order_events` row with `previous_status`, `actor`, `actor_user_id` and metadata (reason, tracking). `src/lib/orders/status.ts` mirrors the machine for the UI and tests.
+
+**Payment.** `startCheckoutAction` opens Stripe Checkout and marks the order `payment_processing`. Only `/api/stripe/webhook` can set `paid`: it verifies the signature, records the event id in `payment_events` (duplicates are acknowledged and ignored), calls `billing_mark_order_paid()` (idempotent, moves to `needs_review`), then sends the admin + customer emails once. The `/dashboard/orders/[id]?paid=1` success URL only shows a "confirming" message.
+
+**Snapshots.** `tag_production_snapshots` rows are immutable (trigger). They hold the design JSON, size, material, finish, QR destination, storage paths, proof path, SHA-256 and the full validation report (browser decode + server decode at 700 and 1200 px). Editing the vehicle, profile or design afterwards never changes a snapshot; the permanent `/s/CODE` link keeps resolving to the current build.
+
+**Reviewing an order.** Email → *View order* → `/admin/orders/[id]`: customer, shipping (copy button), vehicle, product/SKU, large proof, QR status + destination test link, payment, production timestamps, timeline, notification log. Actions appear per state: Approve artwork, Mark artwork issue (reason required), Mark sent to maker, Mark in production, Add tracking & ship (emails the customer), Mark delivered, Production issue, Cancel, Refund (record only; refund in Stripe first).
+
+**Manufacturer files.** Admin-only: `…/artwork?format=svg|png&order=BT-000127` downloads `BT-000127-production.svg/png`; `/admin/orders/[id]/production-sheet` prints the sheet; `/api/admin/orders/[id]/package` zips SVG + PNG + proof + sheet + README. Customers only ever see the proof image (`buildtag-proofs` bucket, unguessable path); the production bucket is admin-only by storage RLS.
+
+**Notifications.** `notification_events` logs every send (`sent | failed | skipped`, provider id, error). Failures never fail the order. To retry after fixing email config, re-trigger the transition (shipped) or resend from Resend; a resend UI is a small follow-up.
+
+**Future automation.** `src/lib/fulfillment` keeps the provider abstraction (`ManualFulfillmentProvider` today). A printer API provider implements `submitOrder`/`getStatus`, sets `provider` + `provider_sku` on `print_specifications`, and flips `AUTO_SUBMIT_TO_FULFILLMENT`; orders, snapshots and statuses do not change.
+
+**Tests.** `pnpm test` covers the state machine, customer-safe labels, file naming, shipping lines and webhook signature verification (accept, bad signature, missing header, stale timestamp, tampered body). Database guards (immutability, RLS, duplicate webhooks) are exercised by `scripts/rls-test.ts` with a service-role key.
 
 ## Security and privacy
 

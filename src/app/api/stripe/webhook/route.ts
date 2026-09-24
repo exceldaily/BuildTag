@@ -1,20 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { anonClient } from "@/lib/db/public";
+import { notifyOrderPaid, summaryFromJson } from "@/lib/orders/notify";
 import { serverEnv } from "@/lib/server-env";
 import { getSubscription, stripeConfig, verifyStripeSignature, type StripeCheckoutSession, type StripeSubscription } from "@/lib/stripe";
-import { anonClient } from "@/lib/db/public";
 import type { Plan, SubscriptionStatus } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Stripe webhook. Verifies the signature, then writes through token-gated
- * security-definer functions (the app holds no service-role key).
+ * Stripe webhook: the ONLY place a card payment marks an order paid.
  *
- * Handles:
- *   checkout.session.completed   decal order paid, or Pro subscription started
- *   customer.subscription.*      plan/status/renewal changes and cancellations
+ *  1. verify the Stripe-Signature header
+ *  2. record the event id (duplicates are acknowledged and ignored)
+ *  3. write through token-gated security-definer functions
+ *  4. notifications are best-effort and logged; they never fail the event
  */
 
 interface StripeEvent {
@@ -56,22 +57,38 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ ok: false, error: "Bad payload." }, { status: 400 });
   }
+  if (!event.id || !event.type) return NextResponse.json({ ok: false, error: "Bad payload." }, { status: 400 });
 
   const db = anonClient();
 
+  // Idempotency: Stripe retries; the same event must not act twice.
+  const { data: isNew, error: recordError } = await db.rpc("billing_record_event", { p_token: token, p_event_id: event.id, p_event_type: event.type });
+  if (recordError) return NextResponse.json({ ok: false, error: recordError.message }, { status: 500 });
+  if (!isNew) return NextResponse.json({ ok: true, received: event.id, duplicate: true });
+
   try {
     if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
-      const session = event.data.object as StripeCheckoutSession;
+      const session = event.data.object as StripeCheckoutSession & { payment_intent?: string | null };
       if (session.mode === "payment" && session.metadata?.order_id && session.payment_status === "paid") {
-        await db.rpc("billing_mark_order_paid", { p_token: token, p_order_id: session.metadata.order_id, p_reference: session.id });
+        const { data: newlyPaid, error } = await db.rpc("billing_mark_order_paid", {
+          p_token: token,
+          p_order_id: session.metadata.order_id,
+          p_reference: session.id,
+          p_payment_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
+        });
+        if (error) throw new Error(error.message);
+        if (newlyPaid) {
+          // One paid order -> one set of notifications. Failures are logged, never thrown.
+          const { data: summaryJson } = await db.rpc("billing_order_summary", { p_token: token, p_order_id: session.metadata.order_id });
+          const summary = summaryFromJson(summaryJson);
+          if (summary) await notifyOrderPaid(db, token, summary);
+        }
       } else if (session.mode === "subscription" && session.subscription) {
         const sub = await getSubscription(session.subscription);
         const userId = session.client_reference_id ?? session.metadata?.user_id ?? sub.metadata?.user_id;
         if (userId) await upsert(db, token, userId, sub);
       }
     } else if (event.type.startsWith("customer.subscription.")) {
-      // Re-read through our pinned API version: newer endpoint versions shape
-      // the subscription object differently (period fields moved to items).
       const sub = await getSubscription((event.data.object as { id: string }).id);
       let userId: string | null = sub.metadata?.user_id ?? null;
       if (!userId) {
@@ -81,7 +98,6 @@ export async function POST(request: NextRequest) {
       if (userId) await upsert(db, token, userId, sub);
     }
   } catch (err) {
-    // Stripe retries on non-2xx; surface the failure so it does retry.
     return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : "Webhook failed" }, { status: 500 });
   }
 

@@ -10,7 +10,7 @@ import type { OrderRow } from "@/lib/types";
 export function OrderActions({ order, paymentsEnabled }: { order: OrderRow; paymentsEnabled: boolean }) {
   const [pending, start] = useTransition();
   const router = useRouter();
-  if (order.status !== "awaiting_payment" && order.status !== "draft") return null;
+  if (order.status !== "awaiting_payment" && order.status !== "draft" && order.status !== "payment_processing") return null;
 
   return (
     <section className="panel space-y-2 p-4">
@@ -31,7 +31,7 @@ export function OrderActions({ order, paymentsEnabled }: { order: OrderRow; paym
           }
           className="btn-signal w-full"
         >
-          {pending ? "Opening checkout…" : "Pay now"}
+          {pending ? "Opening checkout…" : order.status === "payment_processing" ? "Continue to payment" : "Pay now"}
         </button>
       ) : (
         <p className="text-sm text-muted-foreground">Online payment is not switched on yet. Your order is saved; we will send an invoice and start production once it is paid.</p>
