@@ -25,25 +25,13 @@
  * are copied exactly instead of being recomputed.
  */
 import pg from "pg";
-import { existsSync } from "node:fs";
-
-// Secrets come from .env.migrate in the repo root (git-ignored), or from the shell.
-const ENV_FILE = new URL("../.env.migrate", import.meta.url);
-if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
+import { resolveDbUrl } from "./db-env.mjs";
 import { createClient } from "@supabase/supabase-js";
 
 const APPLY = process.argv.includes("--apply");
-const need = (k) => {
-  const v = process.env[k];
-  if (!v) {
-    console.error(`Missing env var ${k}. See the header of this file.`);
-    process.exit(1);
-  }
-  return v;
-};
 
-const OLD_DB_URL = need("OLD_DB_URL");
-const NEW_DB_URL = need("NEW_DB_URL");
+const OLD_DB_URL = await resolveDbUrl("OLD");
+const NEW_DB_URL = await resolveDbUrl("NEW");
 if (!/gncqfzxckjgqslreocti/.test(NEW_DB_URL)) {
   console.error("NEW_DB_URL does not point at the BuildTag project (gncqfzxckjgqslreocti). Refusing.");
   process.exit(1);
@@ -179,7 +167,8 @@ async function main() {
   const oldKey = process.env.OLD_SERVICE_KEY;
   const newKey = process.env.NEW_SERVICE_KEY;
   if (!oldUrl || !newUrl || !oldKey || !newKey) {
-    console.log("Storage keys not set; skipping file copy.");
+    console.log("\n!! OLD_SERVICE_KEY / NEW_SERVICE_KEY not set: photos and other uploaded files were NOT copied.");
+    console.log("!! Add both service_role keys to .env.migrate before running --apply, or the photos stay behind.");
     return;
   }
   const oldSb = createClient(oldUrl, oldKey, { auth: { persistSession: false } });

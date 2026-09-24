@@ -13,19 +13,13 @@
  * throwaway users and the bt_test schema. Output is test names and PASS/FAIL
  * only, never row data.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import pg from "pg";
 
-// Secrets come from .env.migrate in the repo root (git-ignored), or from the shell.
-const ENV_FILE = new URL("../.env.migrate", import.meta.url);
-if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
+import { resolveDbUrl } from "./db-env.mjs";
 
 const APPLY = process.argv.includes("--apply");
-const url = process.env.NEW_DB_URL;
-if (!url) {
-  console.error("Missing env var NEW_DB_URL. See the header of scripts/migrate-project.mjs.");
-  process.exit(1);
-}
+const url = await resolveDbUrl("NEW");
 if (!/gncqfzxckjgqslreocti/.test(url)) {
   console.error("NEW_DB_URL does not point at the BuildTag project (gncqfzxckjgqslreocti). Refusing.");
   process.exit(1);
