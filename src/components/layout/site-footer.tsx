@@ -42,7 +42,7 @@ export function SiteFooter() {
         <div>
           <Wordmark className="h-10" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-            A digital build sheet for your car, connected to one permanent QR decal. Scan the build.
+            The digital identity for your car or motorcycle, connected to one permanent BuildTag. Scan the build.
           </p>
           <div className="mt-6 flex gap-4">
             {SOCIALS.map((s) => (

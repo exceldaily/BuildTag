@@ -23,8 +23,9 @@ export default function AboutPage() {
           moment, so you can rename the build, change your username or transfer the car and the decal keeps working.
         </p>
         <p>
-          The BuildTag Designer produces real print artwork: vector SVG and high-resolution PNG, with the QR quiet zone
-          protected no matter how much automotive styling you wrap around it.
+          You design your BuildTag in the Designer, approve a final proof and order it. Every design is test-scanned
+          before it can be ordered, with the QR quiet zone protected no matter how much automotive styling you wrap
+          around it. We print it, cut it and ship it to you.
         </p>
       </div>
       <div className="mt-10 flex flex-col gap-3 sm:flex-row">

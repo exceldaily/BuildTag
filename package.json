@@ -12,7 +12,7 @@
     "icons": "node scripts/make-icons.mjs",
     "qr:validate": "tsx scripts/qr-validate.ts",
     "og": "tsx scripts/make-og.ts",
-    "test": "tsx --test tests/orders.test.ts tests/business.test.ts",
+    "test": "tsx --test tests/orders.test.ts tests/business.test.ts tests/landing.test.ts",
     "images": "node scripts/fetch-images.mjs"
   },
   "dependencies": {
