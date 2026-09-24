@@ -378,3 +378,33 @@
   .scan-beam { display: none; }
   .hotspot::after { display: none; }
 }
+
+/* ---------------------------------------------------------------------------
+ * Hero studio: the vehicle photo dissolves into a near-black studio with a
+ * floor, a grounding shadow and a faint wet-floor reflection.
+ * ------------------------------------------------------------------------- */
+.hero-vehicle {
+  --hv-radial: radial-gradient(ellipse 64% 60% at 50% 52%, #000 42%, transparent 100%);
+  --hv-vertical: linear-gradient(to bottom, transparent 0%, #000 26%, #000 80%, transparent 100%);
+  --hv-sides: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  -webkit-mask-image: var(--hv-radial), var(--hv-vertical), var(--hv-sides);
+  -webkit-mask-composite: source-in, source-in;
+  mask-image: var(--hv-radial), var(--hv-vertical), var(--hv-sides);
+  mask-composite: intersect;
+}
+.hero-reflection {
+  transform: scaleY(-1);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 56%, rgba(0, 0, 0, 0.55) 71.5%, transparent 72%);
+  mask-image: linear-gradient(to bottom, transparent 56%, rgba(0, 0, 0, 0.55) 71.5%, transparent 72%);
+  filter: blur(1.5px) saturate(0.8);
+  opacity: 0.35;
+}
+.hero-light-bar {
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.55) 20%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.55) 80%, transparent);
+  box-shadow: 0 0 18px 2px rgba(255, 255, 255, 0.12);
+}
+.hero-light-spill {
+  background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 70%);
+}

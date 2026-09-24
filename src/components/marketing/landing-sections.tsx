@@ -22,17 +22,53 @@ function heroPhoto(b: PublicBuild): { src: string; srcSet?: string } | null {
   return b.hero_image_url ? { src: b.hero_image_url } : null;
 }
 
+/**
+ * Oversized abstract module field for the hero backdrop. Deterministic
+ * noise with no finder or timing patterns, so it can never scan.
+ */
+const MODULE_FIELD = (() => {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  const n = 14;
+  let rects = "";
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (rnd() > 0.62) rects += `<rect x="${x}" y="${y}" width="0.86" height="0.86" rx="0.12"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" fill="#fff">${rects}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+})();
+
 /* =============================================================================
- * 1. HERO: vehicle + BuildTag + phone
+ * 1. HERO: vehicle + BuildTag + phone, in a near-black studio
  * ========================================================================== */
 export function Hero({ car, crew, decal }: { car: PublicBuild | null; crew: { name: string; slug: string } | null; decal: DecalImage | null }) {
   const photo = car ? heroPhoto(car) : null;
   return (
-    <section className={cn(SECTION, "overflow-hidden")}>
-      <div className="carbon absolute inset-0 opacity-70" aria-hidden="true" />
-      <div className="hairlines absolute inset-0 opacity-50" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_78%_45%,rgba(255,45,122,0.16),transparent_70%)]" aria-hidden="true" />
-      <Container className="relative grid items-center gap-12 pt-10 pb-16 sm:pt-14 lg:grid-cols-[1fr_1.05fr] lg:gap-8 lg:pt-16 lg:pb-24 xl:gap-16">
+    <section className={cn(SECTION, "overflow-hidden bg-[#050409]")}>
+      {/* STUDIO: felt more than seen, fading in from left to right. Desktop only. */}
+      <div className="pointer-events-none absolute inset-0 hidden lg:block [mask-image:linear-gradient(to_right,transparent_22%,#000_62%)]" aria-hidden="true">
+        {/* back wall with a hint of texture */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_65%_at_72%_38%,#14111f_0%,#0a0911_55%,transparent_100%)]" />
+        <div className="carbon absolute inset-0 opacity-25 [mask-image:radial-gradient(ellipse_50%_60%_at_72%_40%,#000,transparent_75%)]" />
+        {/* overhead linear lights */}
+        <div className="absolute top-[7%] left-[52%] h-[70%] w-[30%]">
+          <div className="hero-light-bar mx-auto w-[88%] opacity-70" />
+          <div className="hero-light-spill absolute inset-x-0 top-0 h-full" />
+        </div>
+        <div className="absolute top-[12%] left-[76%] h-[62%] w-[22%]">
+          <div className="hero-light-bar mx-auto w-[80%] opacity-45" />
+          <div className="hero-light-spill absolute inset-x-0 top-0 h-full opacity-80" />
+        </div>
+        {/* restrained haze */}
+        <div className="absolute top-[18%] left-[48%] h-[60%] w-[46%] rounded-full bg-white/[0.022] blur-3xl" />
+        {/* BuildTags pink ambient, behind and right of the vehicle */}
+        <div className="absolute top-[22%] right-[-6%] h-[70%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,45,122,0.2),transparent_65%)] blur-2xl" />
+      </div>
+      {/* Phones and tablets: one soft pink light, nothing else. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-[radial-gradient(ellipse_70%_60%_at_70%_70%,rgba(255,45,122,0.14),transparent_70%)] lg:hidden" aria-hidden="true" />
+      {/* Headline protection and a natural vignette. */}
+      <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(to_right,#050409_0%,#050409_30%,rgba(5,4,9,0.7)_48%,transparent_68%)] lg:block" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_75%_at_62%_48%,transparent_55%,rgba(0,0,0,0.7)_100%)]" aria-hidden="true" />
+
+      <Container className="relative grid items-center gap-8 pt-8 pb-12 sm:pt-12 md:gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6 lg:pt-14 lg:pb-20 xl:gap-10">
         <div className="max-w-2xl">
           <p className="eyebrow">Scan the build.</p>
           <h1 className="mt-5 text-[3.05rem] leading-[0.88] font-extrabold sm:text-6xl md:text-7xl xl:text-[5.4rem] 2xl:text-[6.2rem]">
@@ -57,41 +93,71 @@ export function Hero({ car, crew, decal }: { car: PublicBuild | null; crew: { na
           <p className="label-tech mt-6">Free to start · Cars and motorcycles · BuildTags from {DECAL_FROM}</p>
         </div>
 
-        {/* The picture that explains it: vehicle, the tag on it, the phone that scanned it. */}
+        {/* REAL CAR -> PHYSICAL TAG -> DIGITAL BUILD, layered back to front. */}
         <div>
-          <div className="relative mx-auto aspect-[20/21] w-full max-w-[620px]">
-            <div className="absolute top-0 left-0 h-[88%] w-[70%] overflow-hidden rounded-2xl border border-white/10 bg-surface-2 shadow-[0_40px_80px_-40px_rgba(0,0,0,0.9)]">
-              {photo && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={photo.src}
-                  srcSet={photo.srcSet}
-                  sizes="(min-width: 1024px) 430px, 70vw"
-                  alt={car ? `${vehicleTitle(car)} "${car.nickname}" at a night meet` : ""}
-                  fetchPriority="high"
-                  decoding="async"
-                  className="size-full object-cover object-[50%_42%]"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
-              <span className="absolute top-3 left-3 rounded bg-background/80 px-2 py-1 font-display text-[10px] font-bold tracking-[0.2em] uppercase">The vehicle</span>
+          <div className="relative mx-auto aspect-[1/1.02] w-full max-w-[560px] lg:max-w-[720px]">
+            {/* abstract module field behind the vehicle only (~3%) */}
+            <div
+              className="pointer-events-none absolute inset-[-8%] hidden opacity-[0.035] md:block [mask-image:radial-gradient(ellipse_48%_46%_at_42%_44%,#000_30%,transparent_78%)]"
+              style={{ backgroundImage: MODULE_FIELD, backgroundSize: "300px 300px" }}
+              aria-hidden="true"
+            />
+            {/* floor plane: horizon line at the car's ground line, a faint lift below */}
+            <div className="pointer-events-none absolute top-[63%] right-[-30%] bottom-[-12%] left-[-20%] hidden [mask-image:linear-gradient(to_right,transparent_8%,#000_30%,#000_85%,transparent)] md:block" aria-hidden="true">
+              <div className="h-px w-full bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.07)_35%,rgba(255,255,255,0.07)_70%,transparent)]" />
+              <div className="h-full w-full bg-[linear-gradient(to_bottom,rgba(255,255,255,0.025),transparent_60%)]" />
             </div>
+
+            {/* 1. VEHICLE: the photo dissolves into the studio */}
+            <div className="absolute top-0 left-0 h-[88%] w-[82%]">
+              {photo && (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.src}
+                    srcSet={photo.srcSet}
+                    sizes="(min-width: 1024px) 560px, 82vw"
+                    alt={car ? `${vehicleTitle(car)} "${car.nickname}" at a night meet` : ""}
+                    fetchPriority="high"
+                    decoding="async"
+                    className="hero-vehicle absolute inset-0 size-full object-cover object-[50%_55%] brightness-[0.93] contrast-[1.05] saturate-[0.82]"
+                  />
+                  {/* faint wet-floor reflection of the car, mirrored about its ground line */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.src} srcSet={photo.srcSet} sizes="(min-width: 1024px) 560px, 82vw" alt="" aria-hidden="true" decoding="async" className="hero-reflection pointer-events-none absolute top-[44%] left-0 hidden h-full w-full object-cover object-[50%_55%] md:block" />
+                </>
+              )}
+              {/* grounding shadow and a whisper of pink bounce light under the car */}
+              <div className="pointer-events-none absolute top-[68%] left-[12%] h-[9%] w-[76%] rounded-[50%] bg-black/70 blur-xl" aria-hidden="true" />
+              <div className="pointer-events-none absolute top-[71%] left-[24%] h-[8%] w-[60%] rounded-[50%] bg-[rgba(255,45,122,0.16)] blur-2xl" aria-hidden="true" />
+              <span className="absolute top-[24%] left-[13%] rounded bg-background/70 px-2 py-1 font-display text-[10px] font-bold tracking-[0.2em] uppercase backdrop-blur-sm">The vehicle</span>
+            </div>
+
+            {/* pink backlight behind the phone */}
+            <div className="pointer-events-none absolute top-[18%] right-[-10%] h-[76%] w-[52%] rounded-full bg-[radial-gradient(circle,rgba(255,45,122,0.26),transparent_68%)] blur-2xl" aria-hidden="true" />
+
+            {/* scan path, tag to phone */}
+            <svg className="pointer-events-none absolute inset-0 z-10 size-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M 35 76 C 46 84, 55 67, 66 60" stroke="var(--signal)" strokeWidth="1.6" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash" />
+            </svg>
+
+            {/* 2. BUILDTAG: on the lower front of the vehicle */}
             {decal && car && (
-              <div className="absolute bottom-[16%] left-[5%] w-[31%] -rotate-3">
-                <Decal decal={decal} priority className="drop-shadow-[0_14px_24px_rgba(0,0,0,0.65)]" />
+              <div className="absolute bottom-[9%] left-[6%] z-10 w-[29%] -rotate-3">
+                <div className="pointer-events-none absolute inset-[-12%] rounded-full bg-[rgba(255,45,122,0.18)] blur-2xl" aria-hidden="true" />
+                <Decal decal={decal} priority className="relative drop-shadow-[0_18px_22px_rgba(0,0,0,0.75)]" />
                 <Viewfinder tight tone="signal" />
               </div>
             )}
-            <svg className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M 37 64 C 46 74, 52 60, 61 55" stroke="var(--signal)" strokeWidth="1.6" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash" />
-            </svg>
+
+            {/* 3. PHONE: the digital build, overlapping the car */}
             {car && (
-              <Phone glow className="animate-rise absolute right-0 bottom-0 w-[39%] [animation-delay:150ms]">
+              <Phone glow className="animate-rise absolute right-0 bottom-[3%] z-20 w-[35%] shadow-[0_50px_90px_-30px_rgba(0,0,0,1),0_0_70px_-14px_var(--signal)] [animation-delay:150ms]">
                 <BuildScreen build={car} crew={crew} mods={3} eager />
               </Phone>
             )}
           </div>
-          <ol className="mx-auto mt-6 flex max-w-[620px] items-center justify-center gap-2 font-display text-xs font-bold tracking-[0.2em] uppercase sm:gap-3 sm:text-sm" aria-label="How a scan works">
+          <ol className="relative mx-auto mt-5 flex max-w-[620px] items-center justify-center gap-2 font-display text-xs font-bold tracking-[0.2em] uppercase sm:gap-3 sm:text-sm" aria-label="How a scan works">
             <li>Vehicle</li>
             <FlowArrow vertical="never" className="w-8" />
             <li className="text-signal">Scan</li>
