@@ -3,7 +3,8 @@
  * vehicle, converting to WebP. All photos are from Unsplash under the
  * Unsplash License (free to use, no attribution required; credited anyway).
  *
- *   pnpm images
+ *   pnpm images          (everything)
+ *   pnpm images moto     (only names starting with "moto")
  *
  * Homepage images land in public/images/home, demo vehicle photos in
  * public/demo/<name>/{full,thumb}.webp (mirrors the storage layout).
@@ -22,6 +23,12 @@ export const HOME_IMAGES = [
   { name: "garage-86", id: "photo-1749498793665-28a97caa1a8c", page: "https://unsplash.com/photos/DnNvKBxHptc", width: 1800, alt: "White Toyota 86 parked inside a garage" },
   { name: "hood-open", id: "photo-1749498701707-d824aedfea3d", page: "https://unsplash.com/photos/kJXg77YKqz4", width: 1800, alt: "Blue Subaru with its hood open at a meet" },
   { name: "fog-lights", id: "photo-1613713568305-8da2fc04f168", page: "https://unsplash.com/photos/wGs6Ffd44lc", width: 2400, alt: "Car headlights cutting through fog on a dark road" },
+  // Motorcycles (BuildTag is pitched to bike shops too)
+  { name: "moto-city-night", id: "photo-1720401110107-bc052557f613", page: "https://unsplash.com/photos/WyejKgcq4t8", width: 1800, alt: "Rider on a sport bike blasting through a city street at night" },
+  { name: "moto-bike-week", id: "photo-1783376751842-bbca196195c5", page: "https://unsplash.com/photos/ei5XUjkH0aw", width: 1800, alt: "Crowded street packed with motorcycles and people at Daytona Bike Week" },
+  { name: "moto-panigale", id: "photo-1698695290237-5c7be2bd52a8", page: "https://unsplash.com/photos/c2cW2tSSvRc", width: 1800, alt: "Red Ducati Panigale parked on a city street at night" },
+  { name: "moto-shop", id: "photo-1758887699124-a9e8763d9289", page: "https://unsplash.com/photos/Uz1yD4eIfY8", width: 1800, alt: "Black Aprilia sport bike on a paddock stand with tire warmers inside a garage" },
+  { name: "moto-r1-rolling", id: "photo-1606927131353-c0ad17d60b56", page: "https://unsplash.com/photos/_MkukMMe36E", width: 1800, alt: "Yamaha R1 rolling shot under city lights at night" },
 ];
 
 export const DEMO_IMAGES = [
@@ -36,14 +43,17 @@ async function fetchBuffer(id, width) {
   return Buffer.from(await res.arrayBuffer());
 }
 
+const only = process.argv[2] ?? "";
 mkdirSync("public/images/home", { recursive: true });
 for (const img of HOME_IMAGES) {
+  if (only && !img.name.startsWith(only)) continue;
   const buf = await fetchBuffer(img.id, img.width);
   await sharp(buf).webp({ quality: 80 }).toFile(`public/images/home/${img.name}.webp`);
   console.log("home", img.name);
 }
 
 for (const img of DEMO_IMAGES) {
+  if (only) break;
   const dir = `public/demo/${img.name}`;
   mkdirSync(dir, { recursive: true });
   const buf = await fetchBuffer(img.id, 2000);

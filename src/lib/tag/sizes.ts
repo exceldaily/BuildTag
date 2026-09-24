@@ -14,7 +14,7 @@ export interface SizePreset {
 }
 
 export const SIZE_PRESETS: SizePreset[] = [
-  { id: "small", name: "Small", width: 3, height: 3, hint: "Quarter window, dash, toolbox" },
+  { id: "small", name: "Small", width: 3, height: 3, hint: "Quarter window, dash, bike tank or tail" },
   { id: "standard", name: "Standard", width: 4, height: 4, hint: "Rear window, bumper" },
   { id: "wide", name: "Wide", width: 5, height: 3, hint: "Plate-style, body panel" },
   { id: "large", name: "Large", width: 5, height: 5, hint: "Show cars, garage door" },

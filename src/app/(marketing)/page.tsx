@@ -6,13 +6,13 @@ import { siteUrl } from "@/lib/env";
 import { scanUrl } from "@/lib/qr/generate";
 import { TEMPLATES, renderTagSvg } from "@/lib/tag";
 import { BuildCard } from "@/components/build/build-card";
-import { BrandChip, EarnShowcase, Faq, Pricing, ShowBuildTag, Ticker } from "@/components/marketing/home-sections";
+import { BrandChip, EarnShowcase, Faq, Pricing, ShowBuildTag, Ticker, TwoWheels } from "@/components/marketing/home-sections";
 import { NightCity } from "@/components/marketing/night-city";
 
 export const metadata: Metadata = {
   title: "BuildTag | Your build deserves a spec sheet",
   description:
-    "Create your digital build sheet, stick your BuildTag on your car, and let anyone scan to see what's done to it.",
+    "Create your digital build sheet, stick your BuildTag on your car or bike, and let anyone scan to see what's done to it.",
   alternates: { canonical: "/" },
 };
 
@@ -105,8 +105,8 @@ export default async function HomePage() {
               <span className="speed-heading chrome-text">a spec sheet.</span>
             </h1>
             <p className="mt-7 max-w-lg text-base text-foreground/85 sm:text-lg xl:max-w-xl xl:text-xl">
-              Create your digital build sheet. Stick your BuildTag on your car. Let anyone scan to see what&apos;s done
-              to it.
+              Create your digital build sheet. Stick your BuildTag on your car or your bike. Let anyone scan to see
+              what&apos;s done to it.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/signup" className="btn-signal">
@@ -246,27 +246,37 @@ export default async function HomePage() {
         <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Wherever the car goes</p>
+              <p className="eyebrow">Wherever the build goes</p>
               <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
                 <span className="speed-heading">The tag goes too.</span>
               </h2>
             </div>
           </div>
-          <div className="mt-10 grid gap-3 sm:grid-cols-3">
+          <div className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-3">
             {[
               { src: "/images/home/rolling-e30.webp", alt: "Yellow BMW E30 rolling shot through a lit-up street at night", chip: "Rolling shots" },
+              { src: "/images/home/moto-city-night.webp", alt: "Rider on a sport bike blasting through a city street at night", chip: "The night ride" },
               { src: "/images/home/lineup.webp", alt: "Modified cars parked at night under streetlights", chip: "The meet" },
+              { src: "/images/home/moto-bike-week.webp", alt: "Crowded street packed with motorcycles and people at Daytona Bike Week", chip: "Bike night" },
               { src: "/images/home/tunnel-gt3.webp", alt: "Lime green Porsche GT3 in a tunnel at night", chip: "The tunnel run" },
+              { src: "/images/home/moto-panigale.webp", alt: "Red Ducati Panigale parked on a city street at night", chip: "The parking spot" },
             ].map((g) => (
               <figure key={g.src} className="neon-card relative overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={g.src} alt={g.alt} loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover sm:aspect-[3/4]" />
+                <img src={g.src} alt={g.alt} loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover lg:aspect-[3/4]" />
                 <figcaption className="absolute bottom-3 left-3">
                   <BrandChip text={g.chip} />
                 </figcaption>
               </figure>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* TWO WHEELS */}
+      <section className="border-b border-line bg-[#080712]">
+        <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">
+          <TwoWheels />
         </div>
       </section>
 
@@ -336,7 +346,7 @@ export default async function HomePage() {
             <span className="speed-heading">What&apos;s done to it?</span>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-foreground/85">
-            Stop answering the same question in every parking lot. Put the answer on the car.
+            Stop answering the same question in every parking lot. Put the answer on the car. Or the bike.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href="/signup" className="btn-signal">

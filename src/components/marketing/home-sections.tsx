@@ -114,6 +114,69 @@ function PhoneMock() {
 }
 
 /* ---------------------------------------------------------------------------
+ * Two wheels: riders and motorcycle shops get the same tag.
+ * ------------------------------------------------------------------------- */
+const SHOP_POINTS = [
+  { title: "Tag every bike you build", body: "The shop makes the build sheet, the customer rides off with the QR on the tail. Every scan at the meet points back to your work." },
+  { title: "Your parts, your links", body: "Exhaust, tune, suspension, wheels. Each part links where you want it to, so the shop gets the sale, not a random search result." },
+  { title: "Sized for a bike", body: "3 x 3 in fits a tank, a tail or a swingarm. Vector export with the QR quiet zone protected, so the printer gets it right the first time." },
+];
+
+export function TwoWheels() {
+  return (
+    <div className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+      <div>
+        <p className="eyebrow">Two wheels too</p>
+        <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
+          <span className="speed-heading">Sportbikes. Cruisers.</span>
+          <br />
+          <span className="speed-heading chrome-text">Shop builds.</span>
+        </h2>
+        <p className="mt-5 text-foreground/80">
+          Same permanent QR, same spec sheet, same part links. Riders get asked &ldquo;what&apos;s done to it&rdquo; at every
+          light. Motorcycle shops get a tag on every bike that leaves the bay.
+        </p>
+        <ul className="mt-6 space-y-4">
+          {SHOP_POINTS.map((p, i) => (
+            <li key={p.title} className="flex gap-3">
+              <span className={`mt-1.5 size-2 shrink-0 rounded-full ${i === 0 ? "bg-signal" : i === 1 ? "bg-neon-cyan" : "bg-neon-amber"}`} />
+              <div>
+                <p className="font-display text-lg leading-none font-bold uppercase">{p.title}</p>
+                <p className="mt-1.5 text-sm text-foreground/75">{p.body}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link href="/signup" className="btn-signal">
+            Tag your bike
+          </Link>
+          <Link href="/signup" className="btn-ghost">
+            I run a shop
+          </Link>
+        </div>
+      </div>
+      <div className="grid grid-cols-[1.25fr_0.75fr] gap-3">
+        <figure className="neon-card relative overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/moto-shop.webp" alt="Black Aprilia sport bike on a paddock stand with tire warmers inside a garage" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover sm:aspect-[4/3] lg:aspect-[4/5]" />
+          <figcaption className="absolute bottom-3 left-3">
+            <BrandChip text="The shop" />
+          </figcaption>
+        </figure>
+        <figure className="neon-card relative overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/moto-r1-rolling.webp" alt="Yamaha R1 rolling shot under city lights at night" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover sm:aspect-[4/3] lg:aspect-[4/5]" />
+          <figcaption className="absolute bottom-3 left-3">
+            <BrandChip text="Out the door" />
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
  * Pricing
  * ------------------------------------------------------------------------- */
 export function Pricing() {
@@ -191,6 +254,10 @@ const FAQ = [
   {
     q: "What if I sell the car?",
     a: "Set the build to private or transfer it later. The decal keeps pointing at the same code, so you stay in control of what it shows.",
+  },
+  {
+    q: "Does it work for motorcycles?",
+    a: "Yes. A bike gets the same build sheet, the same permanent QR and the same part links. The 3 x 3 in tag fits a tank, tail or swingarm, and shops can build the sheet for a customer before the bike leaves.",
   },
 ];
 
