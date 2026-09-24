@@ -37,8 +37,8 @@ export default async function BuildTagPage({ params }: PageProps<"/dashboard/veh
           <p className="eyebrow">BuildTag Designer</p>
           <h2 className="mt-2 text-3xl">Design the physical decal</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Pick a template, shape and automotive style, add your power figure or handle, and download print-ready SVG or
-            PNG. The QR area stays protected no matter what you change.
+            Pick a template, shape and automotive style, add your power figure or handle, then approve the proof and order it.
+            The QR area stays protected no matter what you change, and every design is test-scanned before it can be ordered.
           </p>
           <Link href={`/dashboard/vehicles/${vehicle.id}/tag-designer`} className="btn-signal mt-5">
             Open the designer

@@ -20,7 +20,7 @@ export default async function SignupPage({ searchParams }: PageProps<"/signup">)
   return (
     <AuthShell
       title={claiming ? "Claim your build" : "Create your build"}
-      subtitle={claiming ? "Create your free account and the build your shop set up moves into your garage." : plan === "pro" ? "Create your account first. Pro checkout ($5 a month or $50 a year) is the next step." : "Free to start. One vehicle, a permanent BuildTag, and a print-ready decal."}
+      subtitle={claiming ? "Create your free account and the build your shop set up moves into your garage." : plan === "pro" ? "Create your account first. Pro checkout ($5 a month or $50 a year) is the next step." : "Free to start. Your first vehicle, its build page and a permanent BuildTag QR. Order the physical tag when you are ready."}
       footer={
         <>
           Already have an account?{" "}

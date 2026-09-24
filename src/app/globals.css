@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --font-heading: var(--font-barlow), "Arial Narrow", Impact, sans-serif;
   --font-display: var(--font-barlow), "Arial Narrow", Impact, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -137,8 +137,14 @@
   .label-tech {
     @apply font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground;
   }
+  /* Spec-sheet label: mono, tracked, pink. */
   .eyebrow {
-    @apply font-display text-xs font-semibold uppercase tracking-[0.22em] text-signal;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--signal);
   }
   .stat-number {
     @apply font-display text-4xl leading-none font-bold tracking-tight tabular-nums sm:text-5xl;
@@ -146,11 +152,94 @@
   .panel {
     @apply rounded-lg border border-line bg-surface;
   }
-  .btn-signal {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-md bg-signal px-5 font-display text-sm font-bold tracking-[0.12em] text-signal-foreground uppercase transition-colors shadow-[0_0_24px_-4px_var(--signal)] hover:shadow-[0_0_34px_-2px_var(--signal)] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-signal/60 focus-visible:outline-none disabled:opacity-50;
+  /*
+   * Buttons: clipped top-right corner and a physical press. The fill (signal)
+   * or the 1px frame (ghost) lives on ::before so the corner can be cut while
+   * the drop shadow and focus outline stay on the element itself. The ghost
+   * frame takes its color from the text, so text-destructive etc. still tint it.
+   */
+  .btn-signal,
+  .btn-hero,
+  .btn-ghost,
+  .btn-hero-ghost {
+    position: relative;
+    isolation: isolate;
+    @apply inline-flex h-11 items-center justify-center gap-2 px-5 font-display text-sm font-bold tracking-[0.12em] uppercase;
+    transition:
+      translate 0.14s ease,
+      filter 0.14s ease,
+      color 0.14s ease;
   }
-  .btn-ghost {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-md border border-line bg-transparent px-5 font-display text-sm font-bold tracking-[0.12em] text-foreground uppercase transition-all hover:border-neon-cyan/70 hover:bg-neon-cyan/5 hover:shadow-[0_0_20px_-6px_var(--neon-cyan)] focus-visible:ring-2 focus-visible:ring-signal/60 focus-visible:outline-none disabled:opacity-50;
+  .btn-signal::before,
+  .btn-hero::before,
+  .btn-ghost::before,
+  .btn-hero-ghost::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    transition: background 0.14s ease;
+  }
+  .btn-signal,
+  .btn-hero {
+    color: var(--signal-foreground);
+    filter: drop-shadow(0 8px 14px rgba(255, 45, 122, 0.22));
+  }
+  .btn-signal::before,
+  .btn-hero::before {
+    background: var(--signal);
+    clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%);
+  }
+  .btn-signal:hover,
+  .btn-hero:hover {
+    translate: 0 -2px;
+    filter: drop-shadow(0 12px 18px rgba(255, 45, 122, 0.4));
+  }
+  .btn-ghost,
+  .btn-hero-ghost {
+    color: var(--foreground);
+    background: transparent;
+  }
+  .btn-ghost::before,
+  .btn-hero-ghost::before {
+    background: color-mix(in oklch, currentColor 36%, transparent);
+    clip-path: polygon(
+      0 0, 0 100%, 100% 100%, 100% 11px, calc(100% - 11px) 0, 0 0,
+      1px 1px, calc(100% - 11.4px) 1px, calc(100% - 1px) 11.4px, calc(100% - 1px) calc(100% - 1px), 1px calc(100% - 1px), 1px 1px
+    );
+  }
+  .btn-ghost:hover,
+  .btn-hero-ghost:hover {
+    translate: 0 -2px;
+  }
+  .btn-ghost:hover::before,
+  .btn-hero-ghost:hover::before {
+    background: color-mix(in oklch, var(--signal) 85%, transparent);
+  }
+  .btn-signal:active,
+  .btn-hero:active,
+  .btn-ghost:active,
+  .btn-hero-ghost:active {
+    translate: 0 1px;
+  }
+  .btn-signal:focus-visible,
+  .btn-hero:focus-visible,
+  .btn-ghost:focus-visible,
+  .btn-hero-ghost:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 3px;
+  }
+  .btn-signal:disabled,
+  .btn-ghost:disabled,
+  .btn-signal[aria-disabled="true"],
+  .btn-ghost[aria-disabled="true"] {
+    opacity: 0.5;
+    translate: none;
+    cursor: not-allowed;
+  }
+  .btn-hero,
+  .btn-hero-ghost {
+    @apply h-12;
   }
   .btn-small {
     @apply h-9 px-3 text-xs;
@@ -185,13 +274,12 @@
       0 0 8px color-mix(in oklch, var(--signal), transparent 30%),
       0 0 24px color-mix(in oklch, var(--signal), transparent 60%);
   }
+  /* Flat hairline panel (the old glowing card is retired). */
   .neon-card {
-    @apply relative rounded-lg border border-line bg-surface/80 transition-all;
-    background-image: linear-gradient(160deg, rgba(255, 45, 122, 0.06), transparent 40%, rgba(31, 216, 255, 0.05));
+    @apply relative rounded-sm border border-line bg-surface/70 transition-colors;
   }
   .neon-card:hover {
-    border-color: color-mix(in oklch, var(--signal), transparent 40%);
-    box-shadow: 0 0 30px -10px var(--signal);
+    border-color: color-mix(in oklch, var(--foreground), transparent 72%);
   }
   .chrome-text {
     background: linear-gradient(180deg, #ffffff 0%, #d9d6ee 38%, #7d78a3 50%, #f6f4ff 62%, #b8b3d6 100%);
@@ -442,7 +530,8 @@
   transform: perspective(1100px) rotateX(7deg) rotateY(-11deg) rotateZ(-3deg);
   transform-origin: 50% 60%;
 }
-.tag-physical img {
+.tag-physical img,
+.tag-solid img {
   filter:
     drop-shadow(0 1.5px 0 #2d2a36)
     drop-shadow(0 1.5px 0 #17151d)
@@ -456,72 +545,6 @@
     linear-gradient(116deg, transparent 34%, rgba(255, 255, 255, 0.2) 46%, rgba(255, 255, 255, 0.05) 54%, transparent 64%),
     linear-gradient(to left, rgba(255, 45, 122, 0.2), transparent 30%);
   mix-blend-mode: screen;
-}
-/* Buttons with a clipped corner and a physical press. */
-.btn-hero,
-.btn-hero-ghost {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  height: 3rem;
-  padding: 0 1.35rem 0 1.2rem;
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  transition: translate 0.14s ease, filter 0.14s ease;
-}
-.btn-hero {
-  color: #fff;
-  filter: drop-shadow(0 8px 14px rgba(255, 45, 122, 0.26));
-}
-.btn-hero::before,
-.btn-hero-ghost::before,
-.btn-hero-ghost::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
-}
-.btn-hero::before {
-  inset: 0;
-  background: var(--signal);
-}
-.btn-hero-ghost {
-  color: var(--foreground);
-}
-.btn-hero-ghost::before {
-  inset: 0;
-  background: rgba(255, 255, 255, 0.3);
-  transition: background 0.14s ease;
-}
-.btn-hero-ghost::after {
-  inset: 1px;
-  background: #07060c;
-  clip-path: polygon(0 0, calc(100% - 11.6px) 0, 100% 11.6px, 100% 100%, 0 100%);
-}
-.btn-hero:hover,
-.btn-hero-ghost:hover {
-  translate: 0 -2px;
-}
-.btn-hero:hover {
-  filter: drop-shadow(0 12px 18px rgba(255, 45, 122, 0.42));
-}
-.btn-hero-ghost:hover::before {
-  background: rgba(255, 45, 122, 0.75);
-}
-.btn-hero:active,
-.btn-hero-ghost:active {
-  translate: 0 1px;
-}
-.btn-hero:focus-visible,
-.btn-hero-ghost:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
 }
 /* Entrance: car, then lines draw, then the tag, the scan path and the phone. */
 @media (prefers-reduced-motion: no-preference) {

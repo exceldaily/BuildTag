@@ -15,11 +15,16 @@ export function Container({ className, children }: { className?: string; childre
   return <div className={cn("mx-auto w-full max-w-[1500px] px-4 sm:px-6 lg:px-10 2xl:px-14", className)}>{children}</div>;
 }
 
-/** Section title: small eyebrow, big italic headline, optional short lede. */
-export function SectionHead({ eyebrow, title, lede, center = false, className }: { eyebrow?: string; title: React.ReactNode; lede?: React.ReactNode; center?: boolean; className?: string }) {
+/** Section title: numbered spec label, big italic headline, optional short lede. */
+export function SectionHead({ eyebrow, index, title, lede, center = false, className }: { eyebrow?: string; index?: string; title: React.ReactNode; lede?: React.ReactNode; center?: boolean; className?: string }) {
   return (
     <div className={cn(center && "mx-auto text-center", "max-w-3xl", className)}>
-      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+      {eyebrow && (
+        <p className="eyebrow">
+          {index && <span className="text-foreground/45">{index} / </span>}
+          {eyebrow}
+        </p>
+      )}
       <h2 className="mt-3 text-4xl leading-[0.95] sm:text-5xl xl:text-6xl">{title}</h2>
       {lede && <p className={cn("mt-4 text-base text-foreground/75 sm:text-lg", center && "mx-auto max-w-2xl")}>{lede}</p>}
     </div>
@@ -39,6 +44,22 @@ export function Decal({ decal, className, priority = false }: { decal: DecalImag
       decoding="async"
       className={cn("block h-auto w-full", className)}
     />
+  );
+}
+
+/** Tiny mono spec label. */
+export function Mono({ className, children }: { className?: string; children: React.ReactNode }) {
+  return <span className={cn("font-mono text-[10px] leading-none tracking-[0.14em] text-foreground/55 uppercase", className)}>{children}</span>;
+}
+
+/** A BuildTag that reads as a physical object: vinyl edge, contact shadow, sheen. */
+export function PhysicalTag({ decal, className, tilt = false, priority = false }: { decal: DecalImage; className?: string; tilt?: boolean; priority?: boolean }) {
+  return (
+    <div className={cn(tilt ? "tag-physical" : "tag-solid", "relative", className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={decal.src} width={decal.width} height={decal.height} alt={decal.label} loading={priority ? "eager" : "lazy"} decoding="async" className="block h-auto w-full" />
+      <div className="tag-sheen pointer-events-none absolute inset-0" style={{ WebkitMaskImage: `url("${decal.src}")`, maskImage: `url("${decal.src}")` }} aria-hidden="true" />
+    </div>
   );
 }
 
@@ -136,7 +157,7 @@ export function BuildScreen({ build: b, crew = null, mods = 4, gallery = false, 
           {b.owner && <span className="font-display text-[2.8cqw] tracking-[0.14em] text-muted-foreground uppercase">@{b.owner.username}</span>}
           {builtBy && <span className="font-display text-[2.8cqw] tracking-[0.14em] text-muted-foreground uppercase">· Built by {builtBy.name}</span>}
           {crew && (
-            <span className="rounded-full border border-neon-cyan/50 bg-neon-cyan/10 px-[2cqw] py-[0.6cqw] font-display text-[2.5cqw] font-bold tracking-[0.12em] text-neon-cyan uppercase">Crew · {crew.name}</span>
+            <span className="rounded-[1px] border border-signal/50 px-[2cqw] py-[0.6cqw] font-mono text-[2.4cqw] font-medium tracking-[0.12em] text-foreground/85 uppercase">Crew · {crew.name}</span>
           )}
         </div>
         {b.vehicle_socials.length > 0 && (

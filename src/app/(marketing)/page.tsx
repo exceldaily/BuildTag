@@ -11,15 +11,13 @@ import { Hero } from "@/components/marketing/hero";
 import { Container, SectionHead } from "@/components/marketing/landing-ui";
 import {
   Benefits,
+  BuildLoop,
   CarsAndBikes,
   Crews,
   DesignerShowcase,
   FinalCta,
-  HowItWorks,
-  ProductReveal,
   RealBuilds,
   ScanDemo,
-  ShopPortfolio,
   Shops,
   Showcase,
   WhatModIsThat,
@@ -101,8 +99,7 @@ export default async function HomePage() {
       {/* Prove it with a real permanent code */}
       <ScanDemo car={car} qr={qrSvg(demoLink, 300)} link={demoLink} />
 
-      <ProductReveal bike={sportbike} decal={revealDecal} link={bikeLink} />
-      <HowItWorks />
+      <BuildLoop bike={sportbike} decal={revealDecal} link={bikeLink} />
       <Showcase car={car} crew={carCrew} />
       <Benefits car={car} bagger={bagger} />
       <WhatModIsThat bike={bagger} />
@@ -110,12 +107,12 @@ export default async function HomePage() {
       <CarsAndBikes car={car} bike={bagger ?? sportbike} />
       <Crews crew={crew} />
       <Shops build={shopBuild} />
-      <ShopPortfolio />
       <RealBuilds builds={builds} />
 
       <section id="pricing" className="relative scroll-mt-16 border-b border-line bg-[#080712]">
         <Container className="py-16 md:py-24">
           <SectionHead
+            index="12"
             eyebrow="Pricing"
             title={<span className="speed-heading">Free is the real thing.</span>}
             lede="Build pages are free. Pro adds more vehicles and crews. BuildTags themselves are priced per order."
@@ -128,7 +125,7 @@ export default async function HomePage() {
 
       <section className="border-b border-line">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24 lg:px-10 xl:max-w-4xl">
-          <SectionHead eyebrow="Questions" title={<span className="speed-heading">Before you scan.</span>} />
+          <SectionHead index="13" eyebrow="Questions" title={<span className="speed-heading">Before you scan.</span>} />
           <div className="mt-10">
             <Faq />
           </div>

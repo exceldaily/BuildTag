@@ -54,12 +54,23 @@ export default async function ExplorePage({ searchParams }: PageProps<"/explore"
     return `/explore${s ? `?${s}` : ""}`;
   };
 
+  const activeFilters = [make, model, minHp, maxHp].filter((v) => v !== undefined && v !== "").length + (sort !== "newest" ? 1 : 0);
+
   return (
     <div className="mx-auto max-w-[1720px] px-4 py-10 sm:px-6 lg:px-10 2xl:px-16 md:py-14">
       <p className="eyebrow">Explore</p>
-      <h1 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">Public builds</h1>
+      {/* Phones: filters collapse behind a toggle so the builds come first (CSS only). */}
+      <input id="filters-toggle" type="checkbox" className="peer sr-only" aria-label="Show filters" />
+      <div className="mt-3 flex items-end justify-between gap-4">
+        <h1 className="text-4xl sm:text-5xl xl:text-6xl">
+          <span className="speed-heading">Public builds</span>
+        </h1>
+        <label htmlFor="filters-toggle" className="btn-ghost btn-small shrink-0 cursor-pointer md:hidden">
+          Filters{activeFilters > 0 ? ` · ${activeFilters}` : ""}
+        </label>
+      </div>
 
-      <form className="mt-8 grid gap-3 rounded-lg border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_120px_120px_160px_auto]" action="/explore" method="get">
+      <form className="mt-6 hidden gap-3 rounded-sm border border-line bg-surface p-4 peer-checked:grid sm:grid-cols-2 md:mt-8 md:grid lg:grid-cols-[1fr_1fr_120px_120px_160px_auto]" action="/explore" method="get">
         <div>
           <label htmlFor="make" className="field-label">
             Make

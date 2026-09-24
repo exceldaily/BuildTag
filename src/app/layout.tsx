@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, Inter } from "next/font/google";
+import { Barlow_Condensed, Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { siteUrl } from "@/lib/env";
@@ -19,6 +19,14 @@ const barlow = Barlow_Condensed({
   variable: "--font-barlow",
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
+  display: "swap",
+});
+
+/* Spec-sheet labels. Loaded so they look the same on Windows, Android and iOS. */
+const mono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -66,7 +74,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   return (
-    <html lang={locale} className={`dark ${inter.variable} ${barlow.variable} h-full`}>
+    <html lang={locale} className={`dark ${inter.variable} ${barlow.variable} ${mono.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         {children}
         <Toaster theme="dark" position="bottom-center" richColors closeButton />

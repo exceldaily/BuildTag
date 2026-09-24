@@ -91,7 +91,7 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
               <Link
                 key={c.slug}
                 href={`/crew/${c.slug}`}
-                className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/50 bg-neon-cyan/10 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] text-neon-cyan uppercase hover:bg-neon-cyan/20"
+                className="inline-flex items-center gap-1 rounded-sm border border-signal/50 px-2 py-0.5 font-mono text-[10px] font-medium tracking-[0.14em] text-foreground/85 uppercase hover:border-signal hover:text-foreground"
               >
                 {t(L, "build_crew")} · {c.name}
               </Link>

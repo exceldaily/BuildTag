@@ -17,12 +17,11 @@ export const BUSINESS_FEATURES = [
   "BuildTag ordering for customer builds",
 ];
 
-function Bullets({ items, dot }: { items: string[]; dot: string }) {
+function Bullets({ items }: { items: string[] }) {
   return (
-    <ul className="mt-6 mb-8 space-y-2 text-sm text-foreground/85">
+    <ul className="mt-6 mb-8 divide-y divide-line border-y border-line text-sm text-foreground/85">
       {items.map((f) => (
-        <li key={f} className="flex gap-2">
-          <span className={cn("mt-2 size-1.5 shrink-0 rounded-full", dot)} />
+        <li key={f} className="py-2">
           {f}
         </li>
       ))}
@@ -30,50 +29,56 @@ function Bullets({ items, dot }: { items: string[]; dot: string }) {
   );
 }
 
+function Label({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn("font-mono text-[11px] tracking-[0.16em] text-foreground/60 uppercase", className)}>{children}</p>;
+}
+
+/** Four editorial columns with a rule on top; Pro gets the pink rule. */
 export function Pricing() {
+  const col = "flex flex-col border-t-2 pt-6";
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-      <div className="neon-card flex flex-col p-6 sm:p-7">
-        <p className="label-tech">Free</p>
-        <p className="mt-2 font-display text-5xl font-extrabold uppercase">
-          $0 <span className="text-lg text-muted-foreground">forever</span>
+    <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-4">
+      <div className={cn(col, "border-foreground/25")}>
+        <Label>01 / Free</Label>
+        <p className="mt-3 font-display text-5xl font-extrabold uppercase italic">
+          $0 <span className="text-lg text-muted-foreground not-italic">forever</span>
         </p>
-        <Bullets dot="bg-foreground/60" items={["1 vehicle, 12 photos", "Unlimited mods and part links", "Vehicle and owner socials", "Permanent BuildTag QR", "The BuildTag designer", "Scan and click analytics"]} />
+        <Bullets items={["1 vehicle, 12 photos", "Unlimited mods and part links", "Vehicle and owner socials", "Permanent BuildTag QR", "The BuildTag designer", "Scan and click analytics"]} />
         <Link href="/signup" className="btn-signal mt-auto w-full" data-event="pricing_clicked">
           Create your build
         </Link>
       </div>
-      <div className="neon-card flex flex-col border-signal/50 p-6 sm:p-7">
+      <div className={cn(col, "border-signal")}>
         <div className="flex items-center justify-between gap-2">
-          <p className="label-tech text-signal">Pro</p>
-          <span className="rounded border border-signal/50 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-signal uppercase">2 months free yearly</span>
+          <Label className="text-signal">02 / Pro</Label>
+          <Label className="text-signal">2 months free yearly</Label>
         </div>
-        <p className="mt-2 font-display text-5xl font-extrabold uppercase">
-          $5 <span className="text-lg text-muted-foreground">a month</span>
+        <p className="mt-3 font-display text-5xl font-extrabold uppercase italic">
+          $5 <span className="text-lg text-muted-foreground not-italic">a month</span>
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
           or <span className="font-display text-xl font-bold text-foreground">$50</span> a year
         </p>
-        <Bullets dot="bg-signal" items={["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Start a crew and add members", "Pro badge on your build page", "Priority support"]} />
-        <Link href="/signup?plan=pro" className="btn-ghost mt-auto w-full border-signal/60" data-event="pricing_clicked">
+        <Bullets items={["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Start a crew and add members", "Pro badge on your build page", "Priority support"]} />
+        <Link href="/signup?plan=pro" className="btn-ghost mt-auto w-full" data-event="pricing_clicked">
           Go Pro
         </Link>
         <p className="mt-3 text-center text-xs text-muted-foreground">Secure checkout by Stripe. Cancel any time.</p>
       </div>
-      <div id="business" className="neon-card flex flex-col p-6 sm:p-7">
-        <p className="label-tech">BuildTags Business</p>
-        <p className="mt-2 font-display text-5xl font-extrabold uppercase">Custom</p>
+      <div id="business" className={cn(col, "border-foreground/25")}>
+        <Label>03 / BuildTags Business</Label>
+        <p className="mt-3 font-display text-5xl font-extrabold uppercase italic">Custom</p>
         <p className="mt-1 text-sm text-muted-foreground">For dealers, performance shops, custom shops, motorcycle shops and installers.</p>
-        <Bullets dot="bg-foreground/60" items={["Customer builds and claim cards", "Shop-installed part records", "Built by credit and a business page", "Shop crew and team roles"]} />
+        <Bullets items={["Customer builds and claim cards", "Shop-installed part records", "Built by credit and a business page", "Shop crew and team roles"]} />
         <Link href="/business/contact?interest=customer_buildtags" className="btn-ghost mt-auto w-full" data-event="business_clicked">
           Contact us
         </Link>
       </div>
-      <div className="neon-card flex flex-col p-6 sm:p-7">
-        <p className="label-tech">Enterprise</p>
-        <p className="mt-2 font-display text-4xl leading-none font-extrabold uppercase">Let&apos;s talk</p>
-        <p className="mt-3 text-sm text-muted-foreground">OEM programs, dealer groups and manufacturers. Talk to us about:</p>
-        <Bullets dot="bg-foreground/60" items={["Dealer group rollouts", "Custom branding", "API integration"]} />
+      <div className={cn(col, "border-foreground/25")}>
+        <Label>04 / Enterprise</Label>
+        <p className="mt-3 font-display text-5xl font-extrabold uppercase italic">Let&apos;s talk</p>
+        <p className="mt-1 text-sm text-muted-foreground">OEM programs, dealer groups and manufacturers. Talk to us about:</p>
+        <Bullets items={["Dealer group rollouts", "Custom branding", "API integration"]} />
         <Link href="/business/contact?interest=oem_partnership" className="btn-ghost mt-auto w-full" data-event="business_clicked">
           Discuss a partnership
         </Link>
@@ -134,16 +139,19 @@ const FAQ = [
 
 export function Faq() {
   return (
-    <div className="divide-y divide-line rounded-lg border border-line">
-      {FAQ.map((item) => (
+    <div className="divide-y divide-line border-y border-foreground/20">
+      {FAQ.map((item, i) => (
         <details key={item.q} className="group">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-signal [&::-webkit-details-marker]:hidden">
-            <span className="font-display text-lg font-bold uppercase">{item.q}</span>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal [&::-webkit-details-marker]:hidden">
+            <span className="flex items-baseline gap-4">
+              <span className="font-mono text-[11px] tracking-[0.14em] text-signal">{String(i + 1).padStart(2, "0")}</span>
+              <span className="font-display text-lg font-bold uppercase">{item.q}</span>
+            </span>
             <span className="font-display text-2xl text-signal transition-transform group-open:rotate-45" aria-hidden="true">
               +
             </span>
           </summary>
-          <p className="px-5 pb-5 text-sm text-foreground/80">{item.a}</p>
+          <p className="pb-5 pl-9 text-sm text-foreground/80">{item.a}</p>
         </details>
       ))}
     </div>

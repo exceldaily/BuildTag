@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ScanLine, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 import { crewLeaderboard } from "@/lib/db/public";
 import { formatCount } from "@/lib/utils";
@@ -36,7 +36,7 @@ export default async function CrewsPage() {
       </div>
 
       {crews.length === 0 ? (
-        <div className="panel mt-10 p-10 text-center">
+        <div className="mt-10 rounded-sm border border-line p-10 text-center">
           <p className="text-2xl">No crews yet.</p>
           <p className="mt-2 text-sm text-muted-foreground">Be the first. Go Pro, name your crew, add your people.</p>
         </div>
@@ -44,40 +44,38 @@ export default async function CrewsPage() {
         <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {crews.map((c) => (
             <li key={c.id}>
-              <Link href={`/crew/${c.slug}`} className="group panel block overflow-hidden transition-colors hover:border-foreground/30">
-                <div className="relative aspect-[16/9] bg-surface-2">
+              <Link
+                href={`/crew/${c.slug}`}
+                className="group relative block overflow-hidden rounded-sm border border-line bg-surface transition-colors hover:border-foreground/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden bg-surface-2">
                   {c.hero_image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.hero_image_url} alt="" className="size-full object-cover transition-transform group-hover:scale-[1.02]" loading="lazy" />
+                    <img src={c.hero_image_url} alt="" className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" loading="lazy" />
                   ) : (
                     <div className="flex size-full items-center justify-center">
                       <Users className="size-10 text-muted-foreground" aria-hidden="true" />
                     </div>
                   )}
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-                  <p className="absolute bottom-3 left-4 font-display text-2xl leading-none font-extrabold uppercase">{c.name}</p>
+                  <span className="absolute top-3 right-3 h-3 w-3 border-t border-r border-signal/80" aria-hidden="true" />
+                  <p className="absolute bottom-3 left-4 font-display text-3xl leading-none font-extrabold uppercase italic">{c.name}</p>
                 </div>
-                <div className="p-4">
+                <div className="px-4 pt-3 pb-4">
                   {c.tagline && <p className="line-clamp-2 text-sm text-foreground/80">{c.tagline}</p>}
-                  <dl className="mt-3 flex gap-4 text-xs text-muted-foreground">
-                    <div>
-                      <dt className="sr-only">Members</dt>
-                      <dd className="flex items-center gap-1">
-                        <Users className="size-3.5" aria-hidden="true" />
-                        {c.member_count}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="sr-only">Builds</dt>
-                      <dd>{c.build_count} builds</dd>
-                    </div>
-                    <div className="ml-auto">
-                      <dt className="sr-only">Scans</dt>
-                      <dd className="flex items-center gap-1 font-display text-base font-bold text-neon-cyan tabular-nums">
-                        <ScanLine className="size-4" aria-hidden="true" />
-                        {formatCount(c.scans)}
-                      </dd>
-                    </div>
+                  <dl className="mt-3 grid grid-cols-3 border-t border-line pt-3 font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                    {(
+                      [
+                        [c.member_count, c.member_count === 1 ? "Member" : "Members"],
+                        [c.build_count, c.build_count === 1 ? "Build" : "Builds"],
+                        [c.scans, c.scans === 1 ? "Scan" : "Scans"],
+                      ] as const
+                    ).map(([v, l]) => (
+                      <div key={l} className="flex flex-col-reverse">
+                        <dt className="mt-1">{l}</dt>
+                        <dd className="font-display text-lg leading-none font-bold tracking-normal text-foreground tabular-nums">{formatCount(v)}</dd>
+                      </div>
+                    ))}
                   </dl>
                 </div>
               </Link>

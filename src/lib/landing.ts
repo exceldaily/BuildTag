@@ -70,9 +70,13 @@ export async function loadLanding(): Promise<LandingData> {
     publicBuild(LANDING_SLUGS.shopBuild),
     buildCrew(LANDING_SLUGS.car).catch(() => null),
     getCrew(LANDING_SLUGS.crew).catch(() => null),
-    exploreBuilds({ sort: "scanned", pageSize: 4 }).catch(() => null),
+    exploreBuilds({ sort: "scanned", pageSize: 12 }).catch(() => null),
   ]);
-  return { car, bagger, sportbike, shopBuild, carCrew, crew, builds: explore?.builds ?? [] };
+  // Showcase builds with a photo and a real parts list; fall back to whatever is public.
+  const all = explore?.builds ?? [];
+  const strong = all.filter((b) => b.hero_image_url && b.mod_count >= 5);
+  const builds = (strong.length >= 4 ? strong : all).slice(0, 4);
+  return { car, bagger, sportbike, shopBuild, carCrew, crew, builds };
 }
 
 /** The same data the Designer feeds the renderer, from a public build. */

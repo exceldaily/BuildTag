@@ -45,8 +45,8 @@ export default async function BusinessPage() {
           <div className="scanlines absolute inset-0" />
         </div>
         <div className="relative mx-auto max-w-[1720px] px-4 pt-20 pb-24 sm:px-6 md:pt-28 md:pb-32 lg:px-10 2xl:px-16">
-          <div className="max-w-3xl">
-            <p className="eyebrow neon-text">BuildTags Business</p>
+          <div className="max-w-5xl">
+            <p className="eyebrow">BuildTags Business <span className="text-foreground/45">/ Shops, dealers, builders</span></p>
             <h1 className="mt-5 text-5xl leading-[0.9] font-extrabold sm:text-6xl md:text-7xl xl:text-8xl">
               <span className="speed-heading">Your shop builds it.</span>
               <br />
@@ -69,58 +69,58 @@ export default async function BusinessPage() {
         </div>
       </section>
 
-      {/* WORKFLOW */}
+      {/* WORKFLOW: one connected line */}
       <section id="workflow" className="scroll-mt-20 border-b border-line">
         <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 md:py-24 lg:px-10 2xl:px-16">
-          <p className="eyebrow">How it works</p>
+          <p className="eyebrow">
+            <span className="text-foreground/45">01 / </span>How it works
+          </p>
           <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
             <span className="speed-heading">Shop builds it. Customer claims it.</span>
           </h2>
-          <ol className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <ol className="relative mt-12 grid gap-8 pl-7 md:grid-cols-2 xl:grid-cols-4 xl:gap-8 xl:pl-0">
+            <span className="absolute top-0 bottom-0 left-[5px] w-px bg-signal/50 xl:top-[5px] xl:right-0 xl:bottom-auto xl:left-0 xl:h-px xl:w-auto" aria-hidden="true" />
             {STEPS.map((s, i) => (
-              <li key={s.title} className="neon-card p-6">
-                <div className="flex items-center justify-between">
-                  <s.icon className="size-7 text-signal" aria-hidden="true" />
-                  <span className="font-display text-4xl font-extrabold italic text-foreground/20">{String(i + 1).padStart(2, "0")}</span>
+              <li key={s.title} className="relative">
+                <span className="absolute top-[3px] left-[-28px] size-[11px] border border-signal bg-background xl:static xl:block" aria-hidden="true" />
+                <div className="flex items-center gap-3 xl:mt-5">
+                  <span className="font-mono text-[11px] tracking-[0.14em] text-signal">{String(i + 1).padStart(2, "0")}</span>
+                  <s.icon className="size-4 text-foreground/70" aria-hidden="true" />
                 </div>
-                <h3 className="mt-4 text-2xl">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
+                <h3 className="mt-2 text-2xl">{s.title}</h3>
+                <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">{s.body}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* OWNERSHIP VS CREDIT */}
+      {/* OWNERSHIP VS CREDIT: two ruled columns */}
       <section className="relative border-b border-line bg-[#080712]">
-        <div className="absolute inset-0 grid-fade" aria-hidden="true" />
+        <div className="carbon absolute inset-0 opacity-40" aria-hidden="true" />
         <div className="relative mx-auto max-w-[1720px] px-4 py-16 sm:px-6 md:py-24 lg:px-10 2xl:px-16">
-          <h2 className="max-w-4xl text-4xl sm:text-5xl xl:text-6xl">
-            <span className="speed-heading">The customer takes ownership. The shop keeps the credit.</span>
+          <p className="eyebrow">
+            <span className="text-foreground/45">02 / </span>Ownership and credit
+          </p>
+          <h2 className="mt-3 max-w-4xl text-4xl sm:text-5xl xl:text-6xl">
+            <span className="speed-heading">The customer takes ownership.</span> <span className="speed-heading text-signal">The shop keeps the credit.</span>
           </h2>
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
-            <div className="neon-card p-6 sm:p-8">
-              <p className="label-tech text-neon-cyan">The customer owns</p>
-              <ul className="mt-4 space-y-2 text-sm text-foreground/85">
-                {["The build page, photos and description", "Privacy: public, unlisted or private", "Their own parts, socials and future upgrades", "The permanent QR on the vehicle (it never changes)", "Whether to join your crew"].map((t) => (
-                  <li key={t} className="flex gap-2">
-                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-neon-cyan" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="neon-card border-signal/50 p-6 sm:p-8">
-              <p className="label-tech text-signal">Your shop keeps</p>
-              <ul className="mt-4 space-y-2 text-sm text-foreground/85">
-                {["“Built by” credit on the public page, linked to your business", "Shop-installed badges on the parts you recorded", "Your private customer notes and work order numbers", "The BuildTag orders your business placed", "The build on your business page and crew"].map((t) => (
-                  <li key={t} className="flex gap-2">
-                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-signal" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-0 md:divide-x md:divide-line">
+            {[
+              { label: "The customer owns", tone: "text-foreground/70", items: ["The build page, photos and description", "Privacy: public, unlisted or private", "Their own parts, socials and future upgrades", "The permanent QR on the vehicle (it never changes)", "Whether to join your crew"] },
+              { label: "Your shop keeps", tone: "text-signal", items: ["“Built by” credit on the public page, linked to your business", "Shop-installed badges on the parts you recorded", "Your private customer notes and work order numbers", "The BuildTag orders your business placed", "The build on your business page and crew"] },
+            ].map((c, i) => (
+              <div key={c.label} className={i === 0 ? "md:pr-10" : "md:pl-10"}>
+                <p className={`font-mono text-[11px] tracking-[0.16em] uppercase ${c.tone}`}>{c.label}</p>
+                <ul className="mt-4 divide-y divide-line border-y border-line text-sm text-foreground/85">
+                  {c.items.map((t) => (
+                    <li key={t} className="py-2.5">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
           <p className="mt-6 max-w-3xl text-sm text-muted-foreground">
             Scanning the QR on a vehicle only opens its public page. Ownership moves only through the private claim link or code your business
@@ -129,43 +129,61 @@ export default async function BusinessPage() {
         </div>
       </section>
 
-      {/* BENEFITS */}
+      {/* BENEFITS: spec rows */}
       <section className="border-b border-line">
         <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 md:py-24 lg:px-10 2xl:px-16">
-          <p className="eyebrow">Why shops use it</p>
+          <p className="eyebrow">
+            <span className="text-foreground/45">03 / </span>Why shops use it
+          </p>
           <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
             <span className="speed-heading">Include a BuildTag with every build.</span>
           </h2>
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {BENEFITS.map((b) => (
-              <li key={b.title} className="neon-card p-6">
-                <b.icon className="size-6 text-neon-cyan" aria-hidden="true" />
-                <h3 className="mt-3 text-xl">{b.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{b.body}</p>
+          <ul className="mt-12 grid border-t border-foreground/20 md:grid-cols-2 md:gap-x-12">
+            {BENEFITS.map((b, i) => (
+              <li key={b.title} className="flex gap-5 border-b border-line py-6">
+                <span className="font-mono text-[11px] tracking-[0.14em] text-signal">{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <h3 className="flex items-center gap-2 text-xl">
+                    <b.icon className="size-4 text-foreground/60" aria-hidden="true" />
+                    {b.title}
+                  </h3>
+                  <p className="mt-1.5 max-w-md text-sm text-muted-foreground">{b.body}</p>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* EXAMPLE */}
+      {/* EXAMPLE: one build, start to finish */}
       <section className="relative border-b border-line bg-[#080712]">
-        <div className="relative mx-auto grid max-w-[1720px] gap-10 px-4 py-16 sm:px-6 md:grid-cols-[0.9fr_1.1fr] md:py-24 lg:px-10 2xl:px-16">
+        <div className="relative mx-auto grid max-w-[1720px] gap-12 px-4 py-16 sm:px-6 md:grid-cols-[0.9fr_1.1fr] md:py-24 lg:px-10 2xl:px-16">
           <div>
-            <p className="eyebrow">Example</p>
+            <p className="eyebrow">
+              <span className="text-foreground/45">04 / </span>Example
+            </p>
             <h2 className="mt-3 text-4xl sm:text-5xl">
               <span className="speed-heading">One build, start to finish.</span>
             </h2>
             <p className="mt-4 text-sm text-muted-foreground">
               Blackline Performance is a fictional shop we use to show the flow. It is not a real business or customer.
             </p>
+            <figure className="relative mt-8 max-w-md overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/demo/blackline-1/full.webp" alt="NIGHTSHIFT, the demo 2026 Road Glide built by Blackline Performance" loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
+              <figcaption className="absolute bottom-3 left-4">
+                <span className="font-mono text-[10px] tracking-[0.14em] text-signal uppercase">Built by Blackline Performance</span>
+                <span className="mt-1 block font-display text-3xl leading-none font-extrabold uppercase italic">Nightshift</span>
+              </figcaption>
+            </figure>
             {demo && (
               <Link href={`/org/${demo.slug}`} className="btn-ghost mt-6">
                 See the demo shop page
               </Link>
             )}
           </div>
-          <ol className="space-y-3">
+          <ol className="divide-y divide-line self-center border-y border-foreground/20">
             {[
               ["Blackline Performance", "creates a build for a customer's 2026 Road Glide and adds it to the Blackline Performance Riders crew."],
               ["The team", "records the exhaust, tune, suspension and audio work, each marked Shop installed."],
@@ -173,8 +191,8 @@ export default async function BusinessPage() {
               ["At pickup", "the customer gets a claim card, taps Claim my build, and the Road Glide is in their garage."],
               ["After", "the page says Built by Blackline Performance, the parts keep their shop badges, and the customer adds their own photos and upgrades."],
             ].map(([who, what], i) => (
-              <li key={who} className="neon-card flex gap-4 p-4">
-                <span className="font-display text-3xl leading-none font-extrabold italic text-signal">{i + 1}</span>
+              <li key={who} className="flex gap-5 py-4">
+                <span className="font-mono text-[11px] tracking-[0.14em] text-signal">{String(i + 1).padStart(2, "0")}</span>
                 <p className="text-sm text-foreground/85">
                   <span className="font-semibold text-foreground">{who}</span> {what}
                 </p>
@@ -187,9 +205,11 @@ export default async function BusinessPage() {
       {/* ENTERPRISE */}
       <section id="enterprise" className="scroll-mt-20 border-b border-line">
         <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 md:py-24 lg:px-10 2xl:px-16">
-          <div className="grid gap-10 md:grid-cols-2">
+          <div className="grid gap-12 md:grid-cols-2">
             <div>
-              <p className="eyebrow">OEM &amp; enterprise</p>
+              <p className="eyebrow">
+                <span className="text-foreground/45">05 / </span>OEM &amp; enterprise
+              </p>
               <h2 className="mt-3 text-4xl sm:text-5xl">
                 <span className="speed-heading">Dealer groups and brands.</span>
               </h2>
@@ -202,13 +222,12 @@ export default async function BusinessPage() {
                 Talk about enterprise
               </Link>
             </div>
-            <div className="neon-card p-6 sm:p-8">
-              <p className="label-tech text-neon-cyan">BuildTags Business</p>
-              <p className="mt-2 font-display text-4xl font-extrabold uppercase">Custom pricing</p>
-              <ul className="mt-6 space-y-2 text-sm text-foreground/85">
+            <div className="flex flex-col border-t-2 border-signal pt-6">
+              <p className="font-mono text-[11px] tracking-[0.16em] text-signal uppercase">BuildTags Business</p>
+              <p className="mt-3 font-display text-4xl font-extrabold uppercase italic">Custom pricing</p>
+              <ul className="mt-6 divide-y divide-line border-y border-line text-sm text-foreground/85">
                 {BUSINESS_FEATURES.map((f) => (
-                  <li key={f} className="flex gap-2">
-                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-neon-cyan" />
+                  <li key={f} className="py-2">
                     {f}
                   </li>
                 ))}
