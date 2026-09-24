@@ -40,7 +40,7 @@ export const DEMO_IMAGES = [
   { name: "rosso-2", id: "photo-1615812309036-e3aeba454bba", page: "https://unsplash.com/photos/BIztIhCOVOc", alt: "Red Ducati Panigale V2 framed by the mouth of a concrete tunnel" },
   { name: "rosso-3", id: "photo-1615812595024-43ac7a9c0586", page: "https://unsplash.com/photos/8m_S9Pi6a1I", alt: "Close-up of the Panigale V2 tail and rear wheel" },
   // Demo bagger "DUSK" (Street Glide)
-  { name: "dusk-1", id: "photo-1597171731775-4552eff4c815", page: "https://unsplash.com/photos/h_fK5Nxsth8", alt: "Black and silver Harley-Davidson Street Glide bagger parked on a road at sunset" },
+  { name: "dusk-1", id: "photo-1597171731775-4552eff4c815", page: "https://unsplash.com/photos/h_fK5Nxsth8", alt: "Black and gray CVO Street Glide bagger parked on a road at sunset" },
 ];
 
 async function fetchBuffer(id, width) {

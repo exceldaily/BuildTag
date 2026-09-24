@@ -1,5 +1,5 @@
 -- =============================================================================
--- BuildTag demo seed: "DUSK" 2020 Harley-Davidson Street Glide (bagger example)
+-- BuildTag demo seed: "DUSK" 2020 Harley-Davidson CVO Street Glide (bagger example)
 -- =============================================================================
 -- Run after demo_ghost_supra.sql (it reuses the demo owner). Idempotent:
 -- re-running replaces the bike's data. Social, product and affiliate URLs are
@@ -61,10 +61,10 @@ begin
     horsepower, horsepower_type, torque, torque_unit, mileage, mileage_unit,
     build_started_year, build_cost, build_cost_public, dyno_type, visibility, status, show_owner_section
   ) values (
-    demo_user, 'dusk-2020-harley-davidson-street-glide', 2020, 'Harley-Davidson', 'Street Glide', '', 'DUSK',
-    E'Bought it to tour, then the shop got involved. Big-inch motor, real suspension, and an audio setup you can hear at highway speed.\n\nThe motor and chassis work was done at Example Customs; the bars, seat and lighting were weekend jobs in my garage. Next: a 23-inch front and a fresh set of bags.',
+    demo_user, 'dusk-2020-harley-davidson-street-glide', 2020, 'Harley-Davidson', 'Street Glide', 'CVO', 'DUSK',
+    E'Bought it to tour, then the shop got involved. The factory 117 got a cam, a tune and a real exhaust, the chassis got proper suspension, and the audio is loud enough to hear at highway speed.\n\nThe engine, suspension and audio work was done at Example Customs; the lighting, pads and comms were weekend jobs in my garage. Next: a 21-inch front and taller bars.',
     '/demo/dusk-1/full.webp', '/demo/dusk-1/full.webp', 'Tampa, FL',
-    121, 'WHP', 126, 'LB_FT', 18400, 'MI',
+    118, 'WHP', 128, 'LB_FT', 18400, 'MI',
     2021, null, false, 'Dynojet 250i', 'public', 'active', true
   ) returning id into v_id;
 
@@ -74,7 +74,7 @@ begin
 
   -- Photo (served from /public/demo) ----------------------------------------
   insert into buildtag.vehicle_photos (vehicle_id, storage_path, caption, alt_text, width, height, sort_order) values
-    (v_id, 'demo/dusk-1', 'Last light on the back roads', 'Black and silver Harley-Davidson Street Glide bagger parked on a road at sunset', 2000, 1321, 0);
+    (v_id, 'demo/dusk-1', 'Last light on the back roads', 'Black and gray CVO Street Glide bagger parked on a road at sunset', 2000, 1321, 0);
 
   -- Vehicle socials (placeholders) ------------------------------------------
   insert into buildtag.social_links (owner_type, owner_id, platform, handle, url, sort_order) values
@@ -84,23 +84,16 @@ begin
 
   -- Modifications ------------------------------------------------------------
   insert into buildtag.modifications (vehicle_id, category, brand, part_name, part_number, description, price, price_public, product_url, affiliate_url, merchant, affiliate_network, installed_by_text, shop_id, installation_date, sort_order) values
-    (v_id, 'engine', 'Screamin'' Eagle', 'Milwaukee-Eight Stage IV Kit (107 to 128 cu in)', '', 'Big bore, pistons, cams and heads. Broken in over 500 miles, then back on the dyno.', 2600, false, 'https://example.com/shop/se-stage-iv-128', null, 'Example Customs', '', '', shop, '2022-03-12', 0),
-    (v_id, 'ecu_tuning', 'Dynojet', 'Power Vision PV3', '', 'Custom dyno tune for the 128 and the exhaust.', 600, false, 'https://example.com/shop/dynojet-pv3', 'https://example.com/aff/dynojet-pv3?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 1),
+    (v_id, 'engine', 'Screamin'' Eagle', 'SE8-517 High-Lift Camshaft', '', 'Pulls harder from 3,000 rpm up without killing the low-end the 117 is known for.', 700, false, 'https://example.com/shop/se8-517-cam', null, '', '', '', shop, '2022-03-12', 0),
+    (v_id, 'ecu_tuning', 'Dynojet', 'Power Vision PV3', '', 'Custom dyno tune for the cam and the exhaust.', 600, false, 'https://example.com/shop/dynojet-pv3', 'https://example.com/aff/dynojet-pv3?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 1),
     (v_id, 'exhaust', 'Rinehart Racing', '4.5 in. Slip-On Mufflers', '', 'Black with black end caps. Loud enough to be heard, not enough to be hated.', 800, false, 'https://example.com/shop/rinehart-slip-on', 'https://example.com/aff/rinehart-slip-on?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 2),
-    (v_id, 'intake', 'Screamin'' Eagle', 'Heavy Breather Elite Air Cleaner', '', 'Black finish.', 420, false, 'https://example.com/shop/se-heavy-breather', null, '', '', '', shop, '2022-03-12', 3),
-    (v_id, 'suspension', 'Legend Suspensions', 'REVO-A Coil Rear Shocks', '', 'Adjustable. Set up for two-up touring with the bags loaded.', 1200, false, 'https://example.com/shop/legend-revo-a', null, '', '', '', shop, '2022-05-02', 4),
-    (v_id, 'suspension', 'Progressive Suspension', 'Monotube Fork Cartridge Kit', '', 'Keeps the front calm under hard braking.', 800, false, 'https://example.com/shop/progressive-monotube', null, '', '', '', shop, '2022-05-02', 5),
-    (v_id, 'wheels', 'Performance Machine', '21 in. Front / 18 in. Rear Forged Wheels', '', 'Gloss black, contrast cut.', 4200, false, 'https://example.com/shop/pm-forged-wheels', 'https://example.com/aff/pm-forged-wheels?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-08-19', 6),
-    (v_id, 'brakes', 'Performance Machine', '4-Piston Differential Bore Calipers', '', 'Front and rear, black ops finish.', 1500, false, 'https://example.com/shop/pm-calipers', null, '', '', '', shop, '2022-08-19', 7),
-    (v_id, 'tires', 'Dunlop', 'American Elite Tires', '', 'Front and rear.', 450, false, 'https://example.com/shop/dunlop-american-elite', null, '', '', '', shop, '2022-08-19', 8),
-    (v_id, 'other', 'Paul Yaffe Bagger Nation', '14 in. Monkey Bar Handlebars', '', 'With extended cables and wiring. Shoulders thank me on long days.', 900, false, 'https://example.com/shop/pyb-monkey-bars', null, '', '', 'Self', null, '2021-11-06', 9),
-    (v_id, 'interior', 'Saddlemen', 'Road Sofa Seat', '', 'Heated. Best money spent on the whole bike.', 900, false, 'https://example.com/shop/saddlemen-road-sofa', 'https://example.com/aff/saddlemen-road-sofa?tag=duskglide-20', 'Example Parts', 'Example affiliate program', 'Self', null, '2021-10-02', 10),
-    (v_id, 'audio', 'Rockford Fosgate', 'Stage 3 Audio Kit', '', 'Fairing and lid speakers with a four-channel amp.', 2000, false, 'https://example.com/shop/rockford-stage-3', null, '', '', '', shop, '2023-02-14', 11),
-    (v_id, 'lighting', 'Custom Dynamics', 'ProBEAM LED Turn Signals', '', 'Front and rear, smoked lens.', 250, false, 'https://example.com/shop/cd-probeam-signals', null, '', '', 'Self', null, '2021-12-11', 12),
-    (v_id, 'lighting', 'Custom Dynamics', 'LED Saddlebag Lights', '', 'Run, brake and turn in the bag extensions.', 300, false, 'https://example.com/shop/cd-bag-lights', null, '', '', 'Self', null, '2021-12-11', 13),
-    (v_id, 'exterior', 'Klock Werks', 'Flare Windshield', '', 'Dark smoke, 6.5 in.', 200, false, 'https://example.com/shop/klock-werks-flare', null, '', '', 'Self', null, '2021-09-18', 14),
-    (v_id, 'other', 'Arlen Ness', 'Deep Cut Floorboards', '', 'Rider and passenger, black.', 500, false, 'https://example.com/shop/arlen-ness-deep-cut', null, '', '', 'Self', null, '2022-01-22', 15),
-    (v_id, 'safety', 'Kuryakyn', 'Engine Guard', '', 'Black, with highway pegs.', 350, false, 'https://example.com/shop/kuryakyn-engine-guard', null, '', '', 'Self', null, '2021-09-18', 16);
+    (v_id, 'suspension', 'Legend Suspensions', 'REVO-A Coil Rear Shocks', '', 'Adjustable. Set up for two-up touring with the bags loaded.', 1200, false, 'https://example.com/shop/legend-revo-a', 'https://example.com/aff/legend-revo-a?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-05-02', 3),
+    (v_id, 'suspension', 'Progressive Suspension', 'Monotube Fork Cartridge Kit', '', 'Keeps the front calm under hard braking.', 800, false, 'https://example.com/shop/progressive-monotube', null, '', '', '', shop, '2022-05-02', 4),
+    (v_id, 'brakes', 'EBC Brakes', 'Double-H Sintered Brake Pads', '', 'Front and rear. More bite with a passenger on.', 150, false, 'https://example.com/shop/ebc-double-h', null, '', '', 'Self', null, '2022-06-18', 5),
+    (v_id, 'tires', 'Dunlop', 'American Elite Tires', '', 'Front and rear.', 450, false, 'https://example.com/shop/dunlop-american-elite', null, '', '', '', shop, '2022-08-19', 6),
+    (v_id, 'audio', 'Rockford Fosgate', 'Stage 3 Audio Kit', '', 'Fairing and lid speakers with a four-channel amp.', 2000, false, 'https://example.com/shop/rockford-stage-3', 'https://example.com/aff/rockford-stage-3?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2023-02-14', 7),
+    (v_id, 'lighting', 'Custom Dynamics', 'ProBEAM LED Turn Signals', '', 'Front and rear, smoked lens.', 250, false, 'https://example.com/shop/cd-probeam-signals', null, '', '', 'Self', null, '2021-12-11', 8),
+    (v_id, 'electronics', 'Cardo', 'PACKTALK Edge Helmet Communicator', '', 'Paired to the bike audio. Rider-to-passenger intercom on long days.', 390, false, 'https://example.com/shop/cardo-packtalk-edge', null, '', '', 'Self', null, '2021-10-02', 9);
 
   select array_agg(id order by sort_order) into mod_ids from buildtag.modifications where vehicle_id = v_id;
   select array_agg(id order by sort_order) into social_ids from buildtag.social_links where owner_type = 'vehicle' and owner_id = v_id;
@@ -125,7 +118,7 @@ begin
     insert into buildtag.product_clicks (vehicle_id, modification_id, occurred_at)
     values (
       v_id,
-      mod_ids[(array[3,3,3,1,1,7,7,11,11,10,10,5,12,2,15])[1 + (random() * 14)::integer]],
+      mod_ids[(array[3,3,3,1,1,2,2,4,4,8,8,5,9,7,10])[1 + (random() * 14)::integer]],
       now() - (random() * 30 || ' days')::interval
     );
   end loop;
@@ -142,6 +135,9 @@ begin
     values (v_id, 'demo-' || encode(extensions.gen_random_bytes(16), 'hex'), now() - (random() * 60 || ' days')::interval)
     on conflict do nothing;
   end loop;
+
+  -- The scan trigger stamps the last inserted event; use the real latest.
+  update buildtag.qr_codes q set last_scanned_at = (select max(occurred_at) from buildtag.scan_events e where e.qr_code_id = q.id) where q.id = q_id;
 
   raise notice 'Demo bagger % seeded for user %', v_id, demo_user;
 end $$;
