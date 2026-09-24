@@ -43,7 +43,7 @@ begin
   end if;
 
   insert into buildtag.profiles (id, username, display_name, bio, location_text, website_url)
-  values (demo_user, 'buildtag_demo', 'Brad K.', 'Building a 600+ WHP street Supra one weekend at a time. Dyno days, track days and the occasional oil change.', 'Orlando, FL', 'https://example.com/buildtag-demo')
+  values (demo_user, 'buildtag_demo', 'Brad K.', 'Supra on four wheels, Panigale on two. Dyno days, track days and the occasional oil change.', 'Orlando, FL', 'https://example.com/buildtag-demo')
   on conflict (id) do update set username = excluded.username, display_name = excluded.display_name, bio = excluded.bio, location_text = excluded.location_text, website_url = excluded.website_url;
 
   -- Owner socials (placeholders) --------------------------------------------
