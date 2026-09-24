@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ScanLine } from "lucide-react";
 
 import { photoUrl } from "@/lib/storage";
 import type { PublicBuild } from "@/lib/types";
@@ -106,6 +107,14 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
 
           <div className="mt-6 flex flex-wrap gap-2">
             <LikeButton slug={b.slug} initialCount={b.like_count} initialLiked={liked} />
+            {/* Total scans of this build's permanent BuildTag QR: a stat, not a button. */}
+            <span
+              className="inline-flex h-11 items-center gap-2 px-3 font-display text-sm font-bold tracking-[0.12em] text-foreground/90 uppercase"
+              title={t(L, "build_scans_label")}
+            >
+              <ScanLine className="size-4 text-signal" aria-hidden="true" />
+              <span className="tabular-nums">{t(L, "build_scans", { n: formatCount(b.scan_count) })}</span>
+            </span>
             <ShareButton slug={b.slug} title={`${power ? `${power} ` : ""}${title}`} />
             <a href="#mods" className="btn-ghost">
               {t(L, "build_see_mods")}
