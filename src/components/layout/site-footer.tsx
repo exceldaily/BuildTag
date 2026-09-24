@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { LEGAL } from "@/lib/legal/config";
+
 import { Wordmark } from "./logo";
 
 const COLUMNS = [
@@ -27,8 +29,11 @@ const COLUMNS = [
     links: [
       { href: "/terms", label: "Terms" },
       { href: "/privacy", label: "Privacy" },
+      { href: "/disclaimer", label: "Disclaimer" },
+      { href: "/refunds", label: "Refunds" },
       { href: "/community-guidelines", label: "Community Guidelines" },
-      { href: "/dmca", label: "Copyright / DMCA" },
+      { href: "/copyright", label: "Copyright" },
+      { href: `mailto:${LEGAL.email}`, label: "Contact" },
     ],
   },
 ];
@@ -65,9 +70,15 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-2.5">
               {col.links.map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="inline-block py-1.5 text-sm text-foreground/80 transition-colors hover:text-foreground">
-                    {l.label}
-                  </Link>
+                  {l.href.startsWith("mailto:") ? (
+                    <a href={l.href} className="inline-block py-1.5 text-sm text-foreground/80 transition-colors hover:text-foreground">
+                      {l.label}
+                    </a>
+                  ) : (
+                    <Link href={l.href} className="inline-block py-1.5 text-sm text-foreground/80 transition-colors hover:text-foreground">
+                      {l.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -77,7 +88,7 @@ export function SiteFooter() {
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-[1720px] flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10 2xl:px-16">
           <span>
-            © {new Date().getFullYear()} BuildTag. All rights reserved. Photography via{" "}
+            © {new Date().getFullYear()} {LEGAL.brand}. All rights reserved. Photography via{" "}
             <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer" className="underline">
               Unsplash
             </a>

@@ -1,5 +1,6 @@
-import { BadgeCheck } from "lucide-react";
 import Link from "next/link";
+
+import { VerifiedBadge } from "@/components/legal/verified-badge";
 
 import { t, type DictKey } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n";
@@ -43,9 +44,7 @@ export function ContributorsSection({ contributors, locale = "en" }: { contribut
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 truncate font-display text-lg font-bold tracking-wide uppercase">
                     {o.name}
-                    {o.verified && (
-                      <BadgeCheck className="size-4 shrink-0 text-neon-cyan" aria-label={t(locale, "build_verified_business")} />
-                    )}
+                    {o.verified && <VerifiedBadge id={o.slug} label={t(locale, "build_verified_business")} explainer={t(locale, "build_verified_explainer")} />}
                   </p>
                   <p className="label-tech truncate">
                     {[ORGANIZATION_TYPE_LABEL[o.organization_type], o.location_text || null].filter(Boolean).join(" · ")}
@@ -80,6 +79,7 @@ export function ContributorsSection({ contributors, locale = "en" }: { contribut
           );
         })}
       </ul>
+      <p className="mt-3 text-xs text-muted-foreground">{t(locale, "build_disclosure_attribution")}</p>
     </section>
   );
 }

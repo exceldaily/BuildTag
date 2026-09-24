@@ -35,15 +35,15 @@ export function AnalyticsView({ data, vehicleId }: { data: VehicleAnalytics; veh
       <section className="rounded-lg border border-signal/40 bg-[linear-gradient(120deg,rgba(255,45,122,0.14),rgba(31,216,255,0.06)_60%,transparent)] p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="eyebrow text-signal">Affiliate earnings</p>
+            <p className="eyebrow text-signal">Affiliate links</p>
             <h2 className="mt-1 text-2xl">
               {formatCount(data.affiliate_clicks ?? 0)} affiliate click{(data.affiliate_clicks ?? 0) === 1 ? "" : "s"} sent to your programs
             </h2>
             <p className="mt-1 text-sm text-foreground/80">
               {data.affiliate_clicks_30d ?? 0} in the last 30 days · {data.monetized_parts ?? 0} of {data.total_parts ?? 0} parts carry your affiliate link
-              {(data.linked_parts ?? 0) > (data.monetized_parts ?? 0) && ` · ${(data.linked_parts ?? 0) - (data.monetized_parts ?? 0)} linked parts are not earning yet`}
+              {(data.linked_parts ?? 0) > (data.monetized_parts ?? 0) && ` · ${(data.linked_parts ?? 0) - (data.monetized_parts ?? 0)} linked parts have no affiliate link yet`}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Commissions are paid by the programs themselves. Check their dashboards for what each click turned into.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Commissions, if any, are paid by the programs themselves and are not guaranteed. Check their dashboards for what each click turned into.</p>
           </div>
           <Link href={`/dashboard/vehicles/${vehicleId}/modifications`} className="btn-signal btn-small shrink-0">
             <BadgeDollarSign className="size-4" aria-hidden="true" />

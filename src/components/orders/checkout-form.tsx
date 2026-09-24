@@ -4,6 +4,7 @@ import { ScanLine } from "lucide-react";
 import { useActionState, useState } from "react";
 
 import { placeOrderAction } from "@/lib/actions/orders";
+import { CONSENT_TEXT } from "@/lib/legal/consent";
 import type { PrintSpecificationRow, ProductionSnapshotRow } from "@/lib/types";
 import type { ActionResult } from "@/lib/validation/common";
 
@@ -143,8 +144,16 @@ export function CheckoutForm({ snapshot, spec, proofSrc, initialQuantity, email,
         <section className="panel space-y-3 p-4">
           <label className="flex items-start gap-3 text-sm">
             <input type="checkbox" name="proof_approved" checked={approved} onChange={(e) => setApproved(e.target.checked)} required className="mt-0.5 size-5 shrink-0 accent-[#ff2d7a]" />
-            <span>I have reviewed and approve this BuildTag design for production. I understand the artwork is frozen exactly as shown.</span>
+            <span>{CONSENT_TEXT.customProductApproval}</span>
           </label>
+          <p className="text-xs text-muted-foreground">
+            The design is frozen exactly as the proof shows. Custom products can&apos;t be returned for a change of mind, but we fix defects, damage and our
+            mistakes. See the{" "}
+            <a href="/refunds" target="_blank" rel="noopener" className="text-foreground underline underline-offset-2">
+              Refund &amp; Replacement Policy
+            </a>
+            .
+          </p>
           {errors.proof_approved && <p className="field-error">{errors.proof_approved}</p>}
           {state && !state.ok && !state.fieldErrors && (
             <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">

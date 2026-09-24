@@ -3,7 +3,9 @@
 import { ShieldCheck } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { ConsentCheckbox } from "@/components/legal/consent-checkbox";
 import { claimVehicleAction } from "@/lib/actions/claims";
+import { CONSENT_TEXT, DISCLOSURE } from "@/lib/legal/consent";
 import { CLAIM_ERROR_MESSAGE, looksLikeClaimCode } from "@/lib/claims";
 import type { ClaimResult } from "@/lib/types";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +35,7 @@ export function ClaimFlow({
 }) {
   const [code, setCode] = useState("");
   const [confirming, setConfirming] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Success | null>(null);
   const [pending, start] = useTransition();
@@ -42,7 +45,7 @@ export function ClaimFlow({
   const submit = () => {
     setError(null);
     start(async () => {
-      const res = await claimVehicleAction(token ? { token } : { code });
+      const res = await claimVehicleAction(token ? { token } : { code }, authorized);
       setConfirming(false);
       if (res.ok) {
         setDone(res);
@@ -125,11 +128,14 @@ export function ClaimFlow({
               The QR code on the vehicle stays the same.
             </li>
           </ul>
+          <ConsentCheckbox name="claim_authorization" checked={authorized} onChange={setAuthorized} note={DISCLOSURE.claim}>
+            {CONSENT_TEXT.vehicleClaim}
+          </ConsentCheckbox>
           <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button type="button" className="btn-ghost" onClick={() => setConfirming(false)} disabled={pending}>
               Not yet
             </button>
-            <button type="button" className="btn-signal" onClick={submit} disabled={pending}>
+            <button type="button" className="btn-signal" onClick={submit} disabled={pending || !authorized}>
               {pending ? "Claiming…" : "Yes, claim it"}
             </button>
           </div>

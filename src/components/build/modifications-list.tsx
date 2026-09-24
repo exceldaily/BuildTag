@@ -54,11 +54,14 @@ export function ModificationsList({ slug, modifications, hasAffiliateLinks = fal
 
   return (
     <>
-    {hasAffiliateLinks && (
-      <p className="mt-3 text-xs text-muted-foreground" id="affiliate-disclosure">
-        {t(locale, "build_affiliate_disclosure")}
-      </p>
-    )}
+    <p className="mt-3 text-xs text-muted-foreground">
+      {hasAffiliateLinks && (
+        <span id="affiliate-disclosure" className="block">
+          {t(locale, "build_affiliate_disclosure")}
+        </span>
+      )}
+      <span className="block">{t(locale, "build_disclosure_parts")}</span>
+    </p>
     <div className="mt-4 divide-y divide-line rounded-lg border border-line">
       {ordered.map((cat, idx) => {
         const items = grouped.get(cat.value)!;

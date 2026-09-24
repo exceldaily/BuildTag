@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, Globe, Mail, MapPin, Phone, ScanLine, Users, Wrench } from "lucide-react";
+
+import { VerifiedBadge } from "@/components/legal/verified-badge";
+import { DISCLOSURE } from "@/lib/legal/consent";
+import { Globe, Mail, MapPin, Phone, ScanLine, Users, Wrench } from "lucide-react";
 
 import { getPublicOrganization } from "@/lib/db/public";
 import { ORGANIZATION_TYPE_LABEL, RELATIONSHIP_LABEL } from "@/lib/types";
@@ -48,7 +51,7 @@ export default async function OrganizationPage({ params }: PageProps<"/org/[slug
               <p className="eyebrow">{ORGANIZATION_TYPE_LABEL[org.organization_type]}</p>
               <h1 className="mt-2 flex items-center gap-2 text-4xl sm:text-5xl xl:text-6xl">
                 <span className="speed-heading">{org.name}</span>
-                {org.verified && <BadgeCheck className="size-8 shrink-0 text-neon-cyan" aria-label="Verified business" />}
+                {org.verified && <VerifiedBadge id={org.slug} label="Verified business" explainer={DISCLOSURE.verifiedBusiness} className="size-8" />}
               </h1>
               {org.tagline && <p className="mt-2 max-w-xl text-foreground/80">{org.tagline}</p>}
             </div>

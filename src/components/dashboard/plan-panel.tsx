@@ -100,7 +100,14 @@ export function PlanPanel({ plan, subscription, features, billingEnabled, justUp
           ) : (
             <p className="mt-3 text-xs text-muted-foreground">Card checkout is being switched on. Pro pricing: $5 a month or $50 a year.</p>
           )}
-          <p className="mt-2 text-[11px] text-muted-foreground">Secure checkout by Stripe. Cancel any time from Manage billing.</p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            Renews automatically every {interval === "month" ? "month at $" + PRO_PRICE.month : "year at $" + PRO_PRICE.year} until you cancel. Cancel any time
+            from Manage billing; Pro stays on until the end of the period you paid for. Secure checkout by Stripe. See the{" "}
+            <a href="/terms#subscriptions" className="underline underline-offset-2">
+              subscription terms
+            </a>
+            .
+          </p>
         </div>
       )}
     </div>

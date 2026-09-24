@@ -135,6 +135,7 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
               <SpecRow label="Build started" value={b.build_started_year ? String(b.build_started_year) : "—"} />
               <SpecRow label="Modifications" value={formatCount(b.mod_count)} />
             </dl>
+            <p className="mt-2 text-xs text-muted-foreground">{t(L, "build_disclosure_performance")}</p>
             {b.build_cost_public && b.build_cost !== null && (
               <div className="mt-4 rounded-lg border border-signal/40 bg-signal/10 p-4">
                 <p className="label-tech">{t(L, "build_total_build")}</p>
@@ -184,6 +185,12 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
             <LogoMark className="size-5" />
             Make your own BuildTag
           </Link>
+          <p className="mt-2 max-w-md text-xs text-muted-foreground">
+            {t(L, "build_disclosure_ownership")}{" "}
+            <Link href="/disclaimer" className="underline underline-offset-2 hover:text-foreground">
+              {t(L, "build_disclaimer_link")}
+            </Link>
+          </p>
         </footer>
       </div>
     </main>

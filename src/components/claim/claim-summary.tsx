@@ -1,4 +1,7 @@
-import { BadgeCheck, Camera, Wrench } from "lucide-react";
+import { Camera, Wrench } from "lucide-react";
+
+import { VerifiedBadge } from "@/components/legal/verified-badge";
+import { DISCLOSURE } from "@/lib/legal/consent";
 
 import { ORGANIZATION_TYPE_LABEL, type ClaimPreview } from "@/lib/types";
 import { vehicleTitle } from "@/lib/utils";
@@ -83,12 +86,7 @@ export function ClaimSummary({
               <div>
                 <p className="flex items-center gap-1.5 font-display text-lg font-bold tracking-wide uppercase">
                   {org.name}
-                  {org.verified_status === "verified" && (
-                    <BadgeCheck
-                      className="size-4 text-neon-cyan"
-                      aria-label="Verified business"
-                    />
-                  )}
+                  {org.verified_status === "verified" && <VerifiedBadge id={`claim-${org.slug}`} label="Verified business" explainer={DISCLOSURE.verifiedBusiness} />}
                 </p>
                 <p className="label-tech">
                   {ORGANIZATION_TYPE_LABEL[org.organization_type]}

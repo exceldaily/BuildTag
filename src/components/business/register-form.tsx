@@ -2,7 +2,9 @@
 
 import { useActionState } from "react";
 
+import { ConsentCheckbox } from "@/components/legal/consent-checkbox";
 import { registerOrganizationAction } from "@/lib/actions/business";
+import { CONSENT_TEXT } from "@/lib/legal/consent";
 import { ORGANIZATION_TYPES } from "@/lib/types";
 import type { ActionResult } from "@/lib/validation/common";
 
@@ -50,6 +52,9 @@ export function RegisterBusinessForm() {
       <Field label="Phone" htmlFor="phone" optional>
         <input id="phone" name="phone" type="tel" maxLength={40} className="field" />
       </Field>
+      <ConsentCheckbox name="business_authorization" error={e.business_authorization}>
+        {CONSENT_TEXT.organizationAuthorization}
+      </ConsentCheckbox>
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
       <button type="submit" className="btn-signal w-full sm:w-auto" disabled={pending}>
         {pending ? "Registering…" : "Register business"}

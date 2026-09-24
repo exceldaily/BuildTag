@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { signUpAction } from "@/lib/actions/auth";
 import { LOCALES, LOCALE_LABEL, REGIONS, type Locale, type RegionCode } from "@/lib/i18n";
@@ -8,10 +8,28 @@ import type { ActionResult } from "@/lib/validation/common";
 
 export function SignupForm({ plan, next, defaultLocale = "en", defaultRegion = "US" }: { plan?: "pro"; next?: string; defaultLocale?: Locale; defaultRegion?: RegionCode }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(signUpAction, null);
-  const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
+  const [termsError, setTermsError] = useState<string | null>(null);
+  const errors: Record<string, string | undefined> = { ...(state && !state.ok ? (state.fieldErrors ?? {}) : {}) };
+  if (termsError) errors.accept_terms = termsError;
 
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form
+      action={action}
+      className="space-y-4"
+      noValidate
+      onSubmit={(e) => {
+        // Catch the unticked box before submitting so nothing typed is lost.
+        // The server action enforces the same rule.
+        const box = e.currentTarget.elements.namedItem("accept_terms") as HTMLInputElement | null;
+        if (!box?.checked) {
+          e.preventDefault();
+          setTermsError("Please agree to the Terms of Service and Privacy Policy to create an account.");
+          box?.focus();
+        } else {
+          setTermsError(null);
+        }
+      }}
+    >
       {plan && <input type="hidden" name="plan" value={plan} />}
       {next && <input type="hidden" name="next" value={next} />}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -86,6 +104,36 @@ export function SignupForm({ plan, next, defaultLocale = "en", defaultRegion = "
           <p className="mt-1 text-xs text-muted-foreground">Sets default units and formats.</p>
         </div>
       </div>
+      <div>
+        <label htmlFor="accept_terms" className="flex cursor-pointer items-start gap-3 rounded-sm border border-line p-3 text-sm leading-relaxed text-foreground/85">
+          <input
+            id="accept_terms"
+            name="accept_terms"
+            type="checkbox"
+            required
+            className="mt-0.5 size-5 shrink-0 accent-[var(--signal)]"
+            aria-invalid={Boolean(errors.accept_terms)}
+            onChange={(e) => e.target.checked && setTermsError(null)}
+            aria-describedby={errors.accept_terms ? "accept_terms_error" : undefined}
+          />
+          <span>
+            I agree to the{" "}
+            <a href="/terms" target="_blank" rel="noopener" className="text-foreground underline underline-offset-2">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" target="_blank" rel="noopener" className="text-foreground underline underline-offset-2">
+              Privacy Policy
+            </a>
+            .
+          </span>
+        </label>
+        {errors.accept_terms && (
+          <p id="accept_terms_error" className="field-error">
+            {errors.accept_terms}
+          </p>
+        )}
+      </div>
       {state && !state.ok && !state.fieldErrors && (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
           {state.error}
@@ -94,9 +142,6 @@ export function SignupForm({ plan, next, defaultLocale = "en", defaultRegion = "
       <button type="submit" className="btn-signal w-full" disabled={pending}>
         {pending ? "Creating account…" : "Create account"}
       </button>
-      <p className="text-center text-xs text-muted-foreground">
-        By continuing you agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
-      </p>
     </form>
   );
 }

@@ -1,14 +1,19 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { requireProfile } from "@/lib/supabase/server";
 import { signOutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/layout/logo";
 import { DashboardNav, DashboardTabBar, type NavLabels } from "@/components/dashboard/dashboard-nav";
 import { t } from "@/lib/i18n/dictionary";
+import { getLegalStatus } from "@/lib/legal/status";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { client, profile, isAdmin } = await requireProfile("/dashboard");
-  const { data: orgs } = await client.rpc("my_organizations");
+  // Accounts without a current Terms/Privacy acceptance (created before
+  // clickwrap existed, or after a material update) accept once, then continue.
+  const [legal, { data: orgs }] = await Promise.all([getLegalStatus(client), client.rpc("my_organizations")]);
+  if (!legal.current) redirect("/legal/accept?next=/dashboard");
   const hasBusiness = Array.isArray(orgs) && orgs.length > 0;
   const L = profile.locale;
   const labels: NavLabels = {

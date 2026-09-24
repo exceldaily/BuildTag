@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { setLocaleCookie } from "@/lib/i18n/server";
@@ -8,6 +9,8 @@ import { siteUrl } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { fieldErrors, formToObject, type ActionResult } from "@/lib/validation/common";
 import { loginSchema, signupSchema } from "@/lib/validation/profile";
+import { PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal/config";
+import { isChecked } from "@/lib/legal/consent";
 
 function safeNext(next: unknown): string {
   if (typeof next !== "string") return "/dashboard";
@@ -17,8 +20,18 @@ function safeNext(next: unknown): string {
 
 export async function signUpAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   const parsed = signupSchema.safeParse(formToObject(form));
-  if (!parsed.success) {
-    return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
+  // Affirmative, unticked-by-default acceptance is required; the browser
+  // check can be bypassed, this one cannot.
+  const accepted = isChecked(form.get("accept_terms"));
+  if (!parsed.success || !accepted) {
+    return {
+      ok: false,
+      error: "Check the highlighted fields.",
+      fieldErrors: {
+        ...(parsed.success ? {} : fieldErrors(parsed.error)),
+        ...(accepted ? {} : { accept_terms: "Please agree to the Terms of Service and Privacy Policy to create an account." }),
+      },
+    };
   }
   const client = await createServerSupabaseClient();
   const wantsPro = form.get("plan") === "pro";
@@ -35,7 +48,19 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${siteUrl()}/auth/callback?next=${encodeURIComponent(landing)}`,
-      data: { username: parsed.data.username, display_name: parsed.data.display_name, locale: parsed.data.locale, region: parsed.data.region, app: "buildtag" },
+      data: {
+        username: parsed.data.username,
+        display_name: parsed.data.display_name,
+        locale: parsed.data.locale,
+        region: parsed.data.region,
+        app: "buildtag",
+        // Recorded into buildtag.legal_acceptances by a trigger when the account row is created (0015).
+        legal: {
+          terms_version: TERMS_VERSION,
+          privacy_version: PRIVACY_VERSION,
+          user_agent: (await headers()).get("user-agent")?.slice(0, 300) ?? "",
+        },
+      },
     },
   });
   if (error) {
@@ -55,7 +80,7 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
 
   // Email confirmation on: no session yet.
   if (!data.session) {
-    redirect(`/login?check_email=1&email=${encodeURIComponent(parsed.data.email)}`);
+    redirect("/login?check_email=1");
   }
   redirect(landing);
 }

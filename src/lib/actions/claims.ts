@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { VEHICLE_CLAIM_CONFIRMATION_VERSION } from "@/lib/legal/config";
+import { recordAcceptance } from "@/lib/legal/status";
 import { requireProfile } from "@/lib/supabase/server";
 import type { ClaimResult } from "@/lib/types";
 import type { ActionResult } from "@/lib/validation/common";
@@ -16,9 +18,11 @@ const claimInput = z.union([
  * Claims a business-created build for the signed-in user. The database does
  * all the checks atomically (0014 claim_vehicle); this only validates shape.
  */
-export async function claimVehicleAction(input: { token: string } | { code: string }): Promise<ClaimResult> {
+export async function claimVehicleAction(input: { token: string } | { code: string }, confirmed: boolean): Promise<ClaimResult> {
   const parsed = claimInput.safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid" };
+  // The claimant must affirmatively confirm authority (checkbox in the dialog).
+  if (confirmed !== true) return { ok: false, error: "unconfirmed" };
   const { client } = await requireProfile();
   const { data, error } = await client.rpc("claim_vehicle", {
     p_token: "token" in parsed.data ? parsed.data.token : null,
@@ -27,6 +31,14 @@ export async function claimVehicleAction(input: { token: string } | { code: stri
   if (error || !data) return { ok: false, error: "invalid" };
   const result = data as unknown as ClaimResult;
   if (result.ok) {
+    await recordAcceptance(client, {
+      type: "vehicle_claim_confirmation",
+      version: VEHICLE_CLAIM_CONFIRMATION_VERSION,
+      context: "vehicle_claim",
+      subjectType: "vehicle",
+      subjectId: result.vehicle_id,
+      related: { method: "token" in parsed.data ? "link" : "code" },
+    });
     revalidatePath("/dashboard", "layout");
     revalidatePath(`/build/${result.slug}`);
   }

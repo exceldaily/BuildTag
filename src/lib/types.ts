@@ -72,6 +72,30 @@ export type ClaimStatus = "active" | "claimed" | "expired" | "revoked";
 export type ModSourceType = "owner" | "shop" | "dealer" | "manufacturer" | "import";
 export type ModVerificationStatus = "owner_reported" | "shop_recorded" | "dealer_recorded" | "manufacturer_recorded";
 export type CrewKind = "riding" | "shop" | "dealership" | "brand" | "customer";
+export interface LegalAcceptanceRow {
+  id: string;
+  user_id: string;
+  document_type: LegalDocumentType;
+  document_version: string;
+  accepted_at: string;
+  acceptance_context: string;
+  subject_type: string | null;
+  subject_id: string | null;
+  related: Json;
+  user_agent: string | null;
+  created_at: string;
+}
+
+/** Mirrors buildtag.legal_document_type (0015). */
+export type LegalDocumentType =
+  | "terms"
+  | "privacy"
+  | "disclaimer"
+  | "refunds"
+  | "custom_product_approval"
+  | "business_authorization"
+  | "vehicle_claim_confirmation";
+
 export type BusinessInquiryStatus = "new" | "contacted" | "qualified" | "pilot" | "customer" | "closed" | "spam";
 
 export const ORGANIZATION_TYPES: { value: OrganizationType; label: string }[] = [
@@ -898,7 +922,7 @@ export interface ClaimPreview {
   } | null;
 }
 
-export type ClaimError = "invalid" | "expired" | "revoked" | "claimed" | "issuer_member" | "rate_limited";
+export type ClaimError = "invalid" | "expired" | "revoked" | "claimed" | "issuer_member" | "rate_limited" | "unconfirmed";
 
 export type ClaimResult =
   | {
@@ -1289,6 +1313,8 @@ export interface Database {
         UpdateOf<OrderItemRow>
       >;
       order_events: Table<OrderEventRow, InsertOf<OrderEventRow, "note" | "actor">, UpdateOf<OrderEventRow>>;
+      /** Append-only; written only through record_legal_acceptance / the signup trigger (0015). */
+      legal_acceptances: Table<LegalAcceptanceRow, never, never>;
     };
     Views: {
       public_builds: { Row: { [K in keyof PublicBuildListRow]: PublicBuildListRow[K] }; Relationships: [] };
@@ -1405,6 +1431,22 @@ export interface Database {
         Args: { p_org: string; p_status?: OrganizationStatus | null; p_verified?: VerificationStatus | null; p_type?: OrganizationType | null };
         Returns: undefined;
       };
+      record_legal_acceptance: {
+        Args: {
+          p_document_type: LegalDocumentType;
+          p_document_version: string;
+          p_context: string;
+          p_subject_type?: string | null;
+          p_subject_id?: string | null;
+          p_related?: Json;
+          p_user_agent?: string | null;
+        };
+        Returns: string;
+      };
+      my_legal_status: {
+        Args: Record<never, never>;
+        Returns: { document_type: LegalDocumentType; document_version: string; accepted_at: string }[];
+      };
       admin_set_order_status: {
         Args: {
           p_order_id: string;
@@ -1450,6 +1492,7 @@ export interface Database {
       mod_verification_status: ModVerificationStatus;
       crew_kind: CrewKind;
       business_inquiry_status: BusinessInquiryStatus;
+      legal_document_type: LegalDocumentType;
     };
     CompositeTypes: Record<never, never>;
   };

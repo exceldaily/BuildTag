@@ -11,6 +11,9 @@ import { claimUrl } from "@/lib/claims";
 import { ACTIVE_ORG_COOKIE, listMyOrganizations } from "@/lib/db/business";
 import { sendEmail } from "@/lib/email";
 import { siteUrl } from "@/lib/env";
+import { BUSINESS_AUTHORIZATION_VERSION } from "@/lib/legal/config";
+import { isChecked } from "@/lib/legal/consent";
+import { recordAcceptance } from "@/lib/legal/status";
 import { requireProfile } from "@/lib/supabase/server";
 import type { GeneratedClaim, Json, OrgMemberRole, OrganizationRow } from "@/lib/types";
 import {
@@ -23,6 +26,8 @@ import {
   RELATIONSHIP_ROLE_VALUES,
 } from "@/lib/validation/business";
 import { fieldErrors, formToObject, uuid, type ActionResult } from "@/lib/validation/common";
+
+const AUTH_REQUIRED = { business_authorization: "Please confirm you are authorized before continuing." };
 
 /* The database authorizes every call below (org_can_work / is_org_member / RLS). */
 
@@ -47,11 +52,25 @@ export async function switchOrganizationAction(orgId: string): Promise<ActionRes
 
 export async function registerOrganizationAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   const parsed = organizationRegisterSchema.safeParse(formToObject(form));
-  if (!parsed.success) return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
+  const authorized = isChecked(form.get("business_authorization"));
+  if (!parsed.success || !authorized) {
+    return {
+      ok: false,
+      error: "Check the highlighted fields.",
+      fieldErrors: { ...(parsed.success ? {} : fieldErrors(parsed.error)), ...(authorized ? {} : AUTH_REQUIRED) },
+    };
+  }
   const { client } = await requireProfile();
   const { name, organization_type, ...details } = parsed.data;
   const { data, error } = await client.rpc("create_organization", { p_name: name, p_type: organization_type, p_details: details as unknown as Json });
   if (error || !data) return { ok: false, error: error ? dbError(error.message) : "Could not register the business." };
+  await recordAcceptance(client, {
+    type: "business_authorization",
+    version: BUSINESS_AUTHORIZATION_VERSION,
+    context: "organization_create",
+    subjectType: "organization",
+    subjectId: (data as OrganizationRow).id,
+  });
   await setActiveOrg((data as OrganizationRow).id);
   revalidatePath("/dashboard", "layout");
   redirect("/dashboard/business?registered=1");
@@ -78,7 +97,14 @@ export async function updateOrganizationAction(orgId: string, form: FormData): P
 export async function createOrgBuildAction(orgId: string, _prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   if (!uuid.safeParse(orgId).success) return { ok: false, error: "Invalid business." };
   const parsed = orgVehicleSchema.safeParse(formToObject(form));
-  if (!parsed.success) return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
+  const authorized = isChecked(form.get("business_authorization"));
+  if (!parsed.success || !authorized) {
+    return {
+      ok: false,
+      error: "Check the highlighted fields.",
+      fieldErrors: { ...(parsed.success ? {} : fieldErrors(parsed.error)), ...(authorized ? {} : AUTH_REQUIRED) },
+    };
+  }
   const roles = z.array(z.enum(RELATIONSHIP_ROLE_VALUES)).safeParse(form.getAll("roles"));
   const { customer_name, customer_email, customer_phone, notes, add_to_crew, ...vehicle } = parsed.data;
   const { client } = await requireProfile();
@@ -90,6 +116,14 @@ export async function createOrgBuildAction(orgId: string, _prev: ActionResult | 
     p_add_to_crew: add_to_crew,
   });
   if (error || !data) return { ok: false, error: error ? dbError(error.message) : "Could not create the build." };
+  await recordAcceptance(client, {
+    type: "business_authorization",
+    version: BUSINESS_AUTHORIZATION_VERSION,
+    context: "business_create_vehicle",
+    subjectType: "vehicle",
+    subjectId: String(data),
+    related: { organization_id: orgId },
+  });
   revalidatePath("/dashboard/business", "layout");
   redirect(`/dashboard/vehicles/${data}/setup/photos`);
 }

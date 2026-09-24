@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { siteUrl } from "@/lib/env";
+import { CUSTOM_PRODUCT_APPROVAL_VERSION, REFUNDS_VERSION } from "@/lib/legal/config";
+import { recordAcceptance } from "@/lib/legal/status";
 import { notifyArtworkIssue, notifyShipped, summaryFromJson } from "@/lib/orders/notify";
 import { getPaymentProvider } from "@/lib/payments";
 import { requireAdmin, requireProfile } from "@/lib/supabase/server";
@@ -52,6 +54,17 @@ export async function placeOrderAction(_prev: ActionResult | null, form: FormDat
     p_proof_approved: true,
   });
   if (error || !orderId) return { ok: false, error: friendly(error?.message ?? "Could not place the order.") };
+  // Evidence of the explicit artwork approval, tied to the order and to the
+  // immutable production snapshot it was made from. The order itself is
+  // unpaid at this point; a failed record is logged but never loses the order.
+  await recordAcceptance(client, {
+    type: "custom_product_approval",
+    version: CUSTOM_PRODUCT_APPROVAL_VERSION,
+    context: "checkout",
+    subjectType: "order",
+    subjectId: String(orderId),
+    related: { snapshot_id: parsedPlace.data.snapshot_id, refunds_version: REFUNDS_VERSION, quantity: parsedPlace.data.quantity },
+  });
   revalidatePath("/dashboard/orders");
   redirect(`/dashboard/orders/${orderId}`);
 }

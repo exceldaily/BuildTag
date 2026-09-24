@@ -9,6 +9,7 @@ export const CLAIM_ERROR_MESSAGE: Record<ClaimError, string> = {
   issuer_member:
     "You're on the team of the business that created this build, so you can't claim it. The customer claims it from their own account.",
   rate_limited: "Too many attempts. Wait a bit and try again.",
+  unconfirmed: "Please confirm you are authorized to claim this build.",
 };
 
 /** Private claim URL. The raw token only exists in this URL and on the printed card. */

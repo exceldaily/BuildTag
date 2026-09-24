@@ -2,7 +2,9 @@
 
 import { useActionState } from "react";
 
+import { ConsentCheckbox } from "@/components/legal/consent-checkbox";
 import { createOrgBuildAction } from "@/lib/actions/business";
+import { CONSENT_TEXT, DISCLOSURE } from "@/lib/legal/consent";
 import type { ActionResult } from "@/lib/validation/common";
 
 import { Field, FormError } from "./field";
@@ -100,6 +102,10 @@ export function NewBuildForm({ orgId, hasCrew, crewName }: { orgId: string; hasC
       ) : (
         <input type="hidden" name="add_to_crew" value="false" />
       )}
+
+      <ConsentCheckbox name="business_authorization" error={e.business_authorization} note={DISCLOSURE.attribution}>
+        {CONSENT_TEXT.businessAuthorization}
+      </ConsentCheckbox>
 
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
       <button type="submit" className="btn-signal w-full sm:w-auto sm:px-10" disabled={pending}>
