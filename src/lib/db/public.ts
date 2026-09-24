@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 import { publicEnv } from "@/lib/env";
-import type { Crew, Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
+import type { Crew, CrewLeaderboardRow, Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -131,4 +131,11 @@ export async function getCrew(slug: string): Promise<Crew | null> {
 export async function buildCrew(slug: string): Promise<{ name: string; slug: string } | null> {
   const { data } = await anonClient().rpc("build_crew", { p_slug: slug.toLowerCase() });
   return (data as { name: string; slug: string } | null) ?? null;
+}
+
+/** Crews ranked by their members' scans for a period (also the crews directory). */
+export async function crewLeaderboard(period: LeaderboardPeriod, limit = 50): Promise<CrewLeaderboardRow[]> {
+  const { data, error } = await anonClient().rpc("crew_leaderboard", { p_period: period, p_limit: limit });
+  if (error || !Array.isArray(data)) return [];
+  return data as unknown as CrewLeaderboardRow[];
 }

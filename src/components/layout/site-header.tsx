@@ -11,6 +11,7 @@ export async function SiteHeader() {
   const NAV = [
     { href: "/explore", label: t(locale, "nav_explore") },
     { href: "/leaderboard", label: t(locale, "nav_leaderboard") },
+    { href: "/crews", label: t(locale, "nav_crews") },
     { href: "/build/ghost-2022-toyota-gr-supra", label: "Example" },
     { href: "/#how-it-works", label: "How it works" },
   ];

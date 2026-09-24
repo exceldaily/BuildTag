@@ -149,6 +149,18 @@ export interface CrewMember {
   joined_at: string;
 }
 
+export interface CrewLeaderboardRow {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  created_at: string;
+  member_count: number;
+  build_count: number;
+  hero_image_url: string | null;
+  scans: number;
+}
+
 export interface Crew {
   id: string;
   name: string;
@@ -881,6 +893,7 @@ export interface Database {
       delete_crew: { Args: Record<never, never>; Returns: undefined };
       get_crew: { Args: { p_slug: string }; Returns: Json };
       build_crew: { Args: { p_slug: string }; Returns: Json };
+      crew_leaderboard: { Args: { p_period?: string; p_limit?: number }; Returns: Json };
       my_crew: { Args: Record<never, never>; Returns: Json };
       build_owner_plan: { Args: { p_slug: string }; Returns: Plan };
       admin_set_order_status: {
