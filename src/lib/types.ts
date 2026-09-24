@@ -170,6 +170,7 @@ export interface SubscriptionRow {
   provider_customer_id: string | null;
   provider_subscription_id: string | null;
   current_period_end: string | null;
+  note: string;
   created_at: string;
   updated_at: string;
 }
@@ -844,6 +845,9 @@ export interface Database {
       };
       vehicle_analytics: { Args: { p_vehicle_id: string }; Returns: Json };
       dashboard_stats: { Args: Record<never, never>; Returns: Json };
+      admin_set_plan: { Args: { p_user_id: string; p_plan: Plan; p_until?: string | null; p_note?: string }; Returns: undefined };
+      admin_place_comp_order: { Args: { p_snapshot_id: string; p_user_id: string; p_quantity: number; p_shipping?: Json; p_note?: string }; Returns: string };
+      admin_list_members: { Args: { p_query?: string; p_limit?: number }; Returns: Json };
       admin_search_users: {
         Args: { p_query: string; p_limit?: number };
         Returns: {

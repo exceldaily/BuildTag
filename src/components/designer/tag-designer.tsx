@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { adminPlaceCompOrderAction } from "@/lib/actions/admin";
 import { saveTagDesignAction } from "@/lib/actions/designs";
 import { evaluateQrSafety, type SafetyReport } from "@/lib/qr/safety";
 import { MATERIAL_BY_ID, TEMPLATES, formatSize, moduleSizeMm, renderTagSvg, toInches } from "@/lib/tag";
@@ -27,7 +28,11 @@ interface Props {
   shopLogos: { id: string; name: string }[];
   initialDesign: { id: string; name: string; config: TagConfig } | null;
   savedDesigns: { id: string; name: string }[];
+  /** Admin free-tag mode: design for another member and approve as a zero-total order. */
+  admin?: { userId: string; username: string; displayName: string } | null;
 }
+
+const EMPTY_SHIPPING = { name: "", line1: "", line2: "", city: "", state: "", postal_code: "", country: "US", phone: "" };
 
 export interface DecodeState {
   status: "idle" | "testing" | "pass" | "fail";
@@ -45,7 +50,7 @@ interface DecodeRecord {
  * PNG, production snapshot) renders through renderTagSvg() from the same
  * TagConfig, so the proof a customer approves is what gets printed.
  */
-export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos, initialDesign, savedDesigns }: Props) {
+export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos, initialDesign, savedDesigns, admin = null }: Props) {
   const router = useRouter();
   const [config, setConfig] = useState<TagConfig>(() => initialDesign?.config ?? TEMPLATES.stealth.build());
   const [name, setName] = useState(initialDesign?.name ?? "My BuildTag");
@@ -60,6 +65,8 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
   const [decoded, setDecoded] = useState<DecodeRecord | null>(null);
   const [approving, setApproving] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [shipping, setShipping] = useState<Record<string, string>>(EMPTY_SHIPPING);
+  const [compNote, setCompNote] = useState("");
   const decodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -180,7 +187,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
     if (!orderable || !spec) return;
     setApproving(true);
     try {
-      if (dirty || !designId) {
+      if (!admin && (dirty || !designId)) {
         const res = await saveTagDesignAction({ id: designId, vehicleId, name, config });
         if (res.ok) {
           setDesignId(res.data.id);
@@ -204,6 +211,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
           validationStatus: check.ok ? "passed" : "failed",
           validationReport: { safety, decode: check.results, dpi: PRINT_DPI, pixels: { w, h } },
           config,
+          admin: Boolean(admin),
         }),
       );
       form.set("svg", new File([svg], "artwork.svg", { type: "image/svg+xml" }));
@@ -214,6 +222,13 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
       if (!check.ok) {
         toast.error("The production artwork failed the decoder test. Adjust the design and try again.");
         setApproving(false);
+        return;
+      }
+      if (admin) {
+        const placed = await adminPlaceCompOrderAction({ snapshotId: json.snapshot.id, userId: admin.userId, quantity, shipping, note: compNote });
+        if (!placed.ok) throw new Error(placed.error);
+        toast.success(`Free tag order created for @${admin.username}`);
+        router.push("/admin/orders");
         return;
       }
       router.push(`/dashboard/orders/new?snapshot=${json.snapshot.id}&qty=${quantity}`);
@@ -231,8 +246,8 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
       {/* Top bar */}
       <div className="flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-0">
         <div className="flex items-center gap-3">
-          <Link href={`/dashboard/vehicles/${vehicleId}/buildtag`} className="label-tech hover:text-foreground">
-            ← BuildTag
+          <Link href={admin ? "/admin/tags" : `/dashboard/vehicles/${vehicleId}/buildtag`} className="label-tech hover:text-foreground">
+            {admin ? "← Free tags" : "← BuildTag"}
           </Link>
           <input
             value={name}
@@ -245,17 +260,25 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="label-tech">{saving ? "Saving…" : dirty ? (autosave && designId ? "Autosaving…" : "Unsaved") : designId ? "Saved" : "New design"}</span>
-          {designId && (
-            <button type="button" onClick={() => save(true)} disabled={saving} className="btn-ghost btn-small">
-              Duplicate
-            </button>
+          {admin ? (
+            <span className="rounded-full border border-neon-amber/60 bg-neon-amber/10 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] text-neon-amber uppercase">
+              Free tag for @{admin.username}
+            </span>
+          ) : (
+            <>
+              <span className="label-tech">{saving ? "Saving…" : dirty ? (autosave && designId ? "Autosaving…" : "Unsaved") : designId ? "Saved" : "New design"}</span>
+              {designId && (
+                <button type="button" onClick={() => save(true)} disabled={saving} className="btn-ghost btn-small">
+                  Duplicate
+                </button>
+              )}
+              <button type="button" onClick={() => save(false)} disabled={saving} className="btn-ghost btn-small">
+                {designId ? "Save" : "Save design"}
+              </button>
+            </>
           )}
-          <button type="button" onClick={() => save(false)} disabled={saving} className="btn-ghost btn-small">
-            {designId ? "Save" : "Save design"}
-          </button>
           <button type="button" onClick={approveAndOrder} disabled={!orderable || approving} className="btn-signal btn-small" title={orderable ? "Freeze this proof and order decals" : "Fix validation issues or pick an orderable material first"}>
-            {approving ? "Preparing proof…" : "Approve & order"}
+            {approving ? "Preparing proof…" : admin ? "Approve & create free order" : "Approve & order"}
           </button>
         </div>
       </div>
@@ -313,7 +336,36 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
                 <span className="rounded border border-line px-1.5 py-0.5 font-display text-[10px] font-bold tracking-[0.18em] text-muted-foreground uppercase">Custom size</span>
               )}
             </div>
-            {spec ? (
+            {spec && admin ? (
+              <>
+                <p className="mt-2 font-display text-3xl font-bold uppercase">
+                  Free <span className="text-sm text-muted-foreground">for {admin.displayName || admin.username}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {spec.name} · {Number(spec.width)}×{Number(spec.height)} {spec.units} · order is created as paid with a $0 total
+                </p>
+                <label className="mt-3 block">
+                  <span className="field-label">Quantity</span>
+                  <input type="number" min={1} max={50} value={quantity} onChange={(e) => setQuantity(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} className="field" />
+                </label>
+                <p className="field-label mt-3">Ship to (optional, can be added later)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      ["name", "Name", "col-span-2"],
+                      ["line1", "Address", "col-span-2"],
+                      ["city", "City", ""],
+                      ["state", "State", ""],
+                      ["postal_code", "ZIP", ""],
+                      ["country", "Country (2 letters)", ""],
+                    ] as const
+                  ).map(([k, label, cls]) => (
+                    <input key={k} value={shipping[k] ?? ""} onChange={(e) => setShipping((s) => ({ ...s, [k]: e.target.value }))} placeholder={label} aria-label={label} className={cn("field h-9 text-xs", cls)} />
+                  ))}
+                </div>
+                <input value={compNote} onChange={(e) => setCompNote(e.target.value.slice(0, 200))} placeholder="Note (why it is free)" aria-label="Note" className="field mt-2 h-9 text-xs" />
+              </>
+            ) : spec ? (
               <>
                 <p className="mt-2 font-display text-3xl font-bold uppercase">
                   ${(unitPrice(spec.price_cents, quantity) / 100).toFixed(2)} <span className="text-sm text-muted-foreground">each</span>
@@ -330,7 +382,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
               <p className="mt-2 text-sm text-muted-foreground">Custom sizes export as digital files. Pick a preset size to order printed decals.</p>
             )}
             <button type="button" onClick={approveAndOrder} disabled={!orderable || approving} className="btn-signal mt-4 w-full">
-              {approving ? "Preparing proof…" : "Approve proof & order"}
+              {approving ? "Preparing proof…" : admin ? "Approve & create free order" : "Approve proof & order"}
             </button>
             {!validated && <p className="mt-2 text-xs text-destructive">Ordering unlocks when the scan test passes.</p>}
             {validated && spec && !specOrderable && <p className="mt-2 text-xs text-neon-amber">{material.name} is preview only until a print partner carries it. Gloss and Matte ship today.</p>}
@@ -349,7 +401,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
             </div>
           </section>
 
-          {savedDesigns.length > 0 && (
+          {!admin && savedDesigns.length > 0 && (
             <section className="panel p-4">
               <p className="label-tech">Saved designs</p>
               <div className="mt-2 flex flex-wrap gap-2">

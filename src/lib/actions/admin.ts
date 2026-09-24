@@ -58,3 +58,50 @@ export async function updateReportAction(
   revalidatePath("/admin", "layout");
   return { ok: true, data: undefined };
 }
+
+/** Grant complimentary Pro (lifetime when months is null) or remove it. */
+export async function adminSetPlanAction(input: { userId: string; plan: "free" | "pro"; months: number | null; note?: string }): Promise<ActionResult> {
+  const parsed = z
+    .object({ userId: z.string().uuid(), plan: z.enum(["free", "pro"]), months: z.number().int().min(1).max(120).nullable(), note: z.string().trim().max(200).optional() })
+    .safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid request." };
+  const { client } = await requireAdmin();
+  const until = parsed.data.months ? new Date(Date.now() + parsed.data.months * 30.44 * 24 * 3600 * 1000).toISOString() : null;
+  const { error } = await client.rpc("admin_set_plan", { p_user_id: parsed.data.userId, p_plan: parsed.data.plan, p_until: until, p_note: parsed.data.note ?? "" });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/members");
+  revalidatePath("/dashboard", "layout");
+  return { ok: true, data: undefined };
+}
+
+/** Free tag: a paid, zero-total order for a member from an approved snapshot. */
+export async function adminPlaceCompOrderAction(input: {
+  snapshotId: string;
+  userId: string;
+  quantity: number;
+  shipping: Record<string, string>;
+  note?: string;
+}): Promise<ActionResult<{ orderId: string }>> {
+  const parsed = z
+    .object({
+      snapshotId: z.string().uuid(),
+      userId: z.string().uuid(),
+      quantity: z.number().int().min(1).max(50),
+      shipping: z.record(z.string(), z.string().max(200)),
+      note: z.string().trim().max(200).optional(),
+    })
+    .safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid request." };
+  const { client } = await requireAdmin();
+  const { data, error } = await client.rpc("admin_place_comp_order", {
+    p_snapshot_id: parsed.data.snapshotId,
+    p_user_id: parsed.data.userId,
+    p_quantity: parsed.data.quantity,
+    p_shipping: parsed.data.shipping,
+    p_note: parsed.data.note ?? "",
+  });
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not create the free order." };
+  revalidatePath("/admin/orders");
+  revalidatePath("/dashboard/orders");
+  return { ok: true, data: { orderId: data as string } };
+}

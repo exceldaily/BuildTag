@@ -22,6 +22,7 @@ const metaSchema = z.object({
   validationStatus: z.enum(["passed", "heuristic_only", "failed"]),
   validationReport: z.record(z.string(), z.unknown()).default({}),
   config: z.record(z.string(), z.unknown()),
+  admin: z.boolean().optional(),
 });
 
 /**
@@ -56,8 +57,15 @@ export async function POST(request: NextRequest) {
 
   const { client, user } = ctx;
 
-  // Ownership + live data for the frozen destination.
-  const { data: vehicle } = await client.from("vehicles").select("id").eq("id", meta.vehicleId).eq("owner_id", user.id).maybeSingle();
+  // Ownership (or admin, for free tags) + live data for the frozen destination.
+  let allowed = false;
+  if (meta.admin) {
+    const { data: isAdmin } = await client.rpc("is_admin");
+    allowed = Boolean(isAdmin);
+    if (!allowed) return NextResponse.json({ ok: false, error: "Admins only." }, { status: 403 });
+  }
+  const vehicleQuery = client.from("vehicles").select("id").eq("id", meta.vehicleId);
+  const { data: vehicle } = await (allowed ? vehicleQuery : vehicleQuery.eq("owner_id", user.id)).maybeSingle();
   if (!vehicle) return NextResponse.json({ ok: false, error: "Vehicle not found." }, { status: 404 });
   const { data: qr } = await client.from("qr_codes").select("id, code").eq("vehicle_id", meta.vehicleId).order("created_at").limit(1).maybeSingle();
   if (!qr) return NextResponse.json({ ok: false, error: "This vehicle has no permanent code." }, { status: 400 });
