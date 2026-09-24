@@ -64,7 +64,7 @@ begin
     demo_user, 'dusk-2020-harley-davidson-street-glide', 2020, 'Harley-Davidson', 'Street Glide', '', 'DUSK',
     E'Bought it to tour, then the shop got involved. Big-inch motor, real suspension, and an audio setup you can hear at highway speed.\n\nThe motor and chassis work was done at Example Customs; the bars, seat and lighting were weekend jobs in my garage. Next: a 23-inch front and a fresh set of bags.',
     '/demo/dusk-1/full.webp', '/demo/dusk-1/full.webp', 'Tampa, FL',
-    121, 'WHP', 132, 'LB_FT', 18400, 'MI',
+    121, 'WHP', 126, 'LB_FT', 18400, 'MI',
     2021, null, false, 'Dynojet 250i', 'public', 'active', true
   ) returning id into v_id;
 
@@ -84,7 +84,7 @@ begin
 
   -- Modifications ------------------------------------------------------------
   insert into buildtag.modifications (vehicle_id, category, brand, part_name, part_number, description, price, price_public, product_url, affiliate_url, merchant, affiliate_network, installed_by_text, shop_id, installation_date, sort_order) values
-    (v_id, 'engine', 'Screamin'' Eagle', 'Milwaukee-Eight Stage IV Kit (128 cu in)', '', 'Big bore, pistons, cams and heads. Broken in over 500 miles, then back on the dyno.', 2600, false, 'https://example.com/shop/se-stage-iv-128', null, 'Example Customs', '', '', shop, '2022-03-12', 0),
+    (v_id, 'engine', 'Screamin'' Eagle', 'Milwaukee-Eight Stage IV Kit (107 to 128 cu in)', '', 'Big bore, pistons, cams and heads. Broken in over 500 miles, then back on the dyno.', 2600, false, 'https://example.com/shop/se-stage-iv-128', null, 'Example Customs', '', '', shop, '2022-03-12', 0),
     (v_id, 'ecu_tuning', 'Dynojet', 'Power Vision PV3', '', 'Custom dyno tune for the 128 and the exhaust.', 600, false, 'https://example.com/shop/dynojet-pv3', 'https://example.com/aff/dynojet-pv3?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 1),
     (v_id, 'exhaust', 'Rinehart Racing', '4.5 in. Slip-On Mufflers', '', 'Black with black end caps. Loud enough to be heard, not enough to be hated.', 800, false, 'https://example.com/shop/rinehart-slip-on', 'https://example.com/aff/rinehart-slip-on?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 2),
     (v_id, 'intake', 'Screamin'' Eagle', 'Heavy Breather Elite Air Cleaner', '', 'Black finish.', 420, false, 'https://example.com/shop/se-heavy-breather', null, '', '', '', shop, '2022-03-12', 3),
