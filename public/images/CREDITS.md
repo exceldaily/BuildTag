@@ -18,3 +18,6 @@ All photography via Unsplash (https://unsplash.com/license).
 - ghost-1: https://unsplash.com/photos/SBN-TEfHalA
 - ghost-2: https://unsplash.com/photos/5PibFLH65A4
 - ghost-3: https://unsplash.com/photos/mpt0txRKmM0
+- rosso-1: https://unsplash.com/photos/wb6dyvkqpyo
+- rosso-2: https://unsplash.com/photos/BIztIhCOVOc
+- rosso-3: https://unsplash.com/photos/8m_S9Pi6a1I

@@ -204,6 +204,8 @@ Profiles are created lazily by `buildtag.ensure_profile()` on the first dashboar
 
 Run the seed after migrations; it is idempotent. The demo build lives at `/build/ghost-2022-toyota-gr-supra`, and its permanent code is `GHS7K2P9`.
 
+`supabase/seed/demo_rosso_panigale.sql` seeds the **ROSSO 2021 Ducati Panigale V2** (148 WHP / 72 WTQ, 20 modifications) under the same demo user, so the site has a motorcycle example for bike shops. It lives at `/build/rosso-2021-ducati-panigale-v2` with permanent code `RSSV2K7P`. Photos: `pnpm images rosso`.
+
 ## Admin setup
 
 Authorization is a row in `buildtag.admins`:

@@ -151,8 +151,8 @@ export function TwoWheels() {
           <Link href="/signup" className="btn-signal">
             Tag your bike
           </Link>
-          <Link href="/signup" className="btn-ghost">
-            I run a shop
+          <Link href="/build/rosso-2021-ducati-panigale-v2" className="btn-ghost">
+            See a bike build
           </Link>
         </div>
       </div>

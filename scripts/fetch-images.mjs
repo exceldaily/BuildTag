@@ -35,6 +35,10 @@ export const DEMO_IMAGES = [
   { name: "ghost-1", id: "photo-1631858109510-685566373403", page: "https://unsplash.com/photos/SBN-TEfHalA", alt: "White Toyota GR Supra at a night car meet" },
   { name: "ghost-2", id: "photo-1713311092670-cec9e0d35d60", page: "https://unsplash.com/photos/5PibFLH65A4", alt: "White GR Supra parked among cars under palm trees at night" },
   { name: "ghost-3", id: "photo-1557775209-c50f9bc881ad", page: "https://unsplash.com/photos/mpt0txRKmM0", alt: "Close-up of a gray GR Supra headlight and fender" },
+  // Demo bike "ROSSO" (Ducati Panigale V2), one shoot so the three photos match
+  { name: "rosso-1", id: "photo-1615172282427-9a57ef2d142e", page: "https://unsplash.com/photos/wb6dyvkqpyo", alt: "Red Ducati Panigale V2 parked inside a lit pedestrian tunnel" },
+  { name: "rosso-2", id: "photo-1615812309036-e3aeba454bba", page: "https://unsplash.com/photos/BIztIhCOVOc", alt: "Red Ducati Panigale V2 framed by the mouth of a concrete tunnel" },
+  { name: "rosso-3", id: "photo-1615812595024-43ac7a9c0586", page: "https://unsplash.com/photos/8m_S9Pi6a1I", alt: "Close-up of the Panigale V2 tail and rear wheel" },
 ];
 
 async function fetchBuffer(id, width) {
@@ -53,7 +57,7 @@ for (const img of HOME_IMAGES) {
 }
 
 for (const img of DEMO_IMAGES) {
-  if (only) break;
+  if (only && !img.name.startsWith(only)) continue;
   const dir = `public/demo/${img.name}`;
   mkdirSync(dir, { recursive: true });
   const buf = await fetchBuffer(img.id, 2000);
