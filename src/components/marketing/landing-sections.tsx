@@ -325,9 +325,17 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
             </p>
             <Mono className="mt-1 block">{MOD_CATEGORY_LABEL[linked.category]}</Mono>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1 font-display text-xs font-bold tracking-[0.12em] text-signal uppercase">
+          {/* Same click-tracked redirect a scanner uses on the real build page. */}
+          <a
+            href={`/out/${bagger!.slug}/part/${linked.public_id}`}
+            target="_blank"
+            rel={linked.is_affiliate ? "noopener noreferrer nofollow sponsored" : "noopener noreferrer nofollow"}
+            className="inline-flex shrink-0 items-center gap-1 font-display text-xs font-bold tracking-[0.12em] text-signal uppercase underline-offset-4 hover:underline"
+            aria-label={`View part: ${[linked.brand, linked.part_name].filter(Boolean).join(" ")} (opens the seller's site)`}
+            data-event="explore_build_clicked"
+          >
             View part <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          </span>
+          </a>
         </div>
       ),
     },
