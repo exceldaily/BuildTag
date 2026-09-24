@@ -12,6 +12,8 @@
 import sharp from "sharp";
 import { mkdirSync, writeFileSync } from "node:fs";
 
+import { GHOST1_STICKER, removeDecal } from "./retouch.mjs";
+
 const UNSPLASH = "https://images.unsplash.com";
 
 export const HOME_IMAGES = [
@@ -32,7 +34,7 @@ export const HOME_IMAGES = [
 ];
 
 export const DEMO_IMAGES = [
-  { name: "ghost-1", id: "photo-1631858109510-685566373403", page: "https://unsplash.com/photos/SBN-TEfHalA", alt: "White Toyota GR Supra at a night car meet" },
+  { name: "ghost-1", id: "photo-1631858109510-685566373403", page: "https://unsplash.com/photos/SBN-TEfHalA", alt: "White Toyota GR Supra at a night car meet", retouch: GHOST1_STICKER },
   { name: "ghost-2", id: "photo-1713311092670-cec9e0d35d60", page: "https://unsplash.com/photos/5PibFLH65A4", alt: "White GR Supra parked among cars under palm trees at night" },
   { name: "ghost-3", id: "photo-1557775209-c50f9bc881ad", page: "https://unsplash.com/photos/mpt0txRKmM0", alt: "Close-up of a gray GR Supra headlight and fender" },
   // Demo bike "ROSSO" (Ducati Panigale V2), one shoot so the three photos match
@@ -84,6 +86,8 @@ for (const img of DEMO_IMAGES) {
   mkdirSync(dir, { recursive: true });
   let buf = await fetchBuffer(img.id, 2000);
   if (img.blur) buf = await blurRegions(buf, img.blur);
+  // Third-party decals (e.g. the M Performance hood sticker on GHOST) are retouched out.
+  if (img.retouch) buf = await removeDecal(buf, img.retouch);
   await sharp(buf).resize({ width: 2000, withoutEnlargement: true }).webp({ quality: 82 }).toFile(`${dir}/full.webp`);
   await sharp(buf).resize({ width: 640 }).webp({ quality: 76 }).toFile(`${dir}/thumb.webp`);
   console.log("demo", img.name);
