@@ -179,9 +179,20 @@ export function TwoWheels() {
 /* ---------------------------------------------------------------------------
  * Pricing
  * ------------------------------------------------------------------------- */
+export const BUSINESS_FEATURES = [
+  "Create builds for customer vehicles",
+  "Private claim links and printable claim cards",
+  "Shop-recorded parts the owner can't edit",
+  "Built by credit on every build page",
+  "Business profile page",
+  "Your own shop or dealership crew",
+  "Team roles: owner, admin, manager, staff",
+  "BuildTag ordering for customer builds",
+];
+
 export function Pricing() {
   return (
-    <div className="grid gap-5 md:grid-cols-2">
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       <div className="neon-card p-6 sm:p-8">
         <p className="label-tech">Free</p>
         <p className="mt-2 font-display text-5xl font-extrabold uppercase">
@@ -223,6 +234,32 @@ export function Pricing() {
         </Link>
         <p className="mt-3 text-center text-xs text-muted-foreground">Secure checkout by Stripe. Cancel any time.</p>
       </div>
+      <div id="business" className="neon-card border-neon-cyan/50 p-6 sm:p-8 md:col-span-2 xl:col-span-1">
+        <div className="flex items-center justify-between">
+          <p className="label-tech text-neon-cyan">BuildTags Business</p>
+          <span className="rounded border border-neon-cyan/60 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-neon-cyan uppercase">Shops &amp; dealers</span>
+        </div>
+        <p className="mt-2 font-display text-5xl font-extrabold uppercase">Custom</p>
+        <p className="mt-1 text-sm text-muted-foreground">Priced for your shop. Let&apos;s talk about your setup.</p>
+        <ul className="mt-6 space-y-2 text-sm text-foreground/85">
+          {BUSINESS_FEATURES.map((f) => (
+            <li key={f} className="flex gap-2">
+              <span className="mt-2 size-1.5 shrink-0 rounded-full bg-neon-cyan" />
+              {f}
+            </li>
+          ))}
+        </ul>
+        <Link href="/business/contact" className="btn-ghost mt-8 w-full border-neon-cyan/60">
+          Contact us
+        </Link>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          Dealer groups, manufacturers and OEM programs:{" "}
+          <Link href="/business#enterprise" className="underline">
+            enterprise options
+          </Link>
+          .
+        </p>
+      </div>
     </div>
   );
 }
@@ -254,6 +291,10 @@ const FAQ = [
   {
     q: "What if I sell the car?",
     a: "Set the build to private or transfer it later. The decal keeps pointing at the same code, so you stay in control of what it shows.",
+  },
+  {
+    q: "I run a shop. Can I set up builds for customers?",
+    a: "Yes, with BuildTags Business. Your shop creates the build page, records the parts it installed and hands the customer a private claim link. The customer owns the build once they claim it, and your shop stays credited for its work. Scanning the QR on a vehicle never transfers ownership.",
   },
   {
     q: "Does it work for motorcycles?",

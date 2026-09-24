@@ -9,13 +9,15 @@ import type {
   ShopRow,
   SocialLinkRow,
   TagDesignRow,
+  VehicleManageContext,
   VehiclePhotoRow,
   VehicleRow,
 } from "@/lib/types";
 
 /**
  * Owner-side data access. Every query runs as the signed-in user, so RLS
- * (0003) restricts rows to what they own. Nothing here is reachable by anon.
+ * (0003, 0014) restricts rows to what they own or manage for a business.
+ * Nothing here is reachable by anon.
  */
 
 export interface GarageVehicle extends VehicleRow {
@@ -36,13 +38,39 @@ export async function listGarage(client: BuildTagClient, ownerId: string): Promi
   return (data ?? []) as GarageVehicle[];
 }
 
-/** Vehicle by id, owned by the caller. 404s when missing or not owned (even for admins). */
-export async function getOwnedVehicle(client: BuildTagClient, id: string, ownerId: string): Promise<VehicleRow> {
+/**
+ * Vehicle by id that the caller may manage: its owner, or staff of the
+ * business managing it while it is unclaimed (0014). 404s otherwise, even
+ * for admins, so an admin never edits someone else's build by accident.
+ */
+export async function getOwnedVehicle(client: BuildTagClient, id: string, userId: string): Promise<VehicleRow> {
+  return (await getManagedVehicle(client, id, userId)).vehicle;
+}
+
+export interface ManagedVehicle {
+  vehicle: VehicleRow;
+  /** Set when the caller works on this vehicle for a business rather than as its owner. */
+  organization: VehicleManageContext["organization"];
+  isOwner: boolean;
+}
+
+export async function getManagedVehicle(client: BuildTagClient, id: string, userId: string): Promise<ManagedVehicle> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const { data, error } = await client.from("vehicles").select("*").eq("id", id).eq("owner_id", ownerId).maybeSingle();
+  const { data, error } = await client.from("vehicles").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) notFound();
-  return data as VehicleRow;
+  const vehicle = data as VehicleRow;
+  if (vehicle.owner_id === userId) return { vehicle, organization: null, isOwner: true };
+  if (vehicle.owner_id !== null) notFound();
+  const ctx = await getManageContext(client, id);
+  if (!ctx.organization) notFound();
+  return { vehicle, organization: ctx.organization, isOwner: false };
+}
+
+export async function getManageContext(client: BuildTagClient, vehicleId: string): Promise<VehicleManageContext> {
+  const { data, error } = await client.rpc("vehicle_manage_context", { p_vehicle_id: vehicleId });
+  if (error) throw new Error(error.message);
+  return (data as unknown as VehicleManageContext | null) ?? { is_owner: false, organization: null };
 }
 
 export async function getVehicleQr(client: BuildTagClient, vehicleId: string): Promise<QrCodeRow | null> {
@@ -105,9 +133,15 @@ export async function listTagDesigns(client: BuildTagClient, vehicleId: string):
   return (data ?? []) as TagDesignRow[];
 }
 
-export async function listShops(client: BuildTagClient): Promise<Pick<ShopRow, "id" | "name" | "slug" | "verified">[]> {
-  const { data } = await client.from("shops").select("id, name, slug, verified").order("name").limit(200);
-  return (data ?? []) as Pick<ShopRow, "id" | "name" | "slug" | "verified">[];
+/** Active businesses for the installer picker. */
+export async function listOrganizations(client: BuildTagClient): Promise<ShopRow[]> {
+  const { data } = await client
+    .from("organizations")
+    .select("id, name, slug, organization_type, verified_status")
+    .eq("status", "active")
+    .order("name")
+    .limit(300);
+  return (data ?? []) as ShopRow[];
 }
 
 /** Very small suggestion search over the standardized parts catalog. */

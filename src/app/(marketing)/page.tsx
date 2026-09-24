@@ -307,6 +307,35 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* FOR SHOPS */}
+      <section className="relative overflow-hidden border-b border-line">
+        <div className="absolute inset-0" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/moto-shop.webp" alt="" loading="lazy" decoding="async" className="size-full object-cover opacity-30" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,5,13,0.95)_0%,rgba(6,5,13,0.8)_55%,rgba(6,5,13,0.5)_100%)]" />
+        </div>
+        <div className="relative mx-auto grid max-w-[1720px] gap-8 px-4 py-16 sm:px-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:py-20 lg:px-10 2xl:px-16">
+          <div>
+            <p className="eyebrow">Own a shop?</p>
+            <h2 className="mt-3 text-4xl sm:text-5xl xl:text-6xl">
+              <span className="speed-heading">Include a BuildTag with every build.</span>
+            </h2>
+            <p className="mt-4 max-w-xl text-foreground/85">
+              Set up the build page before the vehicle leaves your bay. Record the parts you installed, stick on the tag, hand the customer a
+              claim link. They own it. Your shop keeps the credit.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row md:flex-col md:items-start lg:flex-row">
+            <Link href="/business" className="btn-signal">
+              BuildTags for shops
+            </Link>
+            <Link href="/business/contact" className="btn-ghost">
+              Talk to us
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* PRICING */}
       <section id="pricing" className="border-b border-line bg-[#080712]">
         <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 lg:px-10 2xl:px-16 md:py-24">

@@ -14,6 +14,15 @@ const COLUMNS = [
     ],
   },
   {
+    title: "Business",
+    links: [
+      { href: "/business", label: "BuildTags for Shops" },
+      { href: "/business#enterprise", label: "Dealers & OEM" },
+      { href: "/business/contact", label: "Contact Sales" },
+      { href: "/claim", label: "Claim Your Build" },
+    ],
+  },
+  {
     title: "Legal",
     links: [
       { href: "/terms", label: "Terms" },
@@ -29,7 +38,7 @@ const SOCIALS = [{ label: "Instagram", handle: "@buildtags.app", href: "https://
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line bg-[#070708]">
-      <div className="mx-auto grid max-w-[1720px] gap-10 px-4 py-14 sm:px-6 lg:px-10 2xl:px-16 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-[1720px] gap-10 px-4 py-14 sm:px-6 lg:px-10 2xl:px-16 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <Wordmark className="h-10" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">

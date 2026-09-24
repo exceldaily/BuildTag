@@ -21,6 +21,10 @@ async function revalidateOwner(ownerType: SocialOwnerType, ownerId: string) {
     // Owner socials appear on every build they own.
     const { data } = await client.from("vehicles").select("slug").eq("owner_id", ownerId);
     for (const v of data ?? []) revalidatePath(`/build/${v.slug}`);
+  } else {
+    const { data } = await client.from("organizations").select("slug").eq("id", ownerId).maybeSingle();
+    revalidatePath("/dashboard/business", "layout");
+    if (data?.slug) revalidatePath(`/org/${data.slug}`);
   }
 }
 

@@ -40,7 +40,7 @@ export const modificationSchema = z.object({
   merchant: trimmed(80),
   affiliate_network: trimmed(80),
   installed_by_text: trimmed(120),
-  shop_id: z
+  installed_by_organization_id: z
     .union([z.literal(""), z.string().uuid()])
     .optional()
     .transform((v) => (v ? v : null)),
@@ -52,6 +52,8 @@ export const modificationSchema = z.object({
     .union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)])
     .optional()
     .transform((v) => (v ? v : null)),
+  /** Private work order / invoice ref. Kept only on business records (the database clears it for owner entries). */
+  work_order_reference: trimmed(80),
 });
 
 export type ModificationInput = z.infer<typeof modificationSchema>;

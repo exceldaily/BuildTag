@@ -14,13 +14,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Logo href="/admin" />
             <span className="rounded bg-signal px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.2em] text-white uppercase">Admin</span>
           </div>
-          <nav className="flex items-center gap-5" aria-label="Admin">
+          <nav className="-mr-4 flex items-center gap-5 overflow-x-auto pr-4 whitespace-nowrap" aria-label="Admin">
             {[
               ["/admin", "Search"],
               ["/admin/reports", "Reports"],
               ["/admin/orders", "Orders"],
               ["/admin/members", "Members"],
               ["/admin/tags", "Free tags"],
+              ["/admin/organizations", "Businesses"],
+              ["/admin/business-inquiries", "Inquiries"],
               ["/dashboard", "Garage"],
             ].map(([href, label]) => (
               <Link key={href} href={href} className="font-display text-sm font-semibold tracking-[0.14em] text-muted-foreground uppercase hover:text-foreground">

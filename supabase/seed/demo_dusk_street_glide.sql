@@ -1,7 +1,7 @@
 -- =============================================================================
 -- BuildTag demo seed: "DUSK" 2020 Harley-Davidson CVO Street Glide (bagger example)
 -- =============================================================================
--- Run after demo_ghost_supra.sql (it reuses the demo owner). Idempotent:
+-- Run after demo_ghost_supra.sql (it reuses the demo owner) and migration 0014. Idempotent:
 -- re-running replaces the bike's data. Social, product and affiliate URLs are
 -- placeholders on example.com; "Example Customs" is a fictional demo shop.
 -- Image lives in /public/demo/dusk-1 (fetched by `pnpm images dusk`).
@@ -35,15 +35,15 @@ begin
     set plan = 'pro', status = 'active', provider = 'comp', current_period_end = null, note = excluded.note, updated_at = now();
 
   -- Demo shop ---------------------------------------------------------------
-  select id into shop from buildtag.shops where slug = 'example-customs';
+  select id into shop from buildtag.organizations where slug = 'example-customs';
   if shop is null then
-    insert into buildtag.shops (owner_id, name, slug, description, website_url, location_text)
-    values (demo_user, 'Example Customs', 'example-customs', 'Fictional demo shop used by the BuildTags example builds.', 'https://example.com/example-customs', 'Tampa, FL')
+    insert into buildtag.organizations (created_by_user_id, name, slug, organization_type, status, description, website_url, location_text)
+    values (demo_user, 'Example Customs', 'example-customs', 'custom_shop', 'active', 'Fictional demo shop used by the BuildTags example builds.', 'https://example.com/example-customs', 'Tampa, FL')
     returning id into shop;
   end if;
 
   -- Demo crew ---------------------------------------------------------------
-  select id into c_id from buildtag.crews where owner_id = demo_user;
+  select id into c_id from buildtag.crews where owner_id = demo_user and organization_id is null;
   if c_id is null then
     delete from buildtag.crew_members where user_id = demo_user;
     insert into buildtag.crews (owner_id, name, slug, tagline)
@@ -83,7 +83,7 @@ begin
     ('vehicle', v_id, 'youtube', 'duskglide', 'https://example.com/youtube/duskglide', 2);
 
   -- Modifications ------------------------------------------------------------
-  insert into buildtag.modifications (vehicle_id, category, brand, part_name, part_number, description, price, price_public, product_url, affiliate_url, merchant, affiliate_network, installed_by_text, shop_id, installation_date, sort_order) values
+  insert into buildtag.modifications (vehicle_id, category, brand, part_name, part_number, description, price, price_public, product_url, affiliate_url, merchant, affiliate_network, installed_by_text, installed_by_organization_id, installation_date, sort_order) values
     (v_id, 'engine', 'Screamin'' Eagle', 'SE8-517 High-Lift Camshaft', '', 'Pulls harder from 3,000 rpm up without killing the low-end the 117 is known for.', 700, false, 'https://example.com/shop/se8-517-cam', null, '', '', '', shop, '2022-03-12', 0),
     (v_id, 'ecu_tuning', 'Dynojet', 'Power Vision PV3', '', 'Custom dyno tune for the cam and the exhaust.', 600, false, 'https://example.com/shop/dynojet-pv3', 'https://example.com/aff/dynojet-pv3?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 1),
     (v_id, 'exhaust', 'Rinehart Racing', '4.5 in. Slip-On Mufflers', '', 'Black with black end caps. Loud enough to be heard, not enough to be hated.', 800, false, 'https://example.com/shop/rinehart-slip-on', 'https://example.com/aff/rinehart-slip-on?tag=duskglide-20', 'Example Parts', 'Example affiliate program', '', shop, '2022-03-12', 2),

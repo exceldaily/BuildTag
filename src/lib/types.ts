@@ -52,6 +52,79 @@ export type Plan = "free" | "pro";
 export type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | "incomplete";
 export type DeviceType = "mobile" | "tablet" | "desktop" | "other";
 
+/* Business / ownership (0014) */
+export type OrganizationType =
+  | "dealership"
+  | "custom_shop"
+  | "performance_shop"
+  | "motorcycle_shop"
+  | "installer"
+  | "tuner"
+  | "manufacturer"
+  | "dealer_group"
+  | "other";
+export type OrganizationStatus = "pending" | "active" | "suspended";
+export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
+export type OrgMemberRole = "owner" | "admin" | "manager" | "staff";
+export type VehicleRelationshipType = "owner" | "creator" | "builder" | "dealer" | "installer" | "tuner" | "sponsor";
+export type OwnershipStatus = "unclaimed" | "claim_pending" | "claimed" | "transfer_pending";
+export type ClaimStatus = "active" | "claimed" | "expired" | "revoked";
+export type ModSourceType = "owner" | "shop" | "dealer" | "manufacturer" | "import";
+export type ModVerificationStatus = "owner_reported" | "shop_recorded" | "dealer_recorded" | "manufacturer_recorded";
+export type CrewKind = "riding" | "shop" | "dealership" | "brand" | "customer";
+export type BusinessInquiryStatus = "new" | "contacted" | "qualified" | "pilot" | "customer" | "closed" | "spam";
+
+export const ORGANIZATION_TYPES: { value: OrganizationType; label: string }[] = [
+  { value: "custom_shop", label: "Custom shop" },
+  { value: "performance_shop", label: "Performance shop" },
+  { value: "motorcycle_shop", label: "Motorcycle shop" },
+  { value: "dealership", label: "Dealership" },
+  { value: "dealer_group", label: "Dealer group" },
+  { value: "installer", label: "Installer" },
+  { value: "tuner", label: "Tuner" },
+  { value: "manufacturer", label: "Manufacturer" },
+  { value: "other", label: "Other" },
+];
+
+export const ORGANIZATION_TYPE_LABEL = Object.fromEntries(ORGANIZATION_TYPES.map((t) => [t.value, t.label])) as Record<
+  OrganizationType,
+  string
+>;
+
+export const RELATIONSHIP_LABEL: Record<VehicleRelationshipType, string> = {
+  owner: "Owner",
+  creator: "Creator",
+  builder: "Builder",
+  dealer: "Dealer",
+  installer: "Installer",
+  tuner: "Tuner",
+  sponsor: "Sponsor",
+};
+
+/** Public badge wording. Says who recorded a part, never certification or OEM approval. */
+export const SOURCE_BADGE: Record<ModSourceType, string> = {
+  owner: "Owner added",
+  shop: "Shop installed",
+  dealer: "Dealer installed",
+  manufacturer: "Factory recorded",
+  import: "Imported",
+};
+
+export const ORG_ROLE_LABEL: Record<OrgMemberRole, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  manager: "Manager",
+  staff: "Staff",
+};
+
+export const CREW_KIND_LABEL: Record<CrewKind, string> = {
+  riding: "Riding crew",
+  shop: "Shop community",
+  dealership: "Dealership community",
+  brand: "Brand community",
+  customer: "Customer community",
+};
+
 export const MOD_CATEGORIES: { value: ModCategory; label: string }[] = [
   { value: "engine", label: "Engine" },
   { value: "forced_induction", label: "Forced Induction" },
@@ -114,7 +187,7 @@ export interface LeaderboardRow {
   trim: string;
   nickname: string;
   hero_image_url: string | null;
-  owner_username: string;
+  owner_username: string | null;
   like_count: number;
   mod_count: number;
   horsepower: number | null;
@@ -155,6 +228,8 @@ export interface CrewLeaderboardRow {
   slug: string;
   tagline: string;
   created_at: string;
+  kind: CrewKind;
+  organization: PublicShop | null;
   member_count: number;
   build_count: number;
   hero_image_url: string | null;
@@ -167,7 +242,10 @@ export interface Crew {
   slug: string;
   tagline: string;
   created_at: string;
-  owner_username: string;
+  kind: CrewKind;
+  /** Set for business crews (shop / dealership communities). */
+  organization: PublicShop | null;
+  owner_username: string | null;
   members: CrewMember[];
   builds: PublicBuildListRow[];
   total_scans: number;
@@ -187,20 +265,33 @@ export interface SubscriptionRow {
   updated_at: string;
 }
 
-export interface ShopRow {
+export interface OrganizationRow {
   id: string;
-  owner_id: string | null;
+  created_by_user_id: string | null;
   name: string;
   slug: string;
+  organization_type: OrganizationType;
+  status: OrganizationStatus;
+  verified_status: VerificationStatus;
+  tagline: string;
   logo_url: string | null;
   description: string;
   website_url: string | null;
   location_text: string;
   instagram_handle: string | null;
-  verified: boolean;
+  phone: string;
+  email: string;
+  address_line1: string;
+  city: string;
+  region: string;
+  postal_code: string;
+  country: string;
   created_at: string;
   updated_at: string;
 }
+
+/** Installer picker entry. */
+export type ShopRow = Pick<OrganizationRow, "id" | "name" | "slug" | "organization_type" | "verified_status">;
 
 export interface PartRow {
   id: string;
@@ -217,7 +308,9 @@ export interface PartRow {
 
 export interface VehicleRow {
   id: string;
-  owner_id: string;
+  /** Current owner. Null while a business-created vehicle is unclaimed. */
+  owner_id: string | null;
+  ownership_status: OwnershipStatus;
   slug: string;
   year: number | null;
   make: string;
@@ -277,10 +370,17 @@ export interface ModificationRow {
   merchant: string;
   affiliate_network: string;
   installed_by_text: string;
-  shop_id: string | null;
+  installed_by_organization_id: string | null;
   part_id: string | null;
   installation_date: string | null;
   sort_order: number;
+  created_by_user_id: string | null;
+  created_by_organization_id: string | null;
+  source_type: ModSourceType;
+  verification_status: ModVerificationStatus;
+  /** Private to the business that recorded the part. */
+  work_order_reference: string;
+  is_hidden: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -534,7 +634,8 @@ export interface PublicBuildListRow {
   scan_count: number;
   created_at: string;
   updated_at: string;
-  owner_username: string;
+  /** Null for business-created builds that are not claimed yet. */
+  owner_username: string | null;
 }
 
 /* ---------------------------------------------------------------------------
@@ -552,10 +653,20 @@ export interface PublicShop {
   name: string;
   slug: string;
   logo_url: string | null;
+  organization_type: OrganizationType;
   website_url: string | null;
   instagram_handle: string | null;
+  /** BuildTags confirmed the business identity. Nothing more. */
   verified: boolean;
   location_text: string;
+  tagline: string;
+}
+
+export interface PublicContributor {
+  organization: PublicShop | null;
+  roles: VehicleRelationshipType[];
+  mod_count: number;
+  crew: { name: string; slug: string } | null;
 }
 
 export interface PublicModification {
@@ -572,7 +683,12 @@ export interface PublicModification {
   merchant: string;
   installed_by_text: string;
   installation_date: string | null;
+  source_type: ModSourceType;
+  verification_status: ModVerificationStatus;
+  /** Installer. For owner-added parts this is what the owner reported. */
   shop: PublicShop | null;
+  /** The business that recorded this part, when a business did. */
+  recorded_by: PublicShop | null;
   part: { brand: string; name: string; slug: string; image_url: string | null } | null;
 }
 
@@ -625,14 +741,17 @@ export interface PublicBuild {
   updated_at: string;
   qr_code: string | null;
   has_affiliate_links: boolean;
+  is_claimed: boolean;
   photos: PublicPhoto[];
   modifications: PublicModification[];
+  contributors: PublicContributor[];
+  crews: { name: string; slug: string; kind: CrewKind }[];
   vehicle_socials: PublicSocial[];
-  owner: PublicOwner;
+  owner: PublicOwner | null;
 }
 
 export type PublicBuildResult =
-  | { access: "ok"; is_owner: boolean; liked: boolean; build: PublicBuild }
+  | { access: "ok"; is_owner: boolean; can_manage: boolean; liked: boolean; build: PublicBuild }
   | { access: "private" }
   | { access: "disabled" }
   | { access: "not_found" };
@@ -655,6 +774,246 @@ export interface VehicleAnalytics {
   top_socials: { platform: SocialPlatform; handle: string; owner_type: SocialOwnerType; count: number }[];
   devices: Partial<Record<DeviceType, number>>;
   countries: { country: string; count: number }[];
+}
+
+/* ---------------------------------------------------------------------------
+ * Business payloads (0014 functions)
+ * ------------------------------------------------------------------------- */
+
+export interface MyOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  organization_type: OrganizationType;
+  status: OrganizationStatus;
+  verified_status: VerificationStatus;
+  logo_url: string | null;
+  role: OrgMemberRole;
+}
+
+export interface OrgClaimSummary {
+  id: string;
+  status: ClaimStatus;
+  code_hint: string;
+  expires_at: string | null;
+  created_at: string;
+  claimed_at: string | null;
+  invite_sent_at: string | null;
+}
+
+export interface OrgBuild {
+  vehicle_id: string;
+  slug: string;
+  year: number | null;
+  make: string;
+  model: string;
+  trim: string;
+  nickname: string;
+  hero_image_url: string | null;
+  visibility: VehicleVisibility;
+  status: VehicleStatus;
+  ownership_status: OwnershipStatus;
+  scan_count: number;
+  like_count: number;
+  created_at: string;
+  mod_count: number;
+  org_mod_count: number;
+  roles: VehicleRelationshipType[];
+  can_edit: boolean;
+  qr_code: string | null;
+  qr_status: QrStatus | null;
+  customer_name: string | null;
+  claim: OrgClaimSummary | null;
+  in_crew: boolean;
+  orders: number;
+}
+
+type OrgVehicleRef = { vehicle_id: string; slug: string; year: number | null; make: string; model: string };
+
+export interface OrgDashboard {
+  organization: Pick<OrganizationRow, "id" | "name" | "slug" | "status" | "verified_status" | "organization_type">;
+  builds_created: number;
+  claimed: number;
+  awaiting_claim: number;
+  active_claims: number;
+  buildtags_ordered: number;
+  active_buildtags: number;
+  total_scans: number;
+  documented_mods: number;
+  recent_builds: (OrgVehicleRef & { nickname: string; hero_image_url: string | null; ownership_status: OwnershipStatus; created_at: string })[];
+  recent_claims: (OrgVehicleRef & { claimed_at: string })[];
+  top_scanned: (OrgVehicleRef & { nickname: string; scan_count: number })[];
+}
+
+export interface OrgTeamMember {
+  user_id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  role: OrgMemberRole;
+  status: "active" | "removed";
+  created_at: string;
+}
+
+export interface OrgOrder {
+  id: string;
+  order_number: string;
+  status: OrderStatus;
+  payment_status: PaymentStatus;
+  total_cents: number;
+  currency: string;
+  created_at: string;
+  placed_by: string | null;
+  quantity: number | null;
+  vehicle: { year: number | null; make: string; model: string; nickname: string; slug: string } | null;
+}
+
+export interface GeneratedClaim {
+  claim_id: string;
+  /** Raw secrets: returned once, never stored. */
+  token: string;
+  code: string;
+  expires_at: string | null;
+}
+
+export interface ClaimPreview {
+  status: "active" | "claimed" | "expired" | "revoked" | "invalid";
+  expires_at?: string | null;
+  vehicle?: {
+    year: number | null;
+    make: string;
+    model: string;
+    trim: string;
+    nickname: string;
+    hero_image_url: string | null;
+    mod_count: number;
+    photo_count: number;
+  };
+  organization?: {
+    name: string;
+    slug: string;
+    logo_url: string | null;
+    organization_type: OrganizationType;
+    verified_status: VerificationStatus;
+  } | null;
+}
+
+export type ClaimError = "invalid" | "expired" | "revoked" | "claimed" | "issuer_member" | "rate_limited";
+
+export type ClaimResult =
+  | {
+      ok: true;
+      vehicle_id: string;
+      slug: string;
+      vehicle: { year: number | null; make: string; model: string; trim: string; nickname: string; hero_image_url: string | null };
+      organization: { name: string; slug: string; logo_url: string | null; organization_type: OrganizationType } | null;
+      counts: { mods: number; business_mods: number; photos: number; designs: number };
+      crew: { id: string; name: string; slug: string; is_member: boolean } | null;
+    }
+  | { ok: false; error: ClaimError };
+
+export interface PublicOrganizationBuild {
+  slug: string;
+  year: number | null;
+  make: string;
+  model: string;
+  trim: string;
+  nickname: string;
+  hero_image_url: string | null;
+  horsepower: number | null;
+  horsepower_type: HorsepowerType;
+  scan_count: number;
+  like_count: number;
+  mod_count: number;
+  shop_mod_count: number;
+  roles: VehicleRelationshipType[];
+}
+
+export interface PublicOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  organization_type: OrganizationType;
+  tagline: string;
+  description: string;
+  logo_url: string | null;
+  website_url: string | null;
+  phone: string;
+  email: string;
+  location_text: string;
+  city: string;
+  region: string;
+  country: string;
+  instagram_handle: string | null;
+  verified: boolean;
+  created_at: string;
+  socials: { platform: SocialPlatform; handle: string; url: string }[];
+  crew: { name: string; slug: string; kind: CrewKind; tagline: string; member_count: number } | null;
+  documented_mods: number;
+  builds: PublicOrganizationBuild[];
+}
+
+export interface VehicleClaimRow {
+  id: string;
+  vehicle_id: string;
+  organization_id: string | null;
+  token_hash: string;
+  code_hash: string;
+  code_hint: string;
+  status: ClaimStatus;
+  expires_at: string | null;
+  recipient_email: string;
+  invite_sent_at: string | null;
+  claimed_by_user_id: string | null;
+  claimed_at: string | null;
+  revoked_at: string | null;
+  revoked_by_user_id: string | null;
+  created_by_user_id: string | null;
+  created_at: string;
+}
+
+export interface VehicleManageContext {
+  is_owner: boolean;
+  organization: { id: string; name: string; slug: string; organization_type: OrganizationType } | null;
+}
+
+export interface BusinessInquiryRow {
+  id: string;
+  name: string;
+  business_name: string;
+  email: string;
+  phone: string;
+  website: string;
+  business_type: string;
+  industry: string;
+  location_count: string;
+  builds_per_month: string;
+  interests: string[];
+  message: string;
+  status: BusinessInquiryStatus;
+  source: string;
+  admin_notes: string;
+  submitter_key: string | null;
+  submitted_by_user_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminOrganizationRow {
+  id: string;
+  name: string;
+  slug: string;
+  organization_type: OrganizationType;
+  status: OrganizationStatus;
+  verified_status: VerificationStatus;
+  created_at: string;
+  email: string;
+  phone: string;
+  website_url: string | null;
+  location_text: string;
+  owner_username: string | null;
+  member_count: number;
+  build_count: number;
 }
 
 export interface DashboardStats {
@@ -729,10 +1088,49 @@ export interface Database {
       admins: Table<{ user_id: string; created_at: string }, { user_id: string; created_at?: string }, Partial<{ user_id: string }>>;
       subscriptions: Table<SubscriptionRow, InsertOf<SubscriptionRow>, UpdateOf<SubscriptionRow>>;
       notification_events: Table<NotificationEventRow, InsertOf<NotificationEventRow>, UpdateOf<NotificationEventRow>>;
-      shops: Table<
-        ShopRow,
-        InsertOf<ShopRow, "owner_id" | "logo_url" | "description" | "website_url" | "location_text" | "instagram_handle" | "verified">,
-        UpdateOf<ShopRow>
+      organizations: Table<OrganizationRow, InsertOf<OrganizationRow>, UpdateOf<OrganizationRow>>;
+      organization_members: Table<
+        {
+          organization_id: string;
+          user_id: string;
+          role: OrgMemberRole;
+          status: "active" | "removed";
+          added_by_user_id: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        { organization_id: string; user_id: string; role?: OrgMemberRole },
+        Partial<{ role: OrgMemberRole; status: "active" | "removed" }>
+      >;
+      vehicle_customer_records: Table<
+        {
+          vehicle_id: string;
+          organization_id: string;
+          customer_name: string;
+          customer_email: string;
+          customer_phone: string;
+          notes: string;
+          created_by_user_id: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          vehicle_id: string;
+          organization_id: string;
+          customer_name?: string;
+          customer_email?: string;
+          customer_phone?: string;
+          notes?: string;
+          created_by_user_id?: string | null;
+        },
+        Partial<{ customer_name: string; customer_email: string; customer_phone: string; notes: string }>
+      >;
+      business_inquiries: Table<BusinessInquiryRow, never, never>;
+      vehicle_claims: Table<VehicleClaimRow, never, never>;
+      crews: Table<
+        { id: string; owner_id: string; name: string; slug: string; tagline: string; organization_id: string | null; kind: CrewKind; created_at: string; updated_at: string },
+        never,
+        never
       >;
       parts: Table<PartRow, InsertOf<PartRow, "part_number" | "category" | "description" | "image_url" | "manufacturer_url">, UpdateOf<PartRow>>;
       vehicles: Table<
@@ -760,6 +1158,7 @@ export interface Database {
           | "visibility"
           | "status"
           | "show_owner_section"
+          | "ownership_status"
           | "mod_count"
           | "like_count"
           | "scan_count"
@@ -789,10 +1188,16 @@ export interface Database {
           | "merchant"
           | "affiliate_network"
           | "installed_by_text"
-          | "shop_id"
+          | "installed_by_organization_id"
           | "part_id"
           | "installation_date"
           | "sort_order"
+          | "created_by_user_id"
+          | "created_by_organization_id"
+          | "source_type"
+          | "verification_status"
+          | "work_order_reference"
+          | "is_hidden"
         >,
         UpdateOf<ModificationRow>,
         VehicleChild
@@ -963,6 +1368,43 @@ export interface Database {
       crew_leaderboard: { Args: { p_period?: string; p_limit?: number }; Returns: Json };
       my_crew: { Args: Record<never, never>; Returns: Json };
       build_owner_plan: { Args: { p_slug: string }; Returns: Plan };
+      create_organization: { Args: { p_name: string; p_type: OrganizationType; p_details?: Json }; Returns: OrganizationRow };
+      my_organizations: { Args: Record<never, never>; Returns: Json };
+      org_team: { Args: { p_org: string }; Returns: Json };
+      org_add_member: { Args: { p_org: string; p_username: string; p_role?: OrgMemberRole }; Returns: undefined };
+      org_set_member_role: { Args: { p_org: string; p_user_id: string; p_role: OrgMemberRole }; Returns: undefined };
+      org_remove_member: { Args: { p_org: string; p_user_id: string }; Returns: undefined };
+      org_create_vehicle: {
+        Args: { p_org: string; p_vehicle: Json; p_roles?: VehicleRelationshipType[]; p_customer?: Json | null; p_add_to_crew?: boolean };
+        Returns: string;
+      };
+      org_builds: { Args: { p_org: string }; Returns: Json };
+      org_dashboard: { Args: { p_org: string }; Returns: Json };
+      org_orders: { Args: { p_org: string }; Returns: Json };
+      org_create_crew: { Args: { p_org: string; p_name: string; p_tagline?: string; p_kind?: CrewKind }; Returns: Json };
+      org_update_crew: { Args: { p_org: string; p_name: string; p_tagline: string; p_kind?: CrewKind | null }; Returns: Json };
+      org_associate_build: { Args: { p_org: string; p_vehicle_id: string }; Returns: undefined };
+      remove_crew_build: { Args: { p_crew_id: string; p_vehicle_id: string }; Returns: undefined };
+      join_crew: { Args: { p_crew_id: string }; Returns: undefined };
+      leave_crew: { Args: { p_crew_id: string }; Returns: undefined };
+      my_business_crews: { Args: Record<never, never>; Returns: Json };
+      vehicle_manage_context: { Args: { p_vehicle_id: string }; Returns: Json };
+      generate_vehicle_claim: { Args: { p_vehicle_id: string; p_expires_in_days?: number; p_recipient_email?: string }; Returns: Json };
+      revoke_vehicle_claim: { Args: { p_claim_id: string }; Returns: undefined };
+      record_claim_invite: { Args: { p_claim_id: string }; Returns: undefined };
+      claim_preview: { Args: { p_token: string }; Returns: Json };
+      claim_vehicle: { Args: { p_token?: string | null; p_code?: string | null }; Returns: Json };
+      get_public_organization: { Args: { p_slug: string }; Returns: Json };
+      submit_business_inquiry: { Args: { p: Json; p_submitter_key?: string | null }; Returns: string };
+      admin_update_business_inquiry: {
+        Args: { p_id: string; p_status?: BusinessInquiryStatus | null; p_notes?: string | null };
+        Returns: undefined;
+      };
+      admin_list_organizations: { Args: { p_query?: string }; Returns: Json };
+      admin_set_organization: {
+        Args: { p_org: string; p_status?: OrganizationStatus | null; p_verified?: VerificationStatus | null; p_type?: OrganizationType | null };
+        Returns: undefined;
+      };
       admin_set_order_status: {
         Args: {
           p_order_id: string;
@@ -997,6 +1439,17 @@ export interface Database {
       fulfillment_status: FulfillmentStatus;
       validation_status: ValidationStatus;
       size_unit: "in" | "mm";
+      organization_type: OrganizationType;
+      organization_status: OrganizationStatus;
+      verification_status: VerificationStatus;
+      org_member_role: OrgMemberRole;
+      vehicle_relationship_type: VehicleRelationshipType;
+      vehicle_ownership_status: OwnershipStatus;
+      vehicle_claim_status: ClaimStatus;
+      mod_source_type: ModSourceType;
+      mod_verification_status: ModVerificationStatus;
+      crew_kind: CrewKind;
+      business_inquiry_status: BusinessInquiryStatus;
     };
     CompositeTypes: Record<never, never>;
   };

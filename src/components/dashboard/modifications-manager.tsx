@@ -1,24 +1,37 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { addModificationAction, deleteModificationAction, reorderModificationsAction, updateModificationAction } from "@/lib/actions/modifications";
-import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, type ModCategory, type ModificationRow, type ShopRow } from "@/lib/types";
-import { formatMoney } from "@/lib/utils";
+import {
+  addModificationAction,
+  deleteModificationAction,
+  reorderModificationsAction,
+  setModificationHiddenAction,
+  updateModificationAction,
+} from "@/lib/actions/modifications";
+import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, SOURCE_BADGE, type ModCategory, type ModificationRow, type ShopRow } from "@/lib/types";
+import { cn, formatMoney } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { EarnBadge, EarnBlock, MonetizeSummary } from "./affiliate-panel";
 import { PartSuggest } from "./part-suggest";
 import { SortableItem, SortableList } from "./sortable";
 
-type Shop = Pick<ShopRow, "id" | "name" | "slug" | "verified">;
+type Shop = ShopRow;
 
 interface Props {
   vehicleId: string;
   modifications: ModificationRow[];
   shops: Shop[];
+  /** The business the signed-in user is working for on this (unclaimed) build. Null for the owner. */
+  actingOrg?: { id: string; name: string } | null;
+}
+
+/** A part recorded by a business is read-only for everyone outside that business. */
+function lockedFor(mod: ModificationRow, actingOrg: Props["actingOrg"]) {
+  return mod.created_by_organization_id !== null && mod.created_by_organization_id !== actingOrg?.id;
 }
 
 /**
@@ -26,7 +39,7 @@ interface Props {
  * in the part-name field so a whole build can be typed in one sitting.
  * Everything else lives in the edit dialog.
  */
-export function ModificationsManager({ vehicleId, modifications: initial, shops }: Props) {
+export function ModificationsManager({ vehicleId, modifications: initial, shops, actingOrg = null }: Props) {
   const [mods, setMods] = useState(initial);
   const [category, setCategory] = useState<ModCategory>("engine");
   const [editing, setEditing] = useState<ModificationRow | null>(null);
@@ -72,6 +85,20 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
     start(async () => {
       const res = await deleteModificationAction(mod.id);
       if (!res.ok) toast.error(res.error);
+    });
+  };
+
+  const toggleHidden = (mod: ModificationRow) => {
+    const hidden = !mod.is_hidden;
+    setMods((m) => m.map((x) => (x.id === mod.id ? { ...x, is_hidden: hidden } : x)));
+    start(async () => {
+      const res = await setModificationHiddenAction(mod.id, hidden);
+      if (!res.ok) {
+        toast.error(res.error);
+        setMods((m) => m.map((x) => (x.id === mod.id ? { ...x, is_hidden: !hidden } : x)));
+        return;
+      }
+      toast.success(hidden ? "Hidden from your public page" : "Showing on your public page");
     });
   };
 
@@ -140,7 +167,11 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
           <Plus className="size-4" aria-hidden="true" />
           Add
         </button>
-        <p className="text-xs text-muted-foreground sm:col-span-4">Press Enter to add and keep typing. Open a part to add the price, your affiliate link and the installer.</p>
+        <p className="text-xs text-muted-foreground sm:col-span-4">
+          {actingOrg
+            ? `Parts you add here are recorded as ${actingOrg.name}'s work. The customer sees them after they claim the build and can't change them.`
+            : "Press Enter to add and keep typing. Open a part to add the price, your affiliate link and the installer."}
+        </p>
       </form>
 
       {grouped.length === 0 ? (
@@ -157,7 +188,7 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
                   {items.map((m) => (
                     <SortableItem key={m.id} id={m.id}>
                       {(handle) => (
-                        <li className="flex items-center gap-2 bg-surface px-2 py-2">
+                        <li className={cn("flex items-center gap-2 bg-surface px-2 py-2", m.is_hidden && "opacity-60")}>
                           {handle}
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium">
@@ -166,21 +197,55 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
                             </p>
                             <p className="truncate text-xs text-muted-foreground">
                               {[
+                                m.source_type !== "owner" ? SOURCE_BADGE[m.source_type] : null,
+                                m.is_hidden ? "Hidden" : null,
                                 m.part_number ? `#${m.part_number}` : null,
                                 m.price !== null ? `${formatMoney(m.price)}${m.price_public ? "" : " (hidden)"}` : null,
-                                m.installed_by_text || (m.shop_id ? shops.find((s) => s.id === m.shop_id)?.name : null),
+                                m.installed_by_text ||
+                                  (m.installed_by_organization_id ? shops.find((s) => s.id === m.installed_by_organization_id)?.name : null),
                               ]
                                 .filter(Boolean)
                                 .join(" · ")}
                             </p>
                           </div>
-                          <EarnBadge mod={m} onAdd={() => setEditing(m)} />
-                          <button type="button" onClick={() => setEditing(m)} className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-white/5 hover:text-foreground" aria-label={`Edit ${m.part_name}`}>
-                            <Pencil className="size-4" />
-                          </button>
-                          <button type="button" onClick={() => remove(m)} className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label={`Delete ${m.part_name}`}>
-                            <Trash2 className="size-4" />
-                          </button>
+                          {lockedFor(m, actingOrg) ? (
+                            <>
+                              <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:inline-flex" title="Recorded by a business. Details stay as recorded.">
+                                <Lock className="size-3.5" aria-hidden="true" />
+                                Recorded
+                              </span>
+                              {!actingOrg && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleHidden(m)}
+                                  className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                                  aria-label={m.is_hidden ? `Show ${m.part_name} on your public page` : `Hide ${m.part_name} from your public page`}
+                                >
+                                  {m.is_hidden ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <EarnBadge mod={m} onAdd={() => setEditing(m)} />
+                              {!actingOrg && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleHidden(m)}
+                                  className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                                  aria-label={m.is_hidden ? `Show ${m.part_name} on your public page` : `Hide ${m.part_name} from your public page`}
+                                >
+                                  {m.is_hidden ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                                </button>
+                              )}
+                              <button type="button" onClick={() => setEditing(m)} className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-white/5 hover:text-foreground" aria-label={`Edit ${m.part_name}`}>
+                                <Pencil className="size-4" />
+                              </button>
+                              <button type="button" onClick={() => remove(m)} className="inline-flex size-9 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label={`Delete ${m.part_name}`}>
+                                <Trash2 className="size-4" />
+                              </button>
+                            </>
+                          )}
                         </li>
                       )}
                     </SortableItem>
@@ -201,6 +266,7 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
             <EditModForm
               mod={editing}
               shops={shops}
+              business={actingOrg !== null && editing.created_by_organization_id === actingOrg.id}
               onSaved={(updated) => {
                 setMods((m) => m.map((x) => (x.id === updated.id ? updated : x)));
                 setEditing(null);
@@ -213,7 +279,18 @@ export function ModificationsManager({ vehicleId, modifications: initial, shops 
   );
 }
 
-function EditModForm({ mod, shops, onSaved }: { mod: ModificationRow; shops: Shop[]; onSaved: (m: ModificationRow) => void }) {
+function EditModForm({
+  mod,
+  shops,
+  business,
+  onSaved,
+}: {
+  mod: ModificationRow;
+  shops: Shop[];
+  /** Editing the business's own record: installer is fixed, work order ref available. */
+  business: boolean;
+  onSaved: (m: ModificationRow) => void;
+}) {
   const [pending, start] = useTransition();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -274,22 +351,32 @@ function EditModForm({ mod, shops, onSaved }: { mod: ModificationRow; shops: Sho
         </label>
       </div>
       <EarnBlock mod={mod} errors={errors} />
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Installed by (text)">
-          <input name="installed_by_text" defaultValue={mod.installed_by_text} maxLength={120} placeholder="Self / shop name" className="field" />
-        </Field>
-        <Field label="Shop">
-          <select name="shop_id" defaultValue={mod.shop_id ?? ""} className="field">
-            <option value="">None</option>
-            {shops.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-                {s.verified ? " ✓" : ""}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
+      {business ? (
+        <>
+          <input type="hidden" name="installed_by_text" value={mod.installed_by_text} />
+          <input type="hidden" name="installed_by_organization_id" value={mod.installed_by_organization_id ?? ""} />
+          <Field label="Work order / invoice #" hint="Private to your business. Never shown publicly or to the customer.">
+            <input name="work_order_reference" defaultValue={mod.work_order_reference} maxLength={80} className="field" />
+          </Field>
+        </>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Installed by (text)">
+            <input name="installed_by_text" defaultValue={mod.installed_by_text} maxLength={120} placeholder="Self / shop name" className="field" />
+          </Field>
+          <Field label="Shop">
+            <select name="installed_by_organization_id" defaultValue={mod.installed_by_organization_id ?? ""} className="field">
+              <option value="">None</option>
+              {shops.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                  {s.verified_status === "verified" ? " ✓" : ""}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+      )}
       <input type="hidden" name="part_id" value={mod.part_id ?? ""} />
       <button type="submit" className="btn-signal w-full" disabled={pending}>
         {pending ? "Saving…" : "Save part"}

@@ -127,7 +127,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps<"/lead
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-display text-lg leading-tight font-bold uppercase sm:text-xl">{b.nickname || title}</span>
                     <span className="block truncate text-xs text-muted-foreground sm:text-sm">
-                      {b.nickname ? `${title} · ` : ""}@{b.owner_username}
+                      {b.nickname ? `${title}${b.owner_username ? " · " : ""}` : ""}{b.owner_username ? `@${b.owner_username}` : ""}
                       {power ? ` · ${power}` : ""}
                       {b.mod_count ? ` · ${b.mod_count} mods` : ""}
                     </span>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { getUserPlan } from "@/lib/db/plan";
-import { getOwnedVehicle, getVehicleQr, listModifications, listShops, listSocialLinks, listTagDesigns } from "@/lib/db/vehicles";
+import { getVehiclePlan } from "@/lib/db/plan";
+import { getManagedVehicle, getVehicleQr, listModifications, listOrganizations, listSocialLinks, listTagDesigns } from "@/lib/db/vehicles";
 import { siteUrl } from "@/lib/env";
 import { scanUrl } from "@/lib/qr/generate";
 import { requireProfile } from "@/lib/supabase/server";
@@ -17,15 +17,17 @@ export default async function TagDesignerPage({ params, searchParams }: PageProp
   const { id } = await params;
   const sp = await searchParams;
   const { client, user, profile } = await requireProfile();
-  const [vehicle, qr, vehicleSocials, ownerSocials, designs, plan, specsRes, shops, mods] = await Promise.all([
-    getOwnedVehicle(client, id, user.id),
+  const managed = await getManagedVehicle(client, id, user.id);
+  const { vehicle, organization } = managed;
+  // On a business build the "owner" handles are the business's, never the staff member's.
+  const [qr, vehicleSocials, ownerSocials, designs, plan, specsRes, shops, mods] = await Promise.all([
     getVehicleQr(client, id),
     listSocialLinks(client, "vehicle", id),
-    listSocialLinks(client, "profile", user.id),
+    organization ? listSocialLinks(client, "shop", organization.id) : listSocialLinks(client, "profile", user.id),
     listTagDesigns(client, id),
-    getUserPlan(client, user.id),
+    getVehiclePlan(client, vehicle),
     client.from("print_specifications").select("*").order("sort_order"),
-    listShops(client),
+    listOrganizations(client),
     listModifications(client, id),
   ]);
 
@@ -48,7 +50,7 @@ export default async function TagDesignerPage({ params, searchParams }: PageProp
     powerLabel: powerLabel(vehicle.horsepower, vehicle.horsepower_type),
     torqueLabel: torqueLabel(vehicle.torque, vehicle.torque_unit, vehicle.horsepower_type),
     modCount: mods.length,
-    username: profile.username,
+    username: organization ? "" : profile.username,
     socials: [
       ...vehicleSocials.filter((s) => s.is_public && s.handle).map((s) => ({ public_id: s.public_id, platform: s.platform, handle: s.handle, source: "vehicle" as const })),
       ...ownerSocials.filter((s) => s.is_public && s.handle).map((s) => ({ public_id: s.public_id, platform: s.platform, handle: s.handle, source: "owner" as const })),

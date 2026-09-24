@@ -5,6 +5,7 @@ import type { PublicBuild } from "@/lib/types";
 import { formatCount, formatMoney, powerLabel, torqueLabel, vehicleTitle } from "@/lib/utils";
 import { LogoMark, Wordmark } from "@/components/layout/logo";
 
+import { ContributorsSection } from "./contributors-section";
 import { Gallery } from "./gallery";
 import { LikeButton } from "./like-button";
 import { ModificationsList } from "./modifications-list";
@@ -25,7 +26,10 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
   const power = powerLabel(b.horsepower, b.horsepower_type);
   const torque = torqueLabel(b.torque, b.torque_unit, b.horsepower_type);
   const hero = b.hero_image_url ?? (b.photos[0] ? photoUrl(b.photos[0].storage_path, "full") : null);
-  const ownerSocials = b.owner.socials ?? [];
+  const ownerSocials = b.owner?.socials ?? [];
+  const builtBy = b.contributors.find((c) => c.organization && c.roles.some((r) => r === "creator" || r === "builder" || r === "dealer"))?.organization ?? null;
+  // personal crew of the owner first, then the shop / dealership communities the build belongs to
+  const crewChips = [...(crew ? [crew] : []), ...b.crews].filter((c, i, all) => all.findIndex((x) => x.slug === c.slug) === i);
   const vehiclePlatforms = new Set(b.vehicle_socials.map((s) => s.platform));
   const extraOwnerSocials = ownerSocials.filter((s) => !vehiclePlatforms.has(s.platform));
 
@@ -71,15 +75,27 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
           </dl>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <Link href={`/build/${b.slug}#owner`} className="label-tech hover:text-foreground">
-              {t(L, "build_owner")} @{b.owner.username}
-            </Link>
-            {b.location_text && <span className="label-tech">· {b.location_text}</span>}
-            {crew && (
-              <Link href={`/crew/${crew.slug}`} className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/50 bg-neon-cyan/10 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] text-neon-cyan uppercase hover:bg-neon-cyan/20">
-                {t(L, "build_crew")} · {crew.name}
+            {b.owner && (
+              <Link href={`/build/${b.slug}#owner`} className="label-tech hover:text-foreground">
+                {t(L, "build_owner")} @{b.owner.username}
               </Link>
             )}
+            {builtBy && (
+              <Link href={`/org/${builtBy.slug}`} className="label-tech hover:text-foreground">
+                {b.owner ? "· " : ""}
+                {t(L, "build_built_by")} {builtBy.name}
+              </Link>
+            )}
+            {b.location_text && <span className="label-tech">· {b.location_text}</span>}
+            {crewChips.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/crew/${c.slug}`}
+                className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/50 bg-neon-cyan/10 px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] text-neon-cyan uppercase hover:bg-neon-cyan/20"
+              >
+                {t(L, "build_crew")} · {c.name}
+              </Link>
+            ))}
           </div>
 
           {b.vehicle_socials.length > 0 && (
@@ -145,8 +161,11 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
           <ModificationsList slug={b.slug} modifications={b.modifications} hasAffiliateLinks={b.has_affiliate_links} locale={L} />
         </section>
 
+        {/* BUILT BY / CONTRIBUTORS */}
+        <ContributorsSection contributors={b.contributors} locale={L} />
+
         {/* OWNER */}
-        {b.show_owner_section && (
+        {b.show_owner_section && b.owner && (
           <section id="owner" className="mt-14 scroll-mt-20">
             <OwnerSection slug={b.slug} owner={b.owner} extraSocials={extraOwnerSocials} pro={ownerPro} />
           </section>

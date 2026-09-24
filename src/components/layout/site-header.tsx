@@ -14,13 +14,14 @@ export async function SiteHeader() {
     { href: "/crews", label: t(locale, "nav_crews") },
     { href: "/build/ghost-2022-toyota-gr-supra", label: "Example" },
     { href: "/#how-it-works", label: "How it works" },
+    { href: "/business", label: "For shops" },
   ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-background pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-16 max-w-[1720px] items-center justify-between px-4 sm:px-6 lg:px-10 2xl:px-16">
         <Logo />
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-4 md:flex xl:gap-7" aria-label="Primary">
           {NAV.map((item) => (
             <Link
               key={item.href}

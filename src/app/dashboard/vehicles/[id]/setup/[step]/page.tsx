@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { PLAN_LIMITS, getUserPlan } from "@/lib/db/plan";
-import { getOwnedVehicle, getVehicleQr, listModifications, listPhotos, listShops, listSocialLinks } from "@/lib/db/vehicles";
+import { PLAN_LIMITS, getVehiclePlan } from "@/lib/db/plan";
+import { getManagedVehicle, getVehicleQr, listModifications, listPhotos, listOrganizations, listSocialLinks } from "@/lib/db/vehicles";
 import { siteUrl } from "@/lib/env";
 import { qrSvg, scanUrl } from "@/lib/qr/generate";
 import { requireProfile } from "@/lib/supabase/server";
@@ -30,7 +30,7 @@ export default async function SetupStepPage({ params }: PageProps<"/dashboard/ve
   if (idx <= 0) notFound();
 
   const { client, user } = await requireProfile();
-  const vehicle = await getOwnedVehicle(client, id, user.id);
+  const { vehicle, organization } = await getManagedVehicle(client, id, user.id);
   const base = `/dashboard/vehicles/${vehicle.id}`;
   const next = WIZARD_STEPS[idx + 1];
   const nextHref = next ? `${base}/setup/${next.id}` : `${base}/buildtag`;
@@ -38,7 +38,7 @@ export default async function SetupStepPage({ params }: PageProps<"/dashboard/ve
 
   let body: React.ReactNode = null;
   if (stepId === "photos") {
-    const [photos, plan] = await Promise.all([listPhotos(client, vehicle.id), getUserPlan(client, user.id)]);
+    const [photos, plan] = await Promise.all([listPhotos(client, vehicle.id), getVehiclePlan(client, vehicle)]);
     body = <PhotoManager vehicle={vehicle} photos={photos} limit={PLAN_LIMITS[plan].photos} />;
   } else if (stepId === "performance") {
     body = <PerformanceForm vehicle={vehicle} compact />;
@@ -46,8 +46,8 @@ export default async function SetupStepPage({ params }: PageProps<"/dashboard/ve
     const links = await listSocialLinks(client, "vehicle", vehicle.id);
     body = <SocialsManager ownerType="vehicle" ownerId={vehicle.id} links={links} title="Vehicle socials" description="Instagram, TikTok, YouTube for this car." />;
   } else if (stepId === "modifications") {
-    const [mods, shops] = await Promise.all([listModifications(client, vehicle.id), listShops(client)]);
-    body = <ModificationsManager vehicleId={vehicle.id} modifications={mods} shops={shops} />;
+    const [mods, shops] = await Promise.all([listModifications(client, vehicle.id), listOrganizations(client)]);
+    body = <ModificationsManager vehicleId={vehicle.id} modifications={mods} shops={shops} actingOrg={organization} />;
   } else if (stepId === "buildtag") {
     const qr = await getVehicleQr(client, vehicle.id);
     if (!qr) {

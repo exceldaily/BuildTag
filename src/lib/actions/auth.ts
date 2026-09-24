@@ -22,7 +22,8 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
   }
   const client = await createServerSupabaseClient();
   const wantsPro = form.get("plan") === "pro";
-  const landing = wantsPro ? "/dashboard/profile?plan=pro" : "/dashboard?welcome=1";
+  // A claim link (or other deep link) that sent the visitor here wins.
+  const landing = form.get("next") ? safeNext(form.get("next")) : wantsPro ? "/dashboard/profile?plan=pro" : "/dashboard?welcome=1";
 
   const { data: available } = await client.rpc("username_available", { p_username: parsed.data.username });
   if (available === false) {

@@ -12,22 +12,25 @@ export const metadata: Metadata = { title: "Create your build", robots: { index:
 export default async function SignupPage({ searchParams }: PageProps<"/signup">) {
   const sp = await searchParams;
   const plan = sp.plan === "pro" ? "pro" : undefined;
+  const nextRaw = typeof sp.next === "string" ? sp.next : "";
+  const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : undefined;
+  const claiming = next?.startsWith("/claim") ?? false;
   const [locale, h] = await Promise.all([getLocale(), headers()]);
   const region = regionFromLocaleTag(h.get("accept-language")?.split(",")[0]);
   return (
     <AuthShell
-      title="Create your build"
-      subtitle={plan === "pro" ? "Create your account first. Pro checkout ($5 a month or $50 a year) is the next step." : "Free to start. One vehicle, a permanent BuildTag, and a print-ready decal."}
+      title={claiming ? "Claim your build" : "Create your build"}
+      subtitle={claiming ? "Create your free account and the build your shop set up moves into your garage." : plan === "pro" ? "Create your account first. Pro checkout ($5 a month or $50 a year) is the next step." : "Free to start. One vehicle, a permanent BuildTag, and a print-ready decal."}
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="text-foreground underline">
+          <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="text-foreground underline">
             Sign in
           </Link>
         </>
       }
     >
-      <SignupForm plan={plan} defaultLocale={locale} defaultRegion={region} />
+      <SignupForm plan={plan} next={next} defaultLocale={locale} defaultRegion={region} />
     </AuthShell>
   );
 }

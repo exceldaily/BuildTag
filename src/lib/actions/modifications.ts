@@ -51,6 +51,26 @@ export async function updateModificationAction(id: string, form: FormData): Prom
   return { ok: true, data: data as ModificationRow };
 }
 
+/**
+ * Owners can hide any part from their public page, including parts a business
+ * recorded (those cannot be edited or deleted by the owner, see 0014).
+ */
+export async function setModificationHiddenAction(id: string, hidden: boolean): Promise<ActionResult<ModificationRow>> {
+  const parsed = z.object({ id: z.string().uuid(), hidden: z.boolean() }).safeParse({ id, hidden });
+  if (!parsed.success) return { ok: false, error: "Invalid request." };
+  const { client } = await requireProfile();
+  const { data, error } = await client
+    .from("modifications")
+    .update({ is_hidden: parsed.data.hidden })
+    .eq("id", parsed.data.id)
+    .select("*")
+    .maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "Modification not found." };
+  await revalidateForVehicle((data as ModificationRow).vehicle_id);
+  return { ok: true, data: data as ModificationRow };
+}
+
 export async function deleteModificationAction(id: string): Promise<ActionResult> {
   const { client } = await requireProfile();
   const { data, error } = await client.from("modifications").delete().eq("id", id).select("vehicle_id").maybeSingle();

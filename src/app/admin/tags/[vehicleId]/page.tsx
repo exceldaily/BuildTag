@@ -24,12 +24,23 @@ export default async function AdminTagDesignerPage({ params }: PageProps<"/admin
   const { data: vehicleData } = await client.from("vehicles").select("*").eq("id", vehicleId).maybeSingle();
   if (!vehicleData) notFound();
   const vehicle = vehicleData as VehicleRow;
+  const ownerId = vehicle.owner_id;
+  if (!ownerId) {
+    return (
+      <div className="panel p-6">
+        <h2 className="text-2xl">Unclaimed business build</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          This vehicle belongs to a business until its customer claims it. Its BuildTag is ordered from that business&apos;s dashboard.
+        </p>
+      </div>
+    );
+  }
 
   const [ownerRes, qr, vehicleSocials, ownerSocials, specsRes, mods] = await Promise.all([
-    client.from("profiles").select("*").eq("id", vehicle.owner_id).maybeSingle(),
+    client.from("profiles").select("*").eq("id", ownerId).maybeSingle(),
     getVehicleQr(client, vehicle.id),
     listSocialLinks(client, "vehicle", vehicle.id),
-    listSocialLinks(client, "profile", vehicle.owner_id),
+    listSocialLinks(client, "profile", ownerId),
     client.from("print_specifications").select("*").order("sort_order"),
     listModifications(client, vehicle.id),
   ]);

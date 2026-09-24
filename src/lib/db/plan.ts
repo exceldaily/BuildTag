@@ -23,6 +23,11 @@ export const PLAN_FEATURES: Record<Plan, string[]> = {
 /** Pro pricing in USD. Keep in sync with the Stripe prices behind STRIPE_PRICE_PRO_*. */
 export const PRO_PRICING = { monthly: 5, yearly: 50 } as const;
 
+/** Limits that apply to a vehicle: its owner's plan, or pro while a business manages it unclaimed (0014). */
+export async function getVehiclePlan(client: BuildTagClient, vehicle: { owner_id: string | null }): Promise<Plan> {
+  return vehicle.owner_id ? getUserPlan(client, vehicle.owner_id) : "pro";
+}
+
 export async function getUserPlan(client: BuildTagClient, userId: string): Promise<Plan> {
   const { data } = await client.rpc("user_plan", { p_user_id: userId });
   return (data as Plan | null) ?? "free";

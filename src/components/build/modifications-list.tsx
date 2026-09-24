@@ -1,9 +1,39 @@
 import { ArrowUpRight } from "lucide-react";
 
-import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, type ModCategory, type PublicModification } from "@/lib/types";
-import { t } from "@/lib/i18n/dictionary";
+import { MOD_CATEGORIES, MOD_CATEGORY_LABEL, type ModCategory, type ModSourceType, type PublicModification } from "@/lib/types";
+import { t, type DictKey } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils";
+
+const BADGE_KEY: Record<ModSourceType, DictKey> = {
+  owner: "badge_owner",
+  shop: "badge_shop",
+  dealer: "badge_dealer",
+  manufacturer: "badge_manufacturer",
+  import: "badge_import",
+};
+
+/** Who recorded the part. Business records link to the business; this never claims certification. */
+function SourceBadge({ mod, locale }: { mod: PublicModification; locale: Locale }) {
+  const label = t(locale, BADGE_KEY[mod.source_type]);
+  const business = mod.source_type !== "owner" && mod.source_type !== "import";
+  const cls = business
+    ? "border-signal/50 bg-signal/10 text-signal"
+    : "border-line text-muted-foreground";
+  const body = (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.14em] uppercase ${cls}`}>
+      {label}
+      {business && mod.recorded_by && mod.shop?.slug !== mod.recorded_by.slug ? ` · ${mod.recorded_by.name}` : ""}
+    </span>
+  );
+  return business && mod.recorded_by ? (
+    <a href={`/org/${mod.recorded_by.slug}`} className="hover:opacity-80">
+      {body}
+    </a>
+  ) : (
+    body
+  );
+}
 
 /**
  * Categorized modifications. Native <details> keeps sections collapsible on
@@ -57,6 +87,9 @@ export function ModificationsList({ slug, modifications, hasAffiliateLinks = fal
                         .join(" · ")}
                     </p>
                     {m.description && <p className="mt-1 text-sm text-foreground/75">{m.description}</p>}
+                    <div className="mt-1.5">
+                      <SourceBadge mod={m} locale={locale} />
+                    </div>
                   </div>
                   {m.has_link && (
                     <a

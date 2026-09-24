@@ -102,8 +102,9 @@ export async function setProfilePhotoAction(id: string, url: string | null): Pro
 
 export async function deleteVehicleAction(id: string): Promise<ActionResult> {
   const { client, user } = await requireProfile();
-  const { data: vehicle } = await client.from("vehicles").select("slug").eq("id", id).eq("owner_id", user.id).maybeSingle();
-  if (!vehicle) return { ok: false, error: "Vehicle not found." };
+  // Owner, or a manager of the business that manages it while unclaimed (RLS decides the latter).
+  const { data: vehicle } = await client.from("vehicles").select("slug, owner_id").eq("id", id).maybeSingle();
+  if (!vehicle || (vehicle.owner_id !== null && vehicle.owner_id !== user.id)) return { ok: false, error: "Vehicle not found." };
 
   // Storage objects first: the storage policies check vehicle ownership, so
   // they must be removed while the vehicle row still exists.
@@ -117,9 +118,10 @@ export async function deleteVehicleAction(id: string): Promise<ActionResult> {
     if (paths.length) await client.storage.from("buildtag-photos").remove(paths);
   }
 
-  const { error } = await client.from("vehicles").delete().eq("id", id);
+  const { data: deleted, error } = await client.from("vehicles").delete().eq("id", id).select("id");
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/dashboard");
+  if (!deleted?.length) return { ok: false, error: "Only the owner or a business manager can delete this build." };
+  revalidatePath("/dashboard", "layout");
   revalidatePath(`/build/${vehicle.slug}`);
-  redirect("/dashboard");
+  redirect(vehicle.owner_id ? "/dashboard" : "/dashboard/business/builds");
 }

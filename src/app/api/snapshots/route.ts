@@ -11,6 +11,7 @@ import { getOptionalUser } from "@/lib/supabase/server";
 import { normalizeConfig } from "@/lib/tag/templates";
 import { toInches } from "@/lib/tag/sizes";
 import type { Json, ProductionSnapshotRow } from "@/lib/types";
+import { getManageContext } from "@/lib/db/vehicles";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -91,9 +92,13 @@ export async function POST(request: NextRequest) {
     allowed = Boolean(isAdmin);
     if (!allowed) return NextResponse.json({ ok: false, error: "Admins only." }, { status: 403 });
   }
-  const vehicleQuery = client.from("vehicles").select("id").eq("id", meta.vehicleId);
-  const { data: vehicle } = await (allowed ? vehicleQuery : vehicleQuery.eq("owner_id", user.id)).maybeSingle();
+  const { data: vehicle } = await client.from("vehicles").select("id, owner_id").eq("id", meta.vehicleId).maybeSingle();
   if (!vehicle) return NextResponse.json({ ok: false, error: "Vehicle not found." }, { status: 404 });
+  // Owner, or staff of the business managing it while unclaimed (the snapshot trigger records that business).
+  if (!allowed && vehicle.owner_id !== user.id) {
+    const managing = vehicle.owner_id === null && (await getManageContext(client, vehicle.id)).organization !== null;
+    if (!managing) return NextResponse.json({ ok: false, error: "Vehicle not found." }, { status: 404 });
+  }
   const { data: qr } = await client.from("qr_codes").select("id, code").eq("vehicle_id", meta.vehicleId).order("created_at").limit(1).maybeSingle();
   if (!qr) return NextResponse.json({ ok: false, error: "This vehicle has no permanent code." }, { status: 400 });
   const { data: spec } = await client.from("print_specifications").select("*").eq("id", meta.printSpecificationId).maybeSingle();

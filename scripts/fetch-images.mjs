@@ -41,12 +41,32 @@ export const DEMO_IMAGES = [
   { name: "rosso-3", id: "photo-1615812595024-43ac7a9c0586", page: "https://unsplash.com/photos/8m_S9Pi6a1I", alt: "Close-up of the Panigale V2 tail and rear wheel" },
   // Demo bagger "DUSK" (Street Glide)
   { name: "dusk-1", id: "photo-1597171731775-4552eff4c815", page: "https://unsplash.com/photos/h_fK5Nxsth8", alt: "Black and gray CVO Street Glide bagger parked on a road at sunset" },
+  // Fictional BuildTags Business demo "Blackline Performance" (stand-in photo, plate blurred)
+  {
+    name: "blackline-1",
+    id: "photo-1519714462216-1eb4089fd8d3",
+    page: "https://unsplash.com/photos/3F40IzoHjG0",
+    alt: "Black touring bagger parked on a pier at dusk",
+    blur: [{ left: 0.555, top: 0.7, width: 0.095, height: 0.065 }],
+  },
 ];
 
 async function fetchBuffer(id, width) {
   const res = await fetch(`${UNSPLASH}/${id}?w=${width}&q=82&fm=jpg&fit=max`);
   if (!res.ok) throw new Error(`${id}: ${res.status}`);
   return Buffer.from(await res.arrayBuffer());
+}
+
+/** Pixelate + blur boxes (fractions of the image) so plates never ship readable. */
+async function blurRegions(buf, boxes) {
+  const { width, height } = await sharp(buf).metadata();
+  const overlays = [];
+  for (const b of boxes) {
+    const region = { left: Math.round(b.left * width), top: Math.round(b.top * height), width: Math.round(b.width * width), height: Math.round(b.height * height) };
+    const input = await sharp(buf).extract(region).resize(8, 4).resize(region.width, region.height, { kernel: "nearest" }).blur(6).toBuffer();
+    overlays.push({ input, left: region.left, top: region.top });
+  }
+  return sharp(buf).composite(overlays).jpeg({ quality: 92 }).toBuffer();
 }
 
 const only = process.argv[2] ?? "";
@@ -62,7 +82,8 @@ for (const img of DEMO_IMAGES) {
   if (only && !img.name.startsWith(only)) continue;
   const dir = `public/demo/${img.name}`;
   mkdirSync(dir, { recursive: true });
-  const buf = await fetchBuffer(img.id, 2000);
+  let buf = await fetchBuffer(img.id, 2000);
+  if (img.blur) buf = await blurRegions(buf, img.blur);
   await sharp(buf).resize({ width: 2000, withoutEnlargement: true }).webp({ quality: 82 }).toFile(`${dir}/full.webp`);
   await sharp(buf).resize({ width: 640 }).webp({ quality: 76 }).toFile(`${dir}/thumb.webp`);
   console.log("demo", img.name);

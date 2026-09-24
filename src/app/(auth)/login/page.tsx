@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       footer={
         <>
           New here?{" "}
-          <Link href="/signup" className="text-foreground underline">
+          <Link href={next === "/dashboard" ? "/signup" : `/signup?next=${encodeURIComponent(next)}`} className="text-foreground underline">
             Create your build
           </Link>
         </>

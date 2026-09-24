@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The partnership deck is its own package (Playwright/Node tooling).
+    "presentation/**",
   ]),
 ]);
 

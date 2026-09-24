@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 import { publicEnv } from "@/lib/env";
-import type { Crew, CrewLeaderboardRow, Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult } from "@/lib/types";
+import type { Crew, CrewLeaderboardRow, Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult, PublicOrganization } from "@/lib/types";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -125,6 +125,13 @@ export async function getCrew(slug: string): Promise<Crew | null> {
   const { data, error } = await anonClient().rpc("get_crew", { p_slug: slug.toLowerCase() });
   if (error || !data) return null;
   return data as unknown as Crew;
+}
+
+/** Public business page (active businesses only). Never includes customers or claim state. */
+export async function getPublicOrganization(slug: string): Promise<PublicOrganization | null> {
+  const { data, error } = await anonClient().rpc("get_public_organization", { p_slug: slug.toLowerCase() });
+  if (error || !data) return null;
+  return data as unknown as PublicOrganization;
 }
 
 /** Crew badge for a build page, if the owner rides with one. */

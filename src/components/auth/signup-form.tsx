@@ -6,13 +6,14 @@ import { signUpAction } from "@/lib/actions/auth";
 import { LOCALES, LOCALE_LABEL, REGIONS, type Locale, type RegionCode } from "@/lib/i18n";
 import type { ActionResult } from "@/lib/validation/common";
 
-export function SignupForm({ plan, defaultLocale = "en", defaultRegion = "US" }: { plan?: "pro"; defaultLocale?: Locale; defaultRegion?: RegionCode }) {
+export function SignupForm({ plan, next, defaultLocale = "en", defaultRegion = "US" }: { plan?: "pro"; next?: string; defaultLocale?: Locale; defaultRegion?: RegionCode }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(signUpAction, null);
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
   return (
     <form action={action} className="space-y-4" noValidate>
       {plan && <input type="hidden" name="plan" value={plan} />}
+      {next && <input type="hidden" name="next" value={next} />}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="display_name" className="field-label">
