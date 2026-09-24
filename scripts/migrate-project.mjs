@@ -25,6 +25,11 @@
  * are copied exactly instead of being recomputed.
  */
 import pg from "pg";
+import { existsSync } from "node:fs";
+
+// Secrets come from .env.migrate in the repo root (git-ignored), or from the shell.
+const ENV_FILE = new URL("../.env.migrate", import.meta.url);
+if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
 import { createClient } from "@supabase/supabase-js";
 
 const APPLY = process.argv.includes("--apply");
