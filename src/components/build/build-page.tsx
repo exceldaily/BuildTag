@@ -69,12 +69,6 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
             {!b.nickname && <h1 className="sr-only">{title}</h1>}
           </div>
 
-          <dl className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-line bg-line">
-            <Stat value={b.horsepower ? formatCount(b.horsepower) : "—"} label={b.horsepower ? b.horsepower_type : "Power"} />
-            <Stat value={b.torque ? formatCount(b.torque) : "—"} label={torque ? torque.split(" ").slice(1).join(" ") : "Torque"} />
-            <Stat value={formatCount(b.mod_count)} label="Mods" />
-          </dl>
-
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {b.owner && (
               <Link href={`/build/${b.slug}#owner`} className="label-tech hover:text-foreground">
@@ -187,9 +181,6 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
             <ShareButton slug={b.slug} title={`${power ? `${power} ` : ""}${title}`} />
             <ReportDialog slug={b.slug} />
           </div>
-          <p className="text-xs text-muted-foreground">
-            {formatCount(b.scan_count)} scans · {formatCount(b.like_count)} likes
-          </p>
           <Link href="/signup" className="mt-2 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <LogoMark className="size-5" />
             Make your own BuildTag
@@ -203,15 +194,6 @@ export function BuildPage({ build: b, liked, viaTag, ownerPro = false, crew = nu
         </footer>
       </div>
     </main>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="bg-background px-3 py-4 text-center sm:py-5">
-      <dd className="stat-number">{value}</dd>
-      <dt className="label-tech mt-1">{label}</dt>
-    </div>
   );
 }
 
