@@ -1040,6 +1040,32 @@ export interface AdminOrganizationRow {
   build_count: number;
 }
 
+export interface AdminOrganizationDetail extends Omit<AdminOrganizationRow, "owner_username" | "member_count" | "build_count"> {
+  members: { user_id: string; username: string | null; display_name: string | null; email: string; role: OrgMemberRole; created_at: string }[];
+  invites: { id: string; email: string; role: OrgMemberRole; created_at: string }[];
+}
+
+/** org_analytics (0016): aggregate counts for a business's builds and parts. */
+export interface OrgAnalytics {
+  days: number;
+  vehicles: number;
+  vehicles_scanned: number;
+  scans_all_time: number;
+  scans: number;
+  scans_7d: number;
+  scans_today: number;
+  parts: number;
+  parts_linked: number;
+  part_clicks_all_time: number;
+  part_clicks: number;
+  scans_by_day: { day: string; count: number }[];
+  top_parts: { brand: string; part_name: string; category: ModCategory; installs: number; vehicles: number; clicks: number }[];
+  categories: { category: ModCategory; installs: number; clicks: number }[];
+  top_vehicles: (OrgVehicleRef & { nickname: string; is_public: boolean; ownership_status: OwnershipStatus; scans: number; part_clicks: number })[];
+  devices: Partial<Record<DeviceType, number>>;
+  countries: { country: string; count: number }[];
+}
+
 export interface DashboardStats {
   vehicles: number;
   scans: number;
@@ -1431,6 +1457,23 @@ export interface Database {
         Args: { p_org: string; p_status?: OrganizationStatus | null; p_verified?: VerificationStatus | null; p_type?: OrganizationType | null };
         Returns: undefined;
       };
+      admin_create_organization: {
+        Args: {
+          p_name: string;
+          p_type?: OrganizationType;
+          p_owner?: string;
+          p_status?: OrganizationStatus;
+          p_verified?: VerificationStatus;
+          p_details?: Json;
+          p_add_self?: OrgMemberRole | null;
+        };
+        Returns: Json;
+      };
+      admin_add_org_member: { Args: { p_org: string; p_identifier: string; p_role?: OrgMemberRole }; Returns: string };
+      admin_set_org_member: { Args: { p_org: string; p_user_id: string; p_role?: OrgMemberRole | null; p_remove?: boolean }; Returns: undefined };
+      admin_revoke_org_invite: { Args: { p_invite_id: string }; Returns: undefined };
+      admin_organization_detail: { Args: { p_org: string }; Returns: Json };
+      org_analytics: { Args: { p_org: string; p_days?: number }; Returns: Json };
       record_legal_acceptance: {
         Args: {
           p_document_type: LegalDocumentType;

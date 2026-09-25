@@ -14,6 +14,7 @@ const RANK: Record<OrgMemberRole, number> = { staff: 1, manager: 2, admin: 3, ow
 const SECTIONS: { href: string; label: string; min: OrgMemberRole; exact?: boolean }[] = [
   { href: "/dashboard/business", label: "Overview", min: "staff", exact: true },
   { href: "/dashboard/business/builds", label: "Builds", min: "staff" },
+  { href: "/dashboard/business/analytics", label: "Analytics", min: "staff" },
   { href: "/dashboard/business/crew", label: "Crew", min: "staff" },
   { href: "/dashboard/business/orders", label: "Orders", min: "manager" },
   { href: "/dashboard/business/team", label: "Team", min: "staff" },
