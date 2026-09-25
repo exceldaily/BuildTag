@@ -1,6 +1,6 @@
 -- =============================================================================
--- Tests for 0016 (admin-provisioned businesses, invites, business analytics).
--- Run INSIDE a transaction that is rolled back, after 0016 has been applied:
+-- Tests for 0017 (admin-provisioned businesses, invites, business analytics).
+-- Run INSIDE a transaction that is rolled back, after 0017 has been applied:
 --
 --   begin; <this file>; rollback;
 --

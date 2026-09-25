@@ -1045,7 +1045,7 @@ export interface AdminOrganizationDetail extends Omit<AdminOrganizationRow, "own
   invites: { id: string; email: string; role: OrgMemberRole; created_at: string }[];
 }
 
-/** org_analytics (0016): aggregate counts for a business's builds and parts. */
+/** org_analytics (0017): aggregate counts for a business's builds and parts. */
 export interface OrgAnalytics {
   days: number;
   vehicles: number;

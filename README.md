@@ -217,7 +217,7 @@ select id from auth.users where email = 'you@example.com';
 
 Set `ADMIN_EMAILS` to the same addresses so the Admin link appears in the dashboard nav. Admin abilities: search users and vehicles, view/triage reports, disable/restore builds, disable/restore QR codes. Every admin function re-checks `buildtag.is_admin()` server-side.
 
-### Business accounts (0016)
+### Business accounts (0017)
 
 `/admin/organizations` → **Create business account** sets up a business directly, already Active (no registration or approval step). The owner can be:
 
@@ -226,7 +226,7 @@ Set `ADMIN_EMAILS` to the same addresses so the Admin link appears in the dashbo
 
 For testing, choose **Add me to it** (or open the business and click **Add me as owner**), then **Open business dashboard as me**. Each business's admin page also manages members and invites and shows its analytics.
 
-**Business analytics** (`/dashboard/business/analytics`, `org_analytics()`) covers the builds a business is linked to (creator, builder, dealer, installer, ...) or recorded parts on, and the parts it recorded or is credited with installing: scans over time, part clicks, top parts, most scanned builds, categories, devices, countries. Aggregate counts only; parts an owner hides are excluded. Tests: `supabase/tests/0016_admin_business_analytics.test.sql` (run inside `begin; ... rollback;`).
+**Business analytics** (`/dashboard/business/analytics`, `org_analytics()`) covers the builds a business is linked to (creator, builder, dealer, installer, ...) or recorded parts on, and the parts it recorded or is credited with installing: scans over time, part clicks, top parts, most scanned builds, categories, devices, countries. Aggregate counts only; parts an owner hides are excluded. Tests: `supabase/tests/0017_admin_business_analytics.test.sql` (run inside `begin; ... rollback;`).
 
 ## Vercel deployment
 
