@@ -549,7 +549,8 @@ export interface ProductionSnapshotRow {
 export interface OrderRow {
   id: string;
   order_number: string;
-  user_id: string;
+  /** Null once the customer deleted their account (paid orders are kept as records, 0018). */
+  user_id: string | null;
   status: OrderStatus;
   payment_status: PaymentStatus;
   fulfillment_status: FulfillmentStatus;
@@ -1066,6 +1067,17 @@ export interface OrgAnalytics {
   countries: { country: string; count: number }[];
 }
 
+/** account_deletion_check (0018): what deleting the caller's account would do. */
+export interface AccountDeletionCheck {
+  sole_owner_of: { id: string; name: string }[];
+  orders_in_progress: number;
+  active_subscription: boolean;
+  delete_vehicle_ids: string[];
+  deleted_vehicles: { id: string; year: number | null; make: string; model: string; nickname: string }[];
+  returned_vehicles: { id: string; year: number | null; make: string; model: string; nickname: string; organization: string }[];
+  kept_orders: number;
+}
+
 export interface DashboardStats {
   vehicles: number;
   scans: number;
@@ -1474,6 +1486,8 @@ export interface Database {
       admin_revoke_org_invite: { Args: { p_invite_id: string }; Returns: undefined };
       admin_organization_detail: { Args: { p_org: string }; Returns: Json };
       org_analytics: { Args: { p_org: string; p_days?: number }; Returns: Json };
+      account_deletion_check: { Args: Record<never, never>; Returns: Json };
+      delete_my_account: { Args: { p_confirm: string }; Returns: undefined };
       record_legal_acceptance: {
         Args: {
           p_document_type: LegalDocumentType;

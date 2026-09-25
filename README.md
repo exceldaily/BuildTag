@@ -228,6 +228,16 @@ For testing, choose **Add me to it** (or open the business and click **Add me as
 
 **Business analytics** (`/dashboard/business/analytics`, `org_analytics()`) covers the builds a business is linked to (creator, builder, dealer, installer, ...) or recorded parts on, and the parts it recorded or is credited with installing: scans over time, part clicks, top parts, most scanned builds, categories, devices, countries. Aggregate counts only; parts an owner hides are excluded. Tests: `supabase/tests/0017_admin_business_analytics.test.sql` (run inside `begin; ... rollback;`).
 
+### Account deletion (0018)
+
+Users delete their own account under **Profile → Delete account** (password + typing `DELETE`). `account_deletion_check()` powers the preview and blockers; `delete_my_account()` does the deletion in one transaction.
+
+- Blocked while the user is the only owner of a business, has an order in progress, or has an active Stripe subscription.
+- Builds a business created and the user claimed go back to that business, unclaimed (the decal keeps working). Other vehicles are deleted with their photos, parts, QR and analytics.
+- Paid orders are kept as records with `user_id` null; drafts and unpaid orders are deleted.
+- The server action removes storage files (vehicle photos, avatar, Designer assets) first, because the storage policies need the rows to exist. Production artwork files stay in the private production bucket.
+- Tests: `supabase/tests/0018_account_deletion.test.sql`.
+
 ## Vercel deployment
 
 1. Import the repository in Vercel (framework preset: Next.js).

@@ -12,6 +12,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/dashboard";
   const checkEmail = sp.check_email === "1";
   const authError = sp.error === "auth";
+  const deleted = sp.deleted === "1";
 
   return (
     <AuthShell
@@ -26,6 +27,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </>
       }
     >
+      {deleted && (
+        <p className="mb-4 rounded-md border border-signal/40 bg-signal/10 px-3 py-2 text-sm" role="status">
+          Your account has been deleted.
+        </p>
+      )}
       {checkEmail && (
         <p className="mb-4 rounded-md border border-signal/40 bg-signal/10 px-3 py-2 text-sm">
           Check your inbox to confirm your email, then sign in.
