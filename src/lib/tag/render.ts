@@ -174,7 +174,7 @@ export function renderTagSvg(config: TagConfig, data: TagData, options: RenderOp
   if (layout.logoBox) {
     const b = layout.logoBox;
     const s = b.w / BRAND_VIEWBOX.width;
-    parts.push(`<g transform="translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) scale(${s.toFixed(5)})"><path d="${BRAND_PATH}" fill="${colors.accent}"/></g>`);
+    parts.push(`<g transform="translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) scale(${s.toFixed(5)})"><path d="${BRAND_PATH}" fill="${colors.accent}" fill-rule="evenodd"/></g>`);
   }
 
   for (const line of layout.lines) parts.push(textElement(line, idp, options.textToPath));

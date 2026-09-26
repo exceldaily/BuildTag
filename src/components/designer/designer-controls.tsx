@@ -227,7 +227,7 @@ function QrSection({ config, shopLogos, onChange }: { config: TagConfig; shopLog
       <Chips
         options={[
           { id: "none", name: "None" },
-          { id: "buildtag", name: "BuildTag" },
+          { id: "buildtag", name: "Btag" },
           { id: "upload", name: "Your logo" },
           ...(shopLogos.length ? [{ id: "shop", name: "Shop logo" }] : []),
         ]}

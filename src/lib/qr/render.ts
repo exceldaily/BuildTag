@@ -190,10 +190,13 @@ export function renderQr(matrix: QrMatrix, o: RenderQrOptions): RenderQrResult {
 
   if (logoBox && o.logo) {
     if (o.logo.kind === "buildtag") {
-      // Wordmark is wide; fit it inside the square logo box, centered.
-      const s = logoBox.w / BRAND_VIEWBOX.width;
+      // Btag mark: fit inside the square logo box, centered on both axes.
+      const s = Math.min(logoBox.w / BRAND_VIEWBOX.width, logoBox.h / BRAND_VIEWBOX.height);
+      const drawnW = BRAND_VIEWBOX.width * s;
       const drawnH = BRAND_VIEWBOX.height * s;
-      parts.push(`<g transform="translate(${fmt(logoBox.x)} ${fmt(logoBox.y + (logoBox.h - drawnH) / 2)}) scale(${fmt(s)})"><path d="${BRAND_PATH}" fill="${o.dark}"/></g>`);
+      parts.push(
+        `<g transform="translate(${fmt(logoBox.x + (logoBox.w - drawnW) / 2)} ${fmt(logoBox.y + (logoBox.h - drawnH) / 2)}) scale(${fmt(s)})"><path d="${BRAND_PATH}" fill="${o.dark}" fill-rule="evenodd"/></g>`,
+      );
     } else if (o.logo.url) {
       parts.push(`<image href="${escapeAttr(o.logo.url)}" x="${fmt(logoBox.x)}" y="${fmt(logoBox.y)}" width="${fmt(logoBox.w)}" height="${fmt(logoBox.h)}" preserveAspectRatio="xMidYMid meet"/>`);
     }
