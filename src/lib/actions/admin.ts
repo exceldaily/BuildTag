@@ -115,3 +115,51 @@ export async function adminSetAdminAction(userId: string, makeAdmin: boolean): P
   revalidatePath("/admin/members");
   return { ok: true, data: undefined };
 }
+
+const banReason = z.string().trim().max(500);
+
+/** Ban an account: blocks sign-in, ends sessions, optionally hides its builds and bans its email (0020). */
+export async function adminBanUserAction(userId: string, input: { reason: string; hideBuilds: boolean; banEmail: boolean }): Promise<ActionResult> {
+  const parsed = z.object({ userId: z.string().uuid(), reason: banReason, hideBuilds: z.boolean(), banEmail: z.boolean() }).safeParse({ userId, ...input });
+  if (!parsed.success) return { ok: false, error: "Invalid ban." };
+  const { client } = await requireAdmin();
+  const { error } = await client.rpc("admin_ban_user", {
+    p_user_id: userId,
+    p_reason: parsed.data.reason,
+    p_hide_builds: parsed.data.hideBuilds,
+    p_ban_email: parsed.data.banEmail,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/members");
+  revalidatePath("/admin/bans");
+  return { ok: true, data: undefined };
+}
+
+export async function adminUnbanUserAction(userId: string): Promise<ActionResult> {
+  if (!z.string().uuid().safeParse(userId).success) return { ok: false, error: "Invalid user." };
+  const { client } = await requireAdmin();
+  const { error } = await client.rpc("admin_unban_user", { p_user_id: userId });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/members");
+  revalidatePath("/admin/bans");
+  return { ok: true, data: undefined };
+}
+
+export async function adminBanEmailAction(email: string, reason: string): Promise<ActionResult> {
+  const parsed = z.object({ email: z.string().trim().toLowerCase().email("Enter a valid email.").max(200), reason: banReason }).safeParse({ email, reason });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid email." };
+  const { client } = await requireAdmin();
+  const { error } = await client.rpc("admin_ban_email", { p_email: parsed.data.email, p_reason: parsed.data.reason });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/bans");
+  return { ok: true, data: undefined };
+}
+
+export async function adminUnbanEmailAction(email: string): Promise<ActionResult> {
+  if (!z.string().max(200).safeParse(email).success) return { ok: false, error: "Invalid email." };
+  const { client } = await requireAdmin();
+  const { error } = await client.rpc("admin_unban_email", { p_email: email });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/bans");
+  return { ok: true, data: undefined };
+}

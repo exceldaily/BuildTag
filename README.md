@@ -217,6 +217,8 @@ select id from auth.users where email = 'you@example.com';
 
 After the first admin exists, add or remove admins from **Admin → Members** (Make admin / Remove admin, migration 0019). Nobody can remove their own admin role and there is always at least one admin.
 
+**Bans (0020):** Admin → Members → **Ban** signs the account out, blocks sign-in (`auth.users.banned_until`), hides its builds and bans its email; **Admin → Bans** lists bans, unbans (which restores exactly what the ban hid) and bans email addresses outright so they can't sign up. Admins can't be banned until their admin role is removed.
+
 The Admin link appears in the dashboard nav for anyone in `buildtag.admins`. `ADMIN_EMAILS` is only a fallback address for business-inquiry notification emails. Admin abilities: search users and vehicles, view/triage reports, disable/restore builds, disable/restore QR codes. Every admin function re-checks `buildtag.is_admin()` server-side.
 
 ### Business accounts (0017)

@@ -301,7 +301,7 @@ export const CTA_PRESETS: { id: CtaPreset; label: string }[] = [
   { id: "scan", label: "SCAN THE BUILD" },
   { id: "whats-done", label: "WHAT'S DONE TO IT?" },
   { id: "build-sheet", label: "BUILD SHEET" },
-  { id: "full-build", label: "FULL BUILD →" },
+  { id: "full-build", label: "SEE THE FULL BUILD" },
   { id: "see-mods", label: "SEE THE MODS" },
   { id: "see-whats-done", label: "SEE WHAT'S DONE" },
   { id: "view-build", label: "VIEW THE BUILD" },

@@ -6,6 +6,7 @@ import { FRAMES } from "./frames";
 import { HERO_MULTIPLIER, LAYOUTS, ROLE_SIZE, type Role } from "./layouts";
 import { SHAPES } from "./shapes";
 import { ctaText } from "./templates";
+import { lineInk, printable } from "./measure";
 import { toInches } from "./sizes";
 import type { TagConfig, TagData, TagLayout, TagSocial, TextLine } from "./types";
 
@@ -72,8 +73,27 @@ function collectLines(config: TagConfig, data: TagData): Map<Role, LineSpec> {
 export interface LayoutResult extends TagLayout {
   /** True when text forced the QR below its preferred size. */
   qrSqueezed: boolean;
+  /** Lines that had to shrink below the printable minimum to fit (see MIN_TEXT_CAP_MM). */
+  tinyText: { role: TextLine["role"]; text: string; capMm: number }[];
 }
 
+/** Smallest printed cap height that stays readable on vinyl. */
+export const MIN_TEXT_CAP_MM = 1.2;
+/** Extra clearance inside the print safe margin, in inches. */
+const SAFE_CLEARANCE_IN = 0.02;
+/** Shapes whose outline curves or angles in, so the plain safe-margin clamp is not enough. */
+const CURVED_SHAPES = new Set<string>(["circle", "hex", "gauge", "tire", "wide", "badge", "shield"]);
+/** Print safe margin from the cut line, in inches (mirrors DEFAULT_PRINT_GEOMETRY.safeMarginIn). */
+export const SAFE_MARGIN_IN = 0.125;
+
+/**
+ * Lays the decal out so that everything (text measured from the real font
+ * metrics, the QR block with its frame, the logo) sits inside the content
+ * rectangle, which itself never comes closer to the cut line than the print
+ * safe margin. When the content does not fit, text shrinks before anything
+ * leaves the safe area; text that ends up too small to read is reported in
+ * tinyText so the Designer can block ordering.
+ */
 export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
   const shape = SHAPES[config.shape] ?? SHAPES.rounded;
   const layout = LAYOUTS[config.layout] ?? LAYOUTS["text-below"];
@@ -83,13 +103,28 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
   const inches = toInches(config.size);
   const width = LAYOUT_WIDTH;
   const height = Math.round((width * inches.height) / inches.width);
-  const content = shape.contentRect(width, height);
+  const unitsPerInch = width / inches.width;
+  const m = (SAFE_MARGIN_IN + SAFE_CLEARANCE_IN) * unitsPerInch;
+  // Curved and angled outlines: take the content area of the safe-inset outline itself (the green guide in the
+  // Designer), so text corners never reach past an arc or chamfer. Straight-edged shapes only need the clamp below.
+  const shapeContent = CURVED_SHAPES.has(shape.id)
+    ? (() => {
+        const r = shape.contentRect(width - m * 2, height - m * 2);
+        return { x: r.x + m, y: r.y + m, w: r.w, h: r.h };
+      })()
+    : shape.contentRect(width, height);
+  const cx0 = Math.max(shapeContent.x, m);
+  const cy0 = Math.max(shapeContent.y, m);
+  const cx1 = Math.min(shapeContent.x + shapeContent.w, width - m);
+  const cy1 = Math.min(shapeContent.y + shapeContent.h, height - m);
+  const content = { x: cx0, y: cy0, w: Math.max(1, cx1 - cx0), h: Math.max(1, cy1 - cy0) };
 
   const matrix = createQrMatrix(data.scanUrl);
   const totalModules = matrix.size + QR_QUIET_ZONE_MODULES * 2;
 
   const specs = collectLines(config, data);
-  const upper = (t: string) => (font.uppercase ? t.toUpperCase() : t);
+  // Characters the font can't draw (emoji, symbols) would print as empty boxes: drop them.
+  const upper = (t: string) => printable(config.font, font.uppercase ? t.toUpperCase() : t);
   const textScale = config.advanced.textScale;
 
   // Distribute roles into groups per the layout definition.
@@ -105,133 +140,148 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
 
   const heroRole = layout.hero;
   const relOf = (s: LineSpec) => (heroRole && s.role === heroRole ? s.rel * HERO_MULTIPLIER : s.rel) * textScale;
+  const logoRatio = BRAND_VIEWBOX.height / BRAND_VIEWBOX.width;
 
-  const fitFont = (spec: LineSpec, maxWidth: number, columnWidth: number, scale: number): number => {
-    const text = upper(spec.text);
-    const iconPad = spec.icon ? 1.3 : 0;
-    const base = relOf(spec) * columnWidth * scale;
-    const perChar = font.factor + font.letterSpacing;
-    const fitted = maxWidth / Math.max(1, text.length * perChar + iconPad);
-    return Math.max(6, Math.min(base, fitted));
+  /** Geometry of one element at font size 1 (everything scales linearly). */
+  const unitInk = (spec: LineSpec, anchor: TextLine["anchor"]) =>
+    lineInk({ text: upper(spec.text), font: config.font, fontSize: 1, letterSpacing: font.letterSpacing, anchor, icon: spec.icon });
+
+  interface Item {
+    spec: LineSpec;
+    fs: number;
+    /** Height the element occupies; ascent = distance from its top to the baseline. */
+    h: number;
+    ascent: number;
+    logoW: number;
+  }
+
+  /** Font size for a spec in a column of width colW at a given text scale. */
+  const sizeItem = (spec: LineSpec, colW: number, scale: number, anchor: TextLine["anchor"], logoMaxW: number): Item => {
+    let fs = relOf(spec) * colW * scale;
+    if (spec.role === "logo") {
+      const logoW = logoWidth(logoMaxW, fs);
+      return { spec, fs, h: logoW * logoRatio, ascent: 0, logoW };
+    }
+    const u = unitInk(spec, anchor);
+    const need = anchor === "middle" ? 2 * Math.max(-u.x0, u.x1) : u.x1 - Math.min(0, u.x0);
+    if (need > 0) fs = Math.min(fs, colW / need);
+    return { spec, fs, h: fs * (u.top + u.bottom), ascent: fs * u.top, logoW: 0 };
   };
 
-  const makeLine = (spec: LineSpec, x: number, y: number, fontSize: number, anchor: TextLine["anchor"]): TextLine => ({
-    role: spec.role,
-    text: upper(spec.text),
+  const makeLine = (item: Item, x: number, baseline: number, anchor: TextLine["anchor"]): TextLine => ({
+    role: item.spec.role,
+    text: upper(item.spec.text),
     x,
-    y,
-    fontSize,
+    y: baseline,
+    fontSize: item.fs,
     anchor,
-    letterSpacing: fontSize * font.letterSpacing,
+    letterSpacing: item.fs * font.letterSpacing,
     font: config.font,
-    color: spec.color,
-    icon: spec.icon,
+    color: item.spec.color,
+    icon: item.spec.icon,
   });
 
   const lines: TextLine[] = [];
   let qr: TagLayout["qr"] = null;
   let logoBox: TagLayout["logoBox"] = null;
   let qrSqueezed = false;
+  let used: Item[] = [];
+
+  const minFrameFor = (w: number) => (MIN_QR_FRACTION * w) / frame.inner;
 
   if (layout.mode === "stack") {
-    const gap = content.w * 0.03;
+    // Spacing follows the text: never more than 45% of the average element height, so many small lines still fit.
+    let gap = content.w * 0.03;
     const all = [...top, ...bottom];
-    let scale = 1;
-    let sizes: number[] = [];
-    let textHeight = 0;
-    let frameSize = 0;
     const preferred = Math.min(content.w, content.h) * layout.qrFraction * config.qr.scale;
-    for (let i = 0; i < 7; i++) {
-      sizes = all.map((s) => fitFont(s, content.w, content.w, scale));
-      textHeight = sizes.reduce((sum, fs) => sum + fs * 1.22, 0) + (all.length ? gap * (all.length + 1) : 0);
-      const avail = content.h - textHeight;
-      frameSize = Math.min(content.w, avail, preferred);
-      const minFrame = (MIN_QR_FRACTION * content.w) / frame.inner;
-      if (frameSize >= minFrame || all.length === 0) break;
-      scale *= 0.84;
+    const absoluteMinFrame = Math.min(content.w, content.h) * 0.25;
+    let scale = 1;
+    let items: Item[] = [];
+    let textH = 0;
+    let frameSize = 0;
+    for (let i = 0; i < 60; i++) {
+      items = all.map((s) => sizeItem(s, content.w, scale, "middle", content.w * 0.55));
+      const itemsH = items.reduce((sum, it) => sum + it.h, 0);
+      gap = Math.min(content.w * 0.03, all.length ? (itemsH / all.length) * 0.45 : 0);
+      textH = itemsH + gap * all.length;
+      frameSize = Math.min(content.w, preferred, content.h - textH);
+      if (all.length === 0) break;
+      // Stop once the QR has its comfortable minimum, or at least the absolute minimum after text has shrunk a lot.
+      if (frameSize >= minFrameFor(content.w) || (frameSize >= absoluteMinFrame && scale < 0.5)) break;
+      scale *= 0.92;
     }
-    if (frameSize < (MIN_QR_FRACTION * content.w) / frame.inner) qrSqueezed = true;
-    frameSize = Math.max(frameSize, content.w * 0.25);
+    frameSize = Math.max(0, Math.min(frameSize, content.w, content.h - textH));
+    if (frameSize < minFrameFor(content.w)) qrSqueezed = true;
+    used = items;
 
-    const used = textHeight + frameSize;
-    let cursor = content.y + Math.max(0, (content.h - used) / 2);
+    const total = textH + frameSize;
+    let cursor = content.y + Math.max(0, (content.h - total) / 2);
     const cx = content.x + content.w / 2;
-    let i = 0;
-    for (const spec of top) {
-      const fs = sizes[i++];
-      cursor += gap + fs * 0.95;
-      if (spec.role === "logo") {
-        const w = logoWidth(content.w * 0.55, fs);
-        logoBox = { x: cx - w / 2, y: cursor - fs * 0.95, w, h: (w * BRAND_VIEWBOX.height) / BRAND_VIEWBOX.width };
-        cursor = logoBox.y + logoBox.h;
+    const place = (it: Item) => {
+      if (it.spec.role === "logo") {
+        logoBox = { x: cx - it.logoW / 2, y: cursor, w: it.logoW, h: it.h };
       } else {
-        lines.push(makeLine(spec, cx, cursor, fs, "middle"));
+        lines.push(makeLine(it, cx, cursor + it.ascent, "middle"));
       }
-      cursor += fs * 0.27;
-    }
-
+      cursor += it.h + gap;
+    };
+    items.slice(0, top.length).forEach(place);
     {
       const size = frameSize * frame.inner;
       const fx = cx - frameSize / 2;
-      cursor += all.length ? gap : 0;
       qr = { frameX: fx, frameY: cursor, frameSize, x: cx - size / 2, y: cursor + (frameSize - size) / 2, size, totalModules, moduleSize: size / totalModules, matrixSize: matrix.size };
-      cursor += frameSize;
+      cursor += frameSize + (bottom.length ? gap : 0);
     }
-
-    for (const spec of bottom) {
-      const fs = sizes[i++];
-      cursor += gap + fs * 0.95;
-      if (spec.role === "logo") {
-        const w = logoWidth(content.w * 0.55, fs);
-        logoBox = { x: cx - w / 2, y: cursor - fs * 0.95, w, h: (w * BRAND_VIEWBOX.height) / BRAND_VIEWBOX.width };
-        cursor = logoBox.y + logoBox.h;
-      } else {
-        lines.push(makeLine(spec, cx, cursor, fs, "middle"));
-      }
-      cursor += fs * 0.27;
-    }
+    items.slice(top.length).forEach(place);
   } else {
     // Row: QR on one side, a text column on the other.
     const gap = content.w * 0.04;
     const preferred = Math.min(content.h, content.w * 0.48) * layout.qrFraction * config.qr.scale;
-    const frameSize = Math.max(content.w * 0.25, preferred);
-    const colW = content.w - frameSize - gap;
+    const frameSize = Math.min(content.h, content.w * 0.6, Math.max(content.w * 0.25, preferred));
+    const colW = Math.max(1, content.w - frameSize - gap);
     const colX = layout.qrSide === "left" ? content.x + frameSize + gap : content.x;
     const qrX = layout.qrSide === "left" ? content.x : content.x + content.w - frameSize;
+    const anchor: TextLine["anchor"] = layout.textAlign === "start" ? "start" : "middle";
 
     let scale = 1;
-    let sizes: number[] = [];
-    let textHeight = 0;
-    for (let i = 0; i < 7; i++) {
-      sizes = side.map((s) => fitFont(s, colW, colW, scale * 1.15));
-      textHeight = sizes.reduce((sum, fs) => sum + fs * 1.28, 0);
-      if (textHeight <= content.h) break;
-      scale *= 0.86;
+    let items: Item[] = [];
+    let textH = 0;
+    for (let i = 0; i < 60; i++) {
+      items = side.map((s) => sizeItem(s, colW, scale * 1.15, anchor, colW * 0.9));
+      const lineGap = items.length ? (items.reduce((s2, it) => s2 + it.h, 0) / items.length) * 0.28 : 0;
+      textH = items.reduce((sum, it) => sum + it.h, 0) + lineGap * Math.max(0, items.length - 1);
+      if (textH <= content.h) break;
+      scale *= 0.92;
     }
-    if (textHeight > content.h) qrSqueezed = true;
+    // The QR column is sized independently of the text here; text that can't fit shrinks (and shows up in tinyText).
+    used = items;
 
     const size = frameSize * frame.inner;
     const fy = content.y + (content.h - frameSize) / 2;
     qr = { frameX: qrX, frameY: fy, frameSize, x: qrX + (frameSize - size) / 2, y: fy + (frameSize - size) / 2, size, totalModules, moduleSize: size / totalModules, matrixSize: matrix.size };
 
-    let cursor = content.y + Math.max(0, (content.h - textHeight) / 2);
-    const anchor = layout.textAlign === "start" ? "start" : "middle";
+    const lineGap = items.length ? (items.reduce((s2, it) => s2 + it.h, 0) / items.length) * 0.28 : 0;
+    let cursor = content.y + Math.max(0, (content.h - textH) / 2);
     const ax = anchor === "start" ? colX : colX + colW / 2;
-    side.forEach((spec, idx) => {
-      const fs = sizes[idx];
-      cursor += fs;
-      if (spec.role === "logo") {
-        const w = logoWidth(colW * 0.9, fs);
-        logoBox = { x: anchor === "start" ? colX : ax - w / 2, y: cursor - fs, w, h: (w * BRAND_VIEWBOX.height) / BRAND_VIEWBOX.width };
-        cursor = logoBox.y + logoBox.h;
+    for (const it of items) {
+      if (it.spec.role === "logo") {
+        logoBox = { x: anchor === "start" ? colX : ax - it.logoW / 2, y: cursor, w: it.logoW, h: it.h };
       } else {
-        lines.push(makeLine(spec, ax, cursor, fs, anchor));
+        // A left overhang (italic fonts) must not cross the column edge.
+        const shift = anchor === "start" ? Math.max(0, -unitInk(it.spec, anchor).x0 * it.fs) : 0;
+        lines.push(makeLine(it, ax + shift, cursor + it.ascent, anchor));
       }
-      cursor += fs * 0.28;
-    });
+      cursor += it.h + lineGap;
+    }
   }
 
-  return { width, height, contentRect: content, qr, lines, logoBox, qrSqueezed };
+  const mmPerUnit = (inches.width * 25.4) / width;
+  const tinyText = used
+    .filter((it) => it.spec.role !== "logo")
+    .map((it) => ({ role: it.spec.role, text: upper(it.spec.text), capMm: it.fs * font.capHeight * mmPerUnit }))
+    .filter((t) => t.capMm < MIN_TEXT_CAP_MM);
+
+  return { width, height, contentRect: content, qr, lines, logoBox, qrSqueezed, tinyText };
 }
 
 /** QR module size in millimetres for the current config (null without QR). */

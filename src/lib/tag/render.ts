@@ -3,10 +3,11 @@ import { renderQr } from "@/lib/qr/render";
 
 import { backgroundDefs, backgroundSvg } from "./backgrounds";
 import { BRAND_PATH, BRAND_VIEWBOX } from "./brand-path";
-import { FONTS, fontFamilyCss } from "./fonts";
+import { fontFamilyCss } from "./fonts";
 import { FRAMES } from "./frames";
 import { socialGlyph } from "./icons";
 import { layoutTag, type LayoutResult } from "./layout";
+import { iconSizeFor, lineInk } from "./measure";
 import { SHAPES } from "./shapes";
 import { toInches } from "./sizes";
 import type { TagConfig, TagData, TextLine } from "./types";
@@ -55,20 +56,17 @@ export function escapeXml(text: string): string {
 }
 
 function textElement(line: TextLine, idp: string, textToPath?: RenderOptions["textToPath"]): string {
-  const font = FONTS[line.font] ?? FONTS.condensed;
   const parts: string[] = [];
-  let x = line.x;
   if (line.icon) {
     const glyph = socialGlyph(line.icon);
     if (glyph) {
-      const iconSize = line.fontSize * font.capHeight * 1.1;
-      const textWidth = line.text.length * (font.factor + font.letterSpacing) * line.fontSize;
-      const totalW = textWidth + iconSize * 1.25;
-      const startX = line.anchor === "middle" ? line.x - totalW / 2 : line.anchor === "end" ? line.x - totalW : line.x;
+      // Same geometry the layout measured (measure.ts): icon, gap, then the text run.
+      const ink = lineInk(line);
+      const iconSize = iconSizeFor(line.font, line.fontSize);
+      const startX = line.x + (ink.iconX ?? 0);
       const iy = line.y - iconSize * 0.95;
       parts.push(`<g transform="translate(${startX.toFixed(1)} ${iy.toFixed(1)}) scale(${(iconSize / 24).toFixed(4)})"><path d="${glyph}" fill="${line.color}"/></g>`);
-      x = startX + iconSize * 1.25;
-      line = { ...line, x, anchor: "start" };
+      line = { ...line, x: line.x + ink.textX, anchor: "start" };
     }
   }
   const pathD = textToPath?.(line) ?? null;

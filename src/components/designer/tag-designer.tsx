@@ -90,6 +90,7 @@ export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos
         imageBackground: config.background.kind === "image",
         frameOutsideBlock: true,
         hasQr: preview.layout.qr !== null,
+        tinyText: preview.layout.tinyText,
       }),
     [config, preview, spec],
   );
