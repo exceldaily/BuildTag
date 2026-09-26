@@ -549,7 +549,8 @@ export interface ProductionSnapshotRow {
 export interface OrderRow {
   id: string;
   order_number: string;
-  user_id: string;
+  /** Null once the customer deleted their account (paid orders are kept as records, 0018). */
+  user_id: string | null;
   status: OrderStatus;
   payment_status: PaymentStatus;
   fulfillment_status: FulfillmentStatus;
@@ -1040,6 +1041,43 @@ export interface AdminOrganizationRow {
   build_count: number;
 }
 
+export interface AdminOrganizationDetail extends Omit<AdminOrganizationRow, "owner_username" | "member_count" | "build_count"> {
+  members: { user_id: string; username: string | null; display_name: string | null; email: string; role: OrgMemberRole; created_at: string }[];
+  invites: { id: string; email: string; role: OrgMemberRole; created_at: string }[];
+}
+
+/** org_analytics (0017): aggregate counts for a business's builds and parts. */
+export interface OrgAnalytics {
+  days: number;
+  vehicles: number;
+  vehicles_scanned: number;
+  scans_all_time: number;
+  scans: number;
+  scans_7d: number;
+  scans_today: number;
+  parts: number;
+  parts_linked: number;
+  part_clicks_all_time: number;
+  part_clicks: number;
+  scans_by_day: { day: string; count: number }[];
+  top_parts: { brand: string; part_name: string; category: ModCategory; installs: number; vehicles: number; clicks: number }[];
+  categories: { category: ModCategory; installs: number; clicks: number }[];
+  top_vehicles: (OrgVehicleRef & { nickname: string; is_public: boolean; ownership_status: OwnershipStatus; scans: number; part_clicks: number })[];
+  devices: Partial<Record<DeviceType, number>>;
+  countries: { country: string; count: number }[];
+}
+
+/** account_deletion_check (0018): what deleting the caller's account would do. */
+export interface AccountDeletionCheck {
+  sole_owner_of: { id: string; name: string }[];
+  orders_in_progress: number;
+  active_subscription: boolean;
+  delete_vehicle_ids: string[];
+  deleted_vehicles: { id: string; year: number | null; make: string; model: string; nickname: string }[];
+  returned_vehicles: { id: string; year: number | null; make: string; model: string; nickname: string; organization: string }[];
+  kept_orders: number;
+}
+
 export interface DashboardStats {
   vehicles: number;
   scans: number;
@@ -1431,6 +1469,25 @@ export interface Database {
         Args: { p_org: string; p_status?: OrganizationStatus | null; p_verified?: VerificationStatus | null; p_type?: OrganizationType | null };
         Returns: undefined;
       };
+      admin_create_organization: {
+        Args: {
+          p_name: string;
+          p_type?: OrganizationType;
+          p_owner?: string;
+          p_status?: OrganizationStatus;
+          p_verified?: VerificationStatus;
+          p_details?: Json;
+          p_add_self?: OrgMemberRole | null;
+        };
+        Returns: Json;
+      };
+      admin_add_org_member: { Args: { p_org: string; p_identifier: string; p_role?: OrgMemberRole }; Returns: string };
+      admin_set_org_member: { Args: { p_org: string; p_user_id: string; p_role?: OrgMemberRole | null; p_remove?: boolean }; Returns: undefined };
+      admin_revoke_org_invite: { Args: { p_invite_id: string }; Returns: undefined };
+      admin_organization_detail: { Args: { p_org: string }; Returns: Json };
+      org_analytics: { Args: { p_org: string; p_days?: number }; Returns: Json };
+      account_deletion_check: { Args: Record<never, never>; Returns: Json };
+      delete_my_account: { Args: { p_confirm: string }; Returns: undefined };
       record_legal_acceptance: {
         Args: {
           p_document_type: LegalDocumentType;

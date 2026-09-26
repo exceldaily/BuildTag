@@ -630,8 +630,8 @@ const S: LegalSection[] = [
     content: (
       <>
         <p>
-          You can stop using {LEGAL.brand} at any time, delete your vehicles from your dashboard, and ask us to delete your account by emailing{" "}
-          <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. We may suspend or terminate an account for legitimate reasons, including fraud, security risk,
+          You can stop using {LEGAL.brand} at any time, delete your vehicles from your dashboard, and delete your account under Profile → Delete account
+          (or ask us to by emailing <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>). We may suspend or terminate an account for legitimate reasons, including fraud, security risk,
           illegal activity, a material violation of these Terms, abuse or non-payment.
         </p>
         <p>
