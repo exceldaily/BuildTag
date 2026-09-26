@@ -1,5 +1,6 @@
 import { QR_QUIET_ZONE_MODULES, createQrMatrix } from "@/lib/qr/generate";
 
+import { BRAND_VIEWBOX } from "./brand-path";
 import { FONTS } from "./fonts";
 import { FRAMES } from "./frames";
 import { HERO_MULTIPLIER, LAYOUTS, ROLE_SIZE, type Role } from "./layouts";
@@ -7,6 +8,11 @@ import { SHAPES } from "./shapes";
 import { ctaText } from "./templates";
 import { toInches } from "./sizes";
 import type { TagConfig, TagData, TagLayout, TagSocial, TextLine } from "./types";
+
+/** Logo width for a text size: the height budget stays fs * 7 * 774 / 2400 (the original wordmark's), whatever the mark's proportions. */
+function logoWidth(maxW: number, fs: number): number {
+  return Math.min(maxW, ((fs * 7 * 774) / 2400) * (BRAND_VIEWBOX.width / BRAND_VIEWBOX.height));
+}
 
 export const LAYOUT_WIDTH = 1000;
 
@@ -155,8 +161,8 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
       const fs = sizes[i++];
       cursor += gap + fs * 0.95;
       if (spec.role === "logo") {
-        const w = Math.min(content.w * 0.55, fs * 7);
-        logoBox = { x: cx - w / 2, y: cursor - fs * 0.95, w, h: (w * 774) / 2400 };
+        const w = logoWidth(content.w * 0.55, fs);
+        logoBox = { x: cx - w / 2, y: cursor - fs * 0.95, w, h: (w * BRAND_VIEWBOX.height) / BRAND_VIEWBOX.width };
         cursor = logoBox.y + logoBox.h;
       } else {
         lines.push(makeLine(spec, cx, cursor, fs, "middle"));
@@ -176,8 +182,8 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
       const fs = sizes[i++];
       cursor += gap + fs * 0.95;
       if (spec.role === "logo") {
-        const w = Math.min(content.w * 0.55, fs * 7);
-        logoBox = { x: cx - w / 2, y: cursor - fs * 0.95, w, h: (w * 774) / 2400 };
+        const w = logoWidth(content.w * 0.55, fs);
+        logoBox = { x: cx - w / 2, y: cursor - fs * 0.95, w, h: (w * BRAND_VIEWBOX.height) / BRAND_VIEWBOX.width };
         cursor = logoBox.y + logoBox.h;
       } else {
         lines.push(makeLine(spec, cx, cursor, fs, "middle"));
@@ -215,8 +221,8 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
       const fs = sizes[idx];
       cursor += fs;
       if (spec.role === "logo") {
-        const w = Math.min(colW * 0.9, fs * 7);
-        logoBox = { x: anchor === "start" ? colX : ax - w / 2, y: cursor - fs, w, h: (w * 774) / 2400 };
+        const w = logoWidth(colW * 0.9, fs);
+        logoBox = { x: anchor === "start" ? colX : ax - w / 2, y: cursor - fs, w, h: (w * BRAND_VIEWBOX.height) / BRAND_VIEWBOX.width };
         cursor = logoBox.y + logoBox.h;
       } else {
         lines.push(makeLine(spec, ax, cursor, fs, anchor));

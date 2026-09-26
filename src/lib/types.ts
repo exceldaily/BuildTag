@@ -1487,6 +1487,8 @@ export interface Database {
       admin_organization_detail: { Args: { p_org: string }; Returns: Json };
       org_analytics: { Args: { p_org: string; p_days?: number }; Returns: Json };
       account_deletion_check: { Args: Record<never, never>; Returns: Json };
+      admin_set_admin: { Args: { p_user_id: string; p_admin: boolean }; Returns: undefined };
+      admin_list_admins: { Args: Record<never, never>; Returns: Json };
       delete_my_account: { Args: { p_confirm: string }; Returns: undefined };
       record_legal_acceptance: {
         Args: {
