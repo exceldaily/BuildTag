@@ -22,7 +22,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const q = (typeof sp.q === "string" ? sp.q : "").slice(0, 80);
   const { client } = await requireAdmin();
 
-  const [usersRes, vehiclesRes, openReports] = await Promise.all([
+  const [usersRes, vehiclesRes, openReports, pendingBusinesses] = await Promise.all([
     client.rpc("admin_search_users", { p_query: q, p_limit: 25 }),
     q
       ? client
@@ -33,6 +33,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
           .limit(25)
       : client.from("vehicles").select("*, qr_codes(id, code, status)").order("created_at", { ascending: false }).limit(25),
     client.from("reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+    client.from("organizations").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
 
   const users = (usersRes.data ?? []) as UserHit[];
@@ -45,9 +46,14 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
           <p className="eyebrow">Moderation</p>
           <h1 className="mt-2 text-4xl">Search</h1>
         </div>
-        <Link href="/admin/reports" className="btn-ghost btn-small">
-          Open reports: {openReports.count ?? 0}
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/organizations" className={pendingBusinesses.count ? "btn-signal btn-small" : "btn-ghost btn-small"}>
+            Business applications: {pendingBusinesses.count ?? 0}
+          </Link>
+          <Link href="/admin/reports" className="btn-ghost btn-small">
+            Open reports: {openReports.count ?? 0}
+          </Link>
+        </div>
       </div>
 
       <form action="/admin" method="get" className="flex gap-2">

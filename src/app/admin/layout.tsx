@@ -5,7 +5,8 @@ import { signOutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/layout/logo";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const { client } = await requireAdmin();
+  const { count: pendingBusinesses } = await client.from("organizations").select("id", { count: "exact", head: true }).eq("status", "pending");
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-40 border-b border-signal/40 bg-background pt-[env(safe-area-inset-top)]">
@@ -21,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               ["/admin/orders", "Orders"],
               ["/admin/members", "Members"],
               ["/admin/tags", "Free tags"],
-              ["/admin/organizations", "Businesses"],
+              ["/admin/organizations", pendingBusinesses ? `Businesses (${pendingBusinesses} new)` : "Businesses"],
               ["/admin/business-inquiries", "Inquiries"],
               ["/admin/legal", "Legal"],
               ["/dashboard", "Garage"],

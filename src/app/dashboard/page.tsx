@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { listMyOrganizations } from "@/lib/db/business";
 import { listGarage } from "@/lib/db/vehicles";
 import { PLAN_LIMITS, getUserPlan } from "@/lib/db/plan";
 import { requireProfile } from "@/lib/supabase/server";
@@ -17,7 +18,12 @@ export const metadata: Metadata = { title: "Garage", robots: { index: false } };
 export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
   const sp = await searchParams;
   const { client, user, profile } = await requireProfile("/dashboard");
-  const [vehicles, statsRes, plan] = await Promise.all([listGarage(client, user.id), client.rpc("dashboard_stats"), getUserPlan(client, user.id)]);
+  const [vehicles, statsRes, plan, orgs] = await Promise.all([
+    listGarage(client, user.id),
+    client.rpc("dashboard_stats"),
+    getUserPlan(client, user.id),
+    listMyOrganizations(client),
+  ]);
   const stats = (statsRes.data ?? { vehicles: 0, scans: 0, likes: 0, clicks: 0 }) as unknown as DashboardStats;
   const limit = PLAN_LIMITS[plan].vehicles;
   const canAdd = vehicles.length < limit;
@@ -80,6 +86,21 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           </div>
         )}
       </section>
+
+      {orgs.length === 0 && (
+        <section className="mt-12 flex flex-col gap-4 rounded-lg border border-line p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="eyebrow">BuildTags Business</p>
+            <p className="mt-1 font-display text-xl font-bold uppercase">Run a shop, dealership or install business?</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Create build pages for customer vehicles, hand them off with a claim link, and keep credit for the parts you install.
+            </p>
+          </div>
+          <Link href="/dashboard/business/register" className="btn-signal btn-small shrink-0">
+            Register your business
+          </Link>
+        </section>
+      )}
     </div>
   );
 }
