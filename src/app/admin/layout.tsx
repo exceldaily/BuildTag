@@ -21,6 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               ["/admin/reports", "Reports"],
               ["/admin/orders", "Orders"],
               ["/admin/members", "Members"],
+              ["/admin/bans", "Bans"],
               ["/admin/tags", "Free tags"],
               ["/admin/organizations", pendingBusinesses ? `Businesses (${pendingBusinesses} new)` : "Businesses"],
               ["/admin/business-inquiries", "Inquiries"],

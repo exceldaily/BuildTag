@@ -13,6 +13,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const checkEmail = sp.check_email === "1";
   const authError = sp.error === "auth";
   const deleted = sp.deleted === "1";
+  const banned = sp.banned === "1";
 
   return (
     <AuthShell
@@ -27,6 +28,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </>
       }
     >
+      {banned && (
+        <p className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
+          This account has been suspended. Contact us if you think this is a mistake.
+        </p>
+      )}
       {deleted && (
         <p className="mb-4 rounded-md border border-signal/40 bg-signal/10 px-3 py-2 text-sm" role="status">
           Your account has been deleted.
