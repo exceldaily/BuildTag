@@ -38,6 +38,11 @@ export async function signUpAction(_prev: ActionResult | null, form: FormData): 
   // A claim link (or other deep link) that sent the visitor here wins.
   const landing = form.get("next") ? safeNext(form.get("next")) : wantsPro ? "/dashboard/profile?plan=pro" : "/dashboard?welcome=1";
 
+  const { data: emailBanned } = await client.rpc("email_is_banned", { p_email: parsed.data.email });
+  if (emailBanned) {
+    return { ok: false, error: "This email address can't be used for a BuildTags account.", fieldErrors: { email: "Not allowed" } };
+  }
+
   const { data: available } = await client.rpc("username_available", { p_username: parsed.data.username });
   if (available === false) {
     return { ok: false, error: "That username is taken.", fieldErrors: { username: "Already taken" } };
@@ -96,6 +101,7 @@ export async function signInAction(_prev: ActionResult | null, form: FormData): 
     password: parsed.data.password,
   });
   if (error) {
+    if (error.code === "user_banned") return { ok: false, error: "This account has been suspended. Contact us if you think this is a mistake." };
     return { ok: false, error: "Wrong email or password." };
   }
   // Follow the account's saved language from the first page after sign-in.

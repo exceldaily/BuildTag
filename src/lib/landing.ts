@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
+
 import { anonClient, buildCrew, exploreBuilds, getCrew } from "@/lib/db/public";
 import { siteUrl } from "@/lib/env";
 import { landingOrigin } from "@/lib/landing-config";
@@ -7,6 +9,7 @@ import { scanUrl } from "@/lib/qr/generate";
 import * as opentype from "opentype.js";
 
 import { FONTS, TEMPLATES, layoutTag, renderTagSvg } from "@/lib/tag";
+import { BRAND_PATH } from "@/lib/tag/brand-path";
 import type { FontId, TagData, TemplateId, TextLine } from "@/lib/tag/types";
 import type { LandingBuildKey } from "@/lib/landing-config";
 import type { Crew, PublicBuild, PublicBuildListRow } from "@/lib/types";
@@ -110,6 +113,9 @@ export interface DecalImage {
   label: string;
 }
 
+/** Changes whenever the traced brand mark changes, so cached decal images refresh with a new logo. */
+const BRAND_VERSION = createHash("sha1").update(BRAND_PATH).digest("hex").slice(0, 8);
+
 /**
  * Where the homepage loads a decal from. The artwork itself is rendered by the
  * decal route (text converted to paths), so the page HTML stays light.
@@ -120,7 +126,7 @@ export function decalImage(b: PublicBuild | null, key: LandingBuildKey, template
   if (!data) return null;
   const layout = layoutTag(TEMPLATES[template].build(), data);
   return {
-    src: `/api/landing/decal/${template}/${key}`,
+    src: `/api/landing/decal/${template}/${key}?v=${BRAND_VERSION}`,
     width: Math.round(layout.width),
     height: Math.round(layout.height),
     label: `${TEMPLATES[template].name} BuildTag for ${b.nickname || `${b.year ?? ""} ${b.make} ${b.model}`.trim()}. Scan it to open the build.`,

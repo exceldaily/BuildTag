@@ -80,10 +80,13 @@ export interface ProfileContext extends AuthContext {
 /** Authenticated user + their BuildTag profile (created on first visit). */
 export async function requireProfile(nextPath?: string): Promise<ProfileContext> {
   const ctx = await requireUser(nextPath);
-  const [{ data: profile, error }, { data: isAdmin }] = await Promise.all([
+  const [{ data: profile, error }, { data: isAdmin }, { data: status }] = await Promise.all([
     ctx.client.rpc("ensure_profile"),
     ctx.client.rpc("is_admin"),
+    ctx.client.rpc("my_account_status"),
   ]);
+  // A banned account's access token can outlive the ban by up to an hour; stop it here (0020).
+  if ((status as { banned?: boolean } | null)?.banned) redirect("/auth/banned");
   if (error || !profile) {
     throw new Error(`Could not load profile: ${error?.message ?? "unknown error"}`);
   }

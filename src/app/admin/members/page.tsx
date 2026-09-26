@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/supabase/server";
 import { AdminRoleToggle } from "@/components/admin/admin-role-toggle";
+import { BanToggle } from "@/components/admin/ban-controls";
+import type { AdminBans } from "@/lib/types";
 import { MemberPlanActions } from "@/components/admin/member-plan-actions";
 
 interface AdminRow {
@@ -40,10 +42,12 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
   const sp = await searchParams;
   const q = (typeof sp.q === "string" ? sp.q : "").slice(0, 80);
   const { client, user } = await requireAdmin();
-  const [{ data }, { data: adminData }] = await Promise.all([
+  const [{ data }, { data: adminData }, { data: banData }] = await Promise.all([
     client.rpc("admin_list_members", { p_query: q, p_limit: 100 }),
     client.rpc("admin_list_admins"),
+    client.rpc("admin_list_bans"),
   ]);
+  const bannedIds = new Set(((banData as unknown as AdminBans | null)?.accounts ?? []).map((b) => b.user_id));
   const admins = (Array.isArray(adminData) ? adminData : []) as unknown as AdminRow[];
   const adminIds = new Set(admins.map((a) => a.user_id));
   const members = (Array.isArray(data) ? data : []) as unknown as MemberRow[];
@@ -108,7 +112,7 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
               <th>Cars</th>
               <th>Joined</th>
               <th>Change plan</th>
-              <th>Admin</th>
+              <th>Access</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -116,7 +120,7 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
               <tr key={m.id} className="[&>td]:px-3 [&>td]:py-2 [&>td]:align-middle">
                 <td>
                   <span className="block font-medium">{m.display_name || m.username}</span>
-                  <span className="block text-xs text-muted-foreground">@{m.username}{adminIds.has(m.id) && <span className="ml-1.5 text-signal">· Admin</span>}</span>
+                  <span className="block text-xs text-muted-foreground">@{m.username}{adminIds.has(m.id) && <span className="ml-1.5 text-signal">· Admin</span>}{bannedIds.has(m.id) && <span className="ml-1.5 text-destructive">· Banned</span>}</span>
                 </td>
                 <td className="max-w-[220px] truncate text-muted-foreground">{m.email}</td>
                 <td>
@@ -139,7 +143,10 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
                   <MemberPlanActions userId={m.id} plan={m.plan} provider={m.provider} />
                 </td>
                 <td>
-                  <AdminRoleToggle userId={m.id} username={m.username} isAdmin={adminIds.has(m.id)} isMe={m.id === user.id} />
+                  <div className="flex flex-wrap gap-1.5">
+                    <AdminRoleToggle userId={m.id} username={m.username} isAdmin={adminIds.has(m.id)} isMe={m.id === user.id} />
+                    <BanToggle userId={m.id} username={m.username} banned={bannedIds.has(m.id)} disabled={m.id === user.id || adminIds.has(m.id)} />
+                  </div>
                 </td>
               </tr>
             ))}

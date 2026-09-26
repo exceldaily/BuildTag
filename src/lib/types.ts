@@ -1067,6 +1067,12 @@ export interface OrgAnalytics {
   countries: { country: string; count: number }[];
 }
 
+/** admin_list_bans (0020). */
+export interface AdminBans {
+  accounts: { user_id: string; username: string | null; email: string; reason: string; hidden_builds: number; created_at: string; banned_by: string | null }[];
+  emails: { email: string; reason: string; from_account: boolean; created_at: string; banned_by: string | null }[];
+}
+
 /** account_deletion_check (0018): what deleting the caller's account would do. */
 export interface AccountDeletionCheck {
   sole_owner_of: { id: string; name: string }[];
@@ -1489,6 +1495,13 @@ export interface Database {
       account_deletion_check: { Args: Record<never, never>; Returns: Json };
       admin_set_admin: { Args: { p_user_id: string; p_admin: boolean }; Returns: undefined };
       admin_list_admins: { Args: Record<never, never>; Returns: Json };
+      my_account_status: { Args: Record<never, never>; Returns: Json };
+      email_is_banned: { Args: { p_email: string }; Returns: boolean };
+      admin_ban_user: { Args: { p_user_id: string; p_reason?: string; p_hide_builds?: boolean; p_ban_email?: boolean }; Returns: undefined };
+      admin_unban_user: { Args: { p_user_id: string }; Returns: undefined };
+      admin_ban_email: { Args: { p_email: string; p_reason?: string }; Returns: undefined };
+      admin_unban_email: { Args: { p_email: string }; Returns: undefined };
+      admin_list_bans: { Args: Record<never, never>; Returns: Json };
       delete_my_account: { Args: { p_confirm: string }; Returns: undefined };
       record_legal_acceptance: {
         Args: {
