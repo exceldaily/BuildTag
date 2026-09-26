@@ -139,7 +139,9 @@ export const SHAPES: Record<ShapeId, ShapeDefinition> = {
     path: hexPath,
     contentRect: (w, h) => {
       const b = squareBox(w, h);
-      return { x: b.x + b.w * 0.16, y: b.y + b.h * 0.17, w: b.w * 0.68, h: b.h * 0.66 };
+      // Corners stay inside the slanted edges: at half-width 0.29 the edge is at 0.5 - 0.29 / 0.433 * 0.25 = 0.333
+      // from the center, so a half-height of 0.30 keeps a clear margin.
+      return { x: b.x + b.w * 0.21, y: b.y + b.h * 0.2, w: b.w * 0.58, h: b.h * 0.6 };
     },
     square: true,
     landscapeFriendly: false,
@@ -258,7 +260,12 @@ export const SHAPES: Record<ShapeId, ShapeDefinition> = {
     name: "Wide Badge",
     description: "Stadium-shaped bar for wide sizes.",
     path: widePath,
-    contentRect: (w, h) => ({ x: w * 0.1, y: h * 0.1, w: w * 0.8, h: h * 0.8 }),
+    // The ends are half-circles of radius min(w, h) / 2: keep 80% of the short side and pull the long sides in
+    // by 0.22 of it, which keeps the corners inside the arcs even when the size is square (a circle).
+    contentRect: (w, h) => {
+      const inset = Math.min(w, h) * 0.22;
+      return w >= h ? { x: inset, y: h * 0.1, w: w - inset * 2, h: h * 0.8 } : { x: w * 0.1, y: inset, w: w * 0.8, h: h - inset * 2 };
+    },
     square: false,
     landscapeFriendly: true,
   },

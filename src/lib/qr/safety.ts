@@ -1,3 +1,5 @@
+import { MIN_TEXT_CAP_MM } from "@/lib/tag/layout";
+
 import { qrContrastVerdict } from "./contrast";
 
 /**
@@ -40,6 +42,8 @@ export interface SafetyInput {
   /** Frame decorations are constrained to stay outside the block by construction. */
   frameOutsideBlock: boolean;
   hasQr: boolean;
+  /** Text lines the layout had to shrink below the printable minimum (layout.tinyText). */
+  tinyText?: { text: string; capMm: number }[];
 }
 
 export interface SafetyReport {
@@ -113,6 +117,19 @@ export function evaluateQrSafety(input: SafetyInput): SafetyReport {
   if (input.imageBackground) {
     checks.push({ id: "backing", level: "pass", label: "Opaque QR backing over the photo", detail: "The plate and quiet zone are always painted solid." });
   }
+
+  // Layout guarantees everything sits inside the safe area (scripts/tag-fit-check.ts verifies it); only size can fail.
+  const tiny = input.tinyText ?? [];
+  checks.push(
+    tiny.length
+      ? {
+          id: "text-size",
+          level: "fail",
+          label: "Text too small to print",
+          detail: `${tiny.map((t) => `"${t.text.length > 28 ? `${t.text.slice(0, 26)}…` : t.text}"`).join(", ")} would print under ${MIN_TEXT_CAP_MM} mm tall. Pick a larger size, turn off a line or shorten it.`,
+        }
+      : { id: "text-size", level: "pass", label: "Text fits and is readable", detail: "Every line sits inside the print-safe area at a readable size." },
+  );
 
   if (input.qrSqueezed) {
     checks.push({ id: "fit", level: "warn", label: "Text is crowding the QR", detail: "The layout shrank the code to fit everything. Remove a line or pick a larger size." });
