@@ -57,7 +57,11 @@ async function test(label: string, config: TagConfig, counters: { tested: number
     return;
   }
   counters.tested++;
-  for (const w of [700, 1300]) {
+  // The same raster sizes as the Designer's decoder gate (decodeAtSizes), so this
+  // sweep measures exactly what the app enforces before an order is allowed.
+  // (700 px was a pathological size for jsQR: designs that decode at 600, 1000
+  // and 1600 px failed there through sampling aliasing alone.)
+  for (const w of [600, 1000, 1600]) {
     const decoded = await decode(svg, w);
     if (decoded !== data.scanUrl) {
       counters.failures.push(`${label} @${w}px -> ${decoded ?? "no decode"}`);

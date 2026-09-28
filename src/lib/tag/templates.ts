@@ -96,7 +96,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         text: text({ logo: true, cta: "none", fields: { model: true, power: true } }),
         qr: { moduleStyle: "technical", finderStyle: "performance" },
         advanced: { border: true, decorOpacity: 0.7 },
-        size: sizeFromPreset("small"),
+        // 4 x 4 by default: on the 3 x 3 badge the code drops under 0.7 mm per module.
+        size: sizeFromPreset("standard"),
       }),
   },
   jdm: {
@@ -165,7 +166,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         font: "motorsport",
         palette: "track",
         frame: "tachometer",
-        text: text({ logo: true, cta: "scan", fields: { nickname: true, power: true } }),
+        // The gauge frame takes most of the plate, so the default keeps the text light: the code stays big enough to scan.
+        text: text({ logo: false, cta: "scan", fields: { nickname: true } }),
         qr: { moduleStyle: "classic", finderStyle: "classic" },
         advanced: { decorOpacity: 1 },
       }),
@@ -184,7 +186,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         palette: "bronze",
         frame: "tire",
         background: { kind: "honeycomb" },
-        text: text({ logo: false, cta: "built-not-bought", fields: { model: true, nickname: true } }),
+        // The tire frame is wide; nickname plus the CTA keeps the code at a scannable size.
+        text: text({ logo: false, cta: "built-not-bought", fields: { nickname: true } }),
         qr: { moduleStyle: "pixel", finderStyle: "classic" },
         size: sizeFromPreset("large"),
       }),

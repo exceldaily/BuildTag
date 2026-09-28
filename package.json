@@ -11,6 +11,7 @@
     "rls:test": "tsx --env-file=.env.local scripts/rls-test.ts",
     "icons": "node scripts/make-icons.mjs",
     "qr:validate": "tsx scripts/qr-validate.ts",
+    "fit:check": "tsx scripts/fit-check.ts",
     "og": "tsx scripts/make-og.ts",
     "test": "tsx --test tests/orders.test.ts tests/business.test.ts tests/landing.test.ts tests/legal.test.ts tests/qr-logo.test.ts",
     "images": "node scripts/fetch-images.mjs"

@@ -27,6 +27,9 @@ export const LAYOUT_WIDTH = 1000;
 /** Minimum QR block (incl. quiet zone) as a fraction of the content width before we flag "squeezed". */
 export const MIN_QR_FRACTION = 0.4;
 
+/** Smallest text scale the auto-fit will go to before it lets the QR block shrink instead. */
+export const MIN_TEXT_SCALE = 0.55;
+
 interface LineSpec {
   role: Role;
   text: string;
@@ -88,6 +91,7 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
   const frame = FRAMES[config.frame] ?? FRAMES.none;
   const font = FONTS[config.font] ?? FONTS.condensed;
   const markBox = logoMarkBox(config.text.logoMark);
+  const logoHeight = (maxW: number, fs: number) => (logoWidth(maxW, fs, markBox) * markBox.height) / markBox.width;
 
   const inches = toInches(config.size);
   const width = LAYOUT_WIDTH;
@@ -152,11 +156,13 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
     const preferred = Math.min(content.w, content.h) * layout.qrFraction * config.qr.scale;
     for (let i = 0; i < 7; i++) {
       sizes = all.map((s) => fitFont(s, content.w, content.w, scale));
-      textHeight = sizes.reduce((sum, fs) => sum + fs * 1.22, 0) + (all.length ? gap * (all.length + 1) : 0);
+      textHeight = sizes.reduce((sum, fs, idx) => sum + (all[idx].role === "logo" ? logoHeight(content.w * 0.55, fs) + fs * 0.27 : fs * 1.22), 0) + (all.length ? gap * (all.length + 1) : 0);
       const avail = content.h - textHeight;
       frameSize = Math.min(content.w, avail, preferred);
       const minFrame = (MIN_QR_FRACTION * content.w) / frame.inner;
-      if (frameSize >= minFrame || all.length === 0) break;
+      // Shrink the text to make room for the code, but never below MIN_TEXT_SCALE:
+      // past that the words are unreadable, so the code gives a little instead.
+      if (frameSize >= minFrame || all.length === 0 || scale * 0.84 < MIN_TEXT_SCALE) break;
       scale *= 0.84;
     }
     if (frameSize < (MIN_QR_FRACTION * content.w) / frame.inner) qrSqueezed = true;
@@ -213,8 +219,8 @@ export function layoutTag(config: TagConfig, data: TagData): LayoutResult {
     let textHeight = 0;
     for (let i = 0; i < 7; i++) {
       sizes = side.map((s) => fitFont(s, colW, colW, scale * 1.15));
-      textHeight = sizes.reduce((sum, fs) => sum + fs * 1.28, 0);
-      if (textHeight <= content.h) break;
+      textHeight = sizes.reduce((sum, fs, idx) => sum + (side[idx].role === "logo" ? logoHeight(colW * 0.9, fs) + fs * 0.28 : fs * 1.28), 0);
+      if (textHeight <= content.h || scale * 0.86 < MIN_TEXT_SCALE) break;
       scale *= 0.86;
     }
     if (textHeight > content.h) qrSqueezed = true;
