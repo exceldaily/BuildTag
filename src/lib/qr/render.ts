@@ -1,4 +1,5 @@
 import { BRAND_PATH, BRAND_VIEWBOX } from "@/lib/tag/brand-path";
+import { WORD_PATH, WORD_VIEWBOX } from "@/lib/tag/word-path";
 import type { QrFinderStyle, QrLogoKind, QrModuleStyle } from "@/lib/tag/types";
 
 import { QR_QUIET_ZONE_MODULES, type QrMatrix } from "./generate";
@@ -137,7 +138,7 @@ export function renderQr(matrix: QrMatrix, o: RenderQrOptions): RenderQrResult {
   let cut: { r0: number; r1: number; c0: number; c1: number } | null = null;
   let logoBox: RenderQrResult["logoBox"] = null;
   let coverage = 0;
-  if (o.logo && o.logo.kind !== "none" && (o.logo.kind === "buildtag" || o.logo.url)) {
+  if (o.logo && o.logo.kind !== "none" && (o.logo.kind === "buildtag" || o.logo.kind === "buildtag-word" || o.logo.url)) {
     const scale = clampLogoScale(o.logo.scale);
     const logoModules = Math.max(5, Math.round(n * scale));
     const plateModules = logoModules + LOGO_PLATE_MARGIN_MODULES * 2;
@@ -189,7 +190,13 @@ export function renderQr(matrix: QrMatrix, o: RenderQrOptions): RenderQrResult {
   parts.push(`</g>`);
 
   if (logoBox && o.logo) {
-    if (o.logo.kind === "buildtag") {
+    if (o.logo.kind === "buildtag-word") {
+      // The word BUILD / TAG, fit inside the square logo box, centered.
+      const s = Math.min(logoBox.w / WORD_VIEWBOX.width, logoBox.h / WORD_VIEWBOX.height);
+      const dx = (logoBox.w - WORD_VIEWBOX.width * s) / 2;
+      const dy = (logoBox.h - WORD_VIEWBOX.height * s) / 2;
+      parts.push(`<g transform="translate(${fmt(logoBox.x + dx)} ${fmt(logoBox.y + dy)}) scale(${fmt(s)})"><path d="${WORD_PATH}" fill="${o.dark}"/></g>`);
+    } else if (o.logo.kind === "buildtag") {
       // Wordmark is wide; fit it inside the square logo box, centered.
       const s = logoBox.w / BRAND_VIEWBOX.width;
       const drawnH = BRAND_VIEWBOX.height * s;

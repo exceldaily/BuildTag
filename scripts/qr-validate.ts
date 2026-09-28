@@ -84,6 +84,7 @@ async function main() {
         await test(`qr/${m.id}/${f.id}/${shape}`, { ...baseCfg, shape, qr: { ...baseCfg.qr, moduleStyle: m.id, finderStyle: f.id } }, counters);
       }
       await test(`qr-logo/${m.id}/${f.id}`, { ...baseCfg, qr: { ...baseCfg.qr, moduleStyle: m.id, finderStyle: f.id, logo: { kind: "buildtag", url: null, scale: 0.24 } } }, counters);
+      await test(`qr-word/${m.id}/${f.id}`, { ...baseCfg, qr: { ...baseCfg.qr, moduleStyle: m.id, finderStyle: f.id, logo: { kind: "buildtag-word", url: null, scale: 0.24 } } }, counters);
     }
   }
 
