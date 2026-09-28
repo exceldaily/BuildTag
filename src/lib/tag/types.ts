@@ -119,8 +119,12 @@ export interface TextFields {
   username: boolean;
 }
 
+/** Artwork for the logo line on the decal: the BuildTags wordmark or the short Btag mark. */
+export type LogoMark = "buildtags" | "btag";
+
 export interface TextConfig {
   logo: boolean;
+  logoMark: LogoMark;
   headline: "none" | "whats-done" | "build-sheet" | "custom";
   headlineCustom: string;
   cta: CtaPreset;

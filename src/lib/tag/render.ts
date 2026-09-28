@@ -2,7 +2,9 @@ import { createQrMatrix } from "@/lib/qr/generate";
 import { renderQr } from "@/lib/qr/render";
 
 import { backgroundDefs, backgroundSvg } from "./backgrounds";
-import { BRAND_PATH, BRAND_VIEWBOX } from "./brand-path";
+import { BRAND_PATH } from "./brand-path";
+import { logoMarkBox } from "./layout";
+import { WORDMARK_PATH } from "./wordmark-path";
 import { FONTS, fontFamilyCss } from "./fonts";
 import { FRAMES } from "./frames";
 import { socialGlyph } from "./icons";
@@ -173,8 +175,9 @@ export function renderTagSvg(config: TagConfig, data: TagData, options: RenderOp
 
   if (layout.logoBox) {
     const b = layout.logoBox;
-    const s = b.w / BRAND_VIEWBOX.width;
-    parts.push(`<g transform="translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) scale(${s.toFixed(5)})"><path d="${BRAND_PATH}" fill="${colors.accent}" fill-rule="evenodd"/></g>`);
+    const mark = config.text.logoMark === "btag" ? BRAND_PATH : WORDMARK_PATH;
+    const s = b.w / logoMarkBox(config.text.logoMark).width;
+    parts.push(`<g transform="translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) scale(${s.toFixed(5)})"><path d="${mark}" fill="${colors.accent}" fill-rule="evenodd"/></g>`);
   }
 
   for (const line of layout.lines) parts.push(textElement(line, idp, options.textToPath));

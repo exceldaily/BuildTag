@@ -27,6 +27,7 @@ const NO_FIELDS: TextFields = {
 function text(overrides: Omit<Partial<TextConfig>, "fields"> & { fields?: Partial<TextFields> }): TextConfig {
   return {
     logo: overrides.logo ?? false,
+    logoMark: overrides.logoMark ?? "buildtags",
     headline: overrides.headline ?? "none",
     headlineCustom: overrides.headlineCustom ?? "",
     cta: overrides.cta ?? "scan",
@@ -349,6 +350,7 @@ function migrateV1(c: TagConfig): TagConfigV2 {
     text: {
       ...t.text,
       logo: Boolean(content.logo),
+      logoMark: "buildtags",
       headline: content.whatsDoneText ? "whats-done" : content.buildSheetText ? "build-sheet" : "none",
       cta: c.ctaText?.trim() ? "custom" : content.scanText ? "scan" : "none",
       ctaCustom: c.ctaText?.trim() ?? "",
@@ -397,6 +399,7 @@ export function normalizeConfig(input: unknown): TagConfigV2 {
     colors: { ...t.colors, ...(c.colors ?? {}) },
     text: {
       logo: c.text?.logo ?? t.text.logo,
+      logoMark: c.text?.logoMark === "btag" ? "btag" : "buildtags",
       headline: c.text?.headline ?? t.text.headline,
       headlineCustom: (c.text?.headlineCustom ?? "").slice(0, 40),
       cta: c.text?.cta ?? t.text.cta,

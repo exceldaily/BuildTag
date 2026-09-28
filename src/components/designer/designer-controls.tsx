@@ -352,8 +352,20 @@ function TextSection({ config, onChange }: { config: TagConfig; onChange: Props[
         ))}
       </div>
       <label className="mt-4 flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={t.logo} onChange={(e) => setText({ logo: e.target.checked })} className="size-4 accent-[#ff2d7a]" /> BuildTag wordmark
+        <input type="checkbox" checked={t.logo} onChange={(e) => setText({ logo: e.target.checked })} className="size-4 accent-[#ff2d7a]" /> Logo line
       </label>
+      {t.logo && (
+        <div className="mt-2">
+          <Chips
+            options={[
+              { id: "buildtags", name: "BuildTags", description: "The BuildTags wordmark" },
+              { id: "btag", name: "Btag", description: "The short Btag mark" },
+            ]}
+            value={t.logoMark}
+            onChange={(v) => setText({ logoMark: v })}
+          />
+        </div>
+      )}
       <label className="mt-3 block">
         <span className="field-label">Headline</span>
         <select value={t.headline} onChange={(e) => setText({ headline: e.target.value as TagConfig["text"]["headline"] })} className="field">

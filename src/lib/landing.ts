@@ -10,6 +10,7 @@ import * as opentype from "opentype.js";
 
 import { FONTS, TEMPLATES, layoutTag, renderTagSvg } from "@/lib/tag";
 import { BRAND_PATH } from "@/lib/tag/brand-path";
+import { WORDMARK_PATH } from "@/lib/tag/wordmark-path";
 import type { FontId, TagData, TemplateId, TextLine } from "@/lib/tag/types";
 import type { LandingBuildKey } from "@/lib/landing-config";
 import type { Crew, PublicBuild, PublicBuildListRow } from "@/lib/types";
@@ -114,7 +115,7 @@ export interface DecalImage {
 }
 
 /** Changes whenever the traced brand mark changes, so cached decal images refresh with a new logo. */
-const BRAND_VERSION = createHash("sha1").update(BRAND_PATH).digest("hex").slice(0, 8);
+const BRAND_VERSION = createHash("sha1").update(BRAND_PATH).update(WORDMARK_PATH).digest("hex").slice(0, 8);
 
 /**
  * Where the homepage loads a decal from. The artwork itself is rendered by the
