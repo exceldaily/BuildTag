@@ -29,7 +29,12 @@ export function OrganizationRow({ org }: { org: AdminOrganizationRow }) {
           {org.location_text ? ` · ${org.location_text}` : ""}
           {org.email ? ` · ${org.email}` : ""}
         </p>
-        <p className="label-tech mt-1">Registered {new Date(org.created_at).toLocaleDateString()}</p>
+        <p className="label-tech mt-1">
+          Registered {new Date(org.created_at).toLocaleDateString()} ·{" "}
+          <Link href={`/admin/organizations/${org.id}`} className="text-foreground hover:underline">
+            Manage members &amp; analytics →
+          </Link>
+        </p>
       </div>
       <div className="flex flex-wrap gap-2">
         <select aria-label="Type" defaultValue={org.organization_type} disabled={pending} onChange={(e) => set({ type: e.target.value as OrganizationType })} className="field h-9 w-auto py-0">

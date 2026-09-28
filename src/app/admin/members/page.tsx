@@ -2,7 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireAdmin } from "@/lib/supabase/server";
+import { AdminRoleToggle } from "@/components/admin/admin-role-toggle";
 import { MemberPlanActions } from "@/components/admin/member-plan-actions";
+
+interface AdminRow {
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  email: string;
+  created_at: string;
+  granted_by: string | null;
+}
 
 export const metadata: Metadata = { title: "Members", robots: { index: false } };
 
@@ -29,8 +39,13 @@ function fmt(iso: string | null): string {
 export default async function AdminMembersPage({ searchParams }: PageProps<"/admin/members">) {
   const sp = await searchParams;
   const q = (typeof sp.q === "string" ? sp.q : "").slice(0, 80);
-  const { client } = await requireAdmin();
-  const { data } = await client.rpc("admin_list_members", { p_query: q, p_limit: 100 });
+  const { client, user } = await requireAdmin();
+  const [{ data }, { data: adminData }] = await Promise.all([
+    client.rpc("admin_list_members", { p_query: q, p_limit: 100 }),
+    client.rpc("admin_list_admins"),
+  ]);
+  const admins = (Array.isArray(adminData) ? adminData : []) as unknown as AdminRow[];
+  const adminIds = new Set(admins.map((a) => a.user_id));
   const members = (Array.isArray(data) ? data : []) as unknown as MemberRow[];
   const proCount = members.filter((m) => m.plan === "pro").length;
 
@@ -52,6 +67,31 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
         </form>
       </div>
 
+      <section className="mt-6 rounded-lg border border-line p-4">
+        <h2 className="text-xl">
+          BuildTags admins <span className="text-muted-foreground">{admins.length}</span>
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Admins can see and change every account, business and order. Use Make admin on a member below to add one. You can&apos;t remove yourself, and
+          there is always at least one admin.
+        </p>
+        <ul className="mt-3 divide-y divide-line">
+          {admins.map((a) => (
+            <li key={a.user_id} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
+              <span className="min-w-0">
+                <span className="font-medium">{a.display_name || a.username || a.email}</span>
+                {a.username && <span className="text-muted-foreground"> @{a.username}</span>}
+                <span className="block text-xs text-muted-foreground">
+                  {a.email}
+                  {a.granted_by ? ` · added by @${a.granted_by}` : ""} · {fmt(a.created_at)}
+                </span>
+              </span>
+              <AdminRoleToggle userId={a.user_id} username={a.username ?? a.email} isAdmin isMe={a.user_id === user.id} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <p className="label-tech mt-6">
         {members.length} shown · {proCount} on Pro
       </p>
@@ -68,6 +108,7 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
               <th>Cars</th>
               <th>Joined</th>
               <th>Change plan</th>
+              <th>Admin</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -75,7 +116,7 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
               <tr key={m.id} className="[&>td]:px-3 [&>td]:py-2 [&>td]:align-middle">
                 <td>
                   <span className="block font-medium">{m.display_name || m.username}</span>
-                  <span className="block text-xs text-muted-foreground">@{m.username}</span>
+                  <span className="block text-xs text-muted-foreground">@{m.username}{adminIds.has(m.id) && <span className="ml-1.5 text-signal">· Admin</span>}</span>
                 </td>
                 <td className="max-w-[220px] truncate text-muted-foreground">{m.email}</td>
                 <td>
@@ -97,11 +138,14 @@ export default async function AdminMembersPage({ searchParams }: PageProps<"/adm
                 <td>
                   <MemberPlanActions userId={m.id} plan={m.plan} provider={m.provider} />
                 </td>
+                <td>
+                  <AdminRoleToggle userId={m.id} username={m.username} isAdmin={adminIds.has(m.id)} isMe={m.id === user.id} />
+                </td>
               </tr>
             ))}
             {members.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-sm text-muted-foreground">
+                <td colSpan={9} className="px-3 py-8 text-center text-sm text-muted-foreground">
                   No members match.
                 </td>
               </tr>

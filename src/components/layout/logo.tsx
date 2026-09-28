@@ -3,10 +3,9 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * Brand assets. The wordmark is the supplied BuildTag logo (car silhouette
- * over italic type with a checkered streak), traced to a single-path SVG in
- * /public/brand. The mark is a compact QR-corner glyph for favicons and
- * tight spots.
+ * Brand assets. The wordmark is the supplied BuildTags brush lettering,
+ * traced to a single-path SVG in /public/brand by scripts/trace-logos.mjs.
+ * The mark is a compact QR-corner glyph for favicons and tight spots.
  */
 
 export function LogoMark({ className }: { className?: string }) {
@@ -32,7 +31,7 @@ export function Wordmark({ className, glow = true }: { className?: string; glow?
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/brand/logo-white.svg"
-      alt="BuildTag"
+      alt="BuildTags"
       className={cn("h-9 w-auto select-none", glow && "drop-shadow-[0_0_14px_rgba(255,45,122,0.45)]", className)}
       draggable={false}
     />
@@ -42,7 +41,7 @@ export function Wordmark({ className, glow = true }: { className?: string; glow?
 export function Logo({ className, href = "/", size = "md" }: { className?: string; href?: string; size?: "sm" | "md" | "lg" }) {
   const h = size === "sm" ? "h-7" : size === "lg" ? "h-14 sm:h-16" : "h-9 sm:h-10";
   return (
-    <Link href={href} className={cn("inline-flex items-center", className)} aria-label="BuildTag home">
+    <Link href={href} className={cn("inline-flex items-center", className)} aria-label="BuildTags home">
       <Wordmark className={h} />
     </Link>
   );

@@ -105,3 +105,13 @@ export async function adminPlaceCompOrderAction(input: {
   revalidatePath("/dashboard/orders");
   return { ok: true, data: { orderId: data as string } };
 }
+
+/** Grant or remove BuildTags admin. The database refuses removing yourself or the last admin (0019). */
+export async function adminSetAdminAction(userId: string, makeAdmin: boolean): Promise<ActionResult> {
+  if (!z.string().uuid().safeParse(userId).success) return { ok: false, error: "Invalid user." };
+  const { client } = await requireAdmin();
+  const { error } = await client.rpc("admin_set_admin", { p_user_id: userId, p_admin: makeAdmin });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/members");
+  return { ok: true, data: undefined };
+}

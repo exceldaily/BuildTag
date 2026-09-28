@@ -234,9 +234,9 @@ const S: LegalSection[] = [
     content: (
       <>
         <p>
-          You can edit or delete your builds, photos and profile at any time from your dashboard, and change a build&apos;s visibility. To access, correct,
-          export or delete your personal information, or to delete your account, email <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. We may need to
-          confirm it is you before acting on a request.
+          You can edit or delete your builds, photos and profile at any time from your dashboard, and change a build&apos;s visibility. You can delete
+          your account yourself under Profile → Delete account. To access, correct, export or delete your personal information, or if you need help deleting
+          your account, email <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. We may need to confirm it is you before acting on a request.
         </p>
         <p>
           Depending on where you live, you may have additional rights under local privacy law, such as the right to know what we hold, to object to certain

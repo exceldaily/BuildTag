@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireProfile } from "@/lib/supabase/server";
+import { removeVehiclePhotos } from "@/lib/storage-cleanup";
 import type { Database, VehicleRow } from "@/lib/types";
 
 type VehicleUpdate = Database["buildtag"]["Tables"]["vehicles"]["Update"];
@@ -108,15 +109,7 @@ export async function deleteVehicleAction(id: string): Promise<ActionResult> {
 
   // Storage objects first: the storage policies check vehicle ownership, so
   // they must be removed while the vehicle row still exists.
-  const { data: objects } = await client.storage.from("buildtag-photos").list(id, { limit: 1000 });
-  if (objects?.length) {
-    const paths: string[] = [];
-    for (const folder of objects) {
-      const { data: files } = await client.storage.from("buildtag-photos").list(`${id}/${folder.name}`, { limit: 10 });
-      for (const f of files ?? []) paths.push(`${id}/${folder.name}/${f.name}`);
-    }
-    if (paths.length) await client.storage.from("buildtag-photos").remove(paths);
-  }
+  await removeVehiclePhotos(client, id);
 
   const { data: deleted, error } = await client.from("vehicles").delete().eq("id", id).select("id");
   if (error) return { ok: false, error: error.message };

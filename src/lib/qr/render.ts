@@ -1,5 +1,5 @@
 import { BRAND_PATH, BRAND_VIEWBOX } from "@/lib/tag/brand-path";
-import { WORD_PATH, WORD_VIEWBOX } from "@/lib/tag/word-path";
+import { WORDMARK_PATH, WORDMARK_VIEWBOX } from "@/lib/tag/wordmark-path";
 import type { QrFinderStyle, QrLogoKind, QrModuleStyle } from "@/lib/tag/types";
 
 import { QR_QUIET_ZONE_MODULES, type QrMatrix } from "./generate";
@@ -119,6 +119,13 @@ function finderPath(style: QrFinderStyle, ox: number, oy: number): string {
   }
 }
 
+/** Width:height of the built-in marks; uploads get a square box. */
+function logoAspect(kind: QrLogoKind): number {
+  if (kind === "buildtag-word") return WORDMARK_VIEWBOX.width / WORDMARK_VIEWBOX.height;
+  if (kind === "buildtag") return BRAND_VIEWBOX.width / BRAND_VIEWBOX.height;
+  return 1;
+}
+
 /** Clamp a requested logo scale to the safe window. */
 export function clampLogoScale(scale: number): number {
   return Math.min(LOGO_MAX_SCALE, Math.max(LOGO_MIN_SCALE, Number.isFinite(scale) ? scale : 0.18));
@@ -134,22 +141,31 @@ export function renderQr(matrix: QrMatrix, o: RenderQrOptions): RenderQrResult {
   const plateR = (o.plateRadius ?? 0.04) * o.size;
   parts.push(`<rect x="${fmt(o.x)}" y="${fmt(o.y)}" width="${fmt(o.size)}" height="${fmt(o.size)}" rx="${fmt(plateR)}" fill="${o.light}"/>`);
 
-  // Logo cutout, in module coordinates.
+  // Logo cutout, in module coordinates. The plate keeps the area the scale
+  // implies (so coverage and the safety report mean the same thing for every
+  // logo) but takes the artwork's proportions: a wide wordmark gets a wide,
+  // short plate instead of shrinking inside a square one.
   let cut: { r0: number; r1: number; c0: number; c1: number } | null = null;
   let logoBox: RenderQrResult["logoBox"] = null;
   let coverage = 0;
   if (o.logo && o.logo.kind !== "none" && (o.logo.kind === "buildtag" || o.logo.kind === "buildtag-word" || o.logo.url)) {
     const scale = clampLogoScale(o.logo.scale);
-    const logoModules = Math.max(5, Math.round(n * scale));
-    const plateModules = logoModules + LOGO_PLATE_MARGIN_MODULES * 2;
-    const start = Math.floor((n - plateModules) / 2);
-    cut = { r0: start, r1: start + plateModules, c0: start, c1: start + plateModules };
-    coverage = (plateModules * plateModules) / (n * n);
-    const px = o.x + (q + start) * m;
-    const py = o.y + (q + start) * m;
-    const ps = plateModules * m;
-    logoBox = { x: px + LOGO_PLATE_MARGIN_MODULES * m, y: py + LOGO_PLATE_MARGIN_MODULES * m, w: logoModules * m, h: logoModules * m };
-    parts.push(`<rect x="${fmt(px)}" y="${fmt(py)}" width="${fmt(ps)}" height="${fmt(ps)}" rx="${fmt(m * 0.8)}" fill="${o.light}"/>`);
+    const aspect = logoAspect(o.logo.kind);
+    const area = (n * scale) ** 2;
+    // Never wider than the space between the finder patterns' inner edges.
+    const maxW = n - 2 * (7 + LOGO_PLATE_MARGIN_MODULES + 1);
+    const logoW = Math.max(5, Math.min(maxW, Math.round(Math.sqrt(area * aspect))));
+    const logoH = Math.max(4, Math.round(area / logoW));
+    const plateW = logoW + LOGO_PLATE_MARGIN_MODULES * 2;
+    const plateH = logoH + LOGO_PLATE_MARGIN_MODULES * 2;
+    const c0 = Math.floor((n - plateW) / 2);
+    const r0 = Math.floor((n - plateH) / 2);
+    cut = { r0, r1: r0 + plateH, c0, c1: c0 + plateW };
+    coverage = (plateW * plateH) / (n * n);
+    const px = o.x + (q + c0) * m;
+    const py = o.y + (q + r0) * m;
+    logoBox = { x: px + LOGO_PLATE_MARGIN_MODULES * m, y: py + LOGO_PLATE_MARGIN_MODULES * m, w: logoW * m, h: logoH * m };
+    parts.push(`<rect x="${fmt(px)}" y="${fmt(py)}" width="${fmt(plateW * m)}" height="${fmt(plateH * m)}" rx="${fmt(m * 0.8)}" fill="${o.light}"/>`);
   }
 
   // Data modules (finder areas and logo cutout excluded).
@@ -190,17 +206,13 @@ export function renderQr(matrix: QrMatrix, o: RenderQrOptions): RenderQrResult {
   parts.push(`</g>`);
 
   if (logoBox && o.logo) {
-    if (o.logo.kind === "buildtag-word") {
-      // The word BUILD / TAG, fit inside the square logo box, centered.
-      const s = Math.min(logoBox.w / WORD_VIEWBOX.width, logoBox.h / WORD_VIEWBOX.height);
-      const dx = (logoBox.w - WORD_VIEWBOX.width * s) / 2;
-      const dy = (logoBox.h - WORD_VIEWBOX.height * s) / 2;
-      parts.push(`<g transform="translate(${fmt(logoBox.x + dx)} ${fmt(logoBox.y + dy)}) scale(${fmt(s)})"><path d="${WORD_PATH}" fill="${o.dark}"/></g>`);
-    } else if (o.logo.kind === "buildtag") {
-      // Wordmark is wide; fit it inside the square logo box, centered.
-      const s = logoBox.w / BRAND_VIEWBOX.width;
-      const drawnH = BRAND_VIEWBOX.height * s;
-      parts.push(`<g transform="translate(${fmt(logoBox.x)} ${fmt(logoBox.y + (logoBox.h - drawnH) / 2)}) scale(${fmt(s)})"><path d="${BRAND_PATH}" fill="${o.dark}"/></g>`);
+    const mark = o.logo.kind === "buildtag-word" ? { d: WORDMARK_PATH, vb: WORDMARK_VIEWBOX } : o.logo.kind === "buildtag" ? { d: BRAND_PATH, vb: BRAND_VIEWBOX } : null;
+    if (mark) {
+      // Fit inside the logo box, centered on both axes.
+      const s = Math.min(logoBox.w / mark.vb.width, logoBox.h / mark.vb.height);
+      const dx = (logoBox.w - mark.vb.width * s) / 2;
+      const dy = (logoBox.h - mark.vb.height * s) / 2;
+      parts.push(`<g transform="translate(${fmt(logoBox.x + dx)} ${fmt(logoBox.y + dy)}) scale(${fmt(s)})"><path d="${mark.d}" fill="${o.dark}" fill-rule="evenodd"/></g>`);
     } else if (o.logo.url) {
       parts.push(`<image href="${escapeAttr(o.logo.url)}" x="${fmt(logoBox.x)}" y="${fmt(logoBox.y)}" width="${fmt(logoBox.w)}" height="${fmt(logoBox.h)}" preserveAspectRatio="xMidYMid meet"/>`);
     }

@@ -50,7 +50,7 @@ export type FontId = "condensed" | "technical" | "motorsport" | "heavy" | "minim
 
 export type QrModuleStyle = "classic" | "soft" | "rounded" | "dots" | "diamond" | "technical" | "pixel" | "performance";
 export type QrFinderStyle = "classic" | "rounded" | "double-ring" | "performance" | "hex" | "minimal";
-/** "buildtag-word" = the word BUILD / TAG as type; "buildtag" = the car wordmark logo. */
+/** "buildtag-word" = the BuildTags brush wordmark; "buildtag" = the short Btag mark. */
 export type QrLogoKind = "none" | "buildtag-word" | "buildtag" | "upload" | "shop";
 
 export type FrameId =

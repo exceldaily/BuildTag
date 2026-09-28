@@ -1,6 +1,6 @@
 /**
- * QR center logos must never break scanning. Renders the BuildTag word and
- * the car wordmark at the largest allowed size, rasterizes at the same
+ * QR center logos must never break scanning. Renders the BuildTags wordmark
+ * and the Btag mark at the largest allowed size, rasterizes at the same
  * sizes the designer's decoder gate uses, and decodes with jsQR.
  */
 import assert from "node:assert/strict";
@@ -11,7 +11,7 @@ import sharp from "sharp";
 
 import { createQrMatrix } from "../src/lib/qr/generate";
 import { LOGO_MAX_SCALE, renderQr } from "../src/lib/qr/render";
-import { WORD_PATH, WORD_VIEWBOX } from "../src/lib/tag/word-path";
+import { WORDMARK_PATH, WORDMARK_VIEWBOX } from "../src/lib/tag/wordmark-path";
 
 const URL = "https://buildtags.app/s/GHS7K2P9";
 
@@ -21,10 +21,10 @@ async function decode(svg: string, px: number): Promise<string | null> {
 }
 
 describe("QR center logo", () => {
-  it("word path is a sane, NaN-free outline", () => {
-    assert.ok(WORD_VIEWBOX.width > 0 && WORD_VIEWBOX.height > 0);
-    assert.doesNotMatch(WORD_PATH, /NaN/);
-    assert.ok(WORD_PATH.length > 1000);
+  it("wordmark path is a sane, NaN-free outline", () => {
+    assert.ok(WORDMARK_VIEWBOX.width > 0 && WORDMARK_VIEWBOX.height > 0);
+    assert.doesNotMatch(WORDMARK_PATH, /NaN/);
+    assert.ok(WORDMARK_PATH.length > 1000);
   });
 
   for (const kind of ["buildtag-word", "buildtag"] as const) {
@@ -40,6 +40,7 @@ describe("QR center logo", () => {
         logo: { kind, url: null, scale: LOGO_MAX_SCALE },
       });
       assert.ok(qr.logoBox, "logo box present");
+      assert.ok(qr.logoCoverage < 0.11, `coverage ${qr.logoCoverage} stays under the fail limit`);
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">${qr.svg}</svg>`;
       for (const px of [600, 1000, 1600]) {
         assert.equal(await decode(svg, px), URL, `${kind} @ ${px}px`);

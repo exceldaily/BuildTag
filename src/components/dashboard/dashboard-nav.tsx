@@ -22,7 +22,8 @@ function useItems(isAdmin: boolean, labels: NavLabels, hasBusiness: boolean) {
   return [
     { key: "Garage", href: "/dashboard", label: labels.garage, active: pathname === "/dashboard" || pathname.startsWith("/dashboard/vehicles") },
     { key: "Orders", href: "/dashboard/orders", label: labels.orders, active: pathname.startsWith("/dashboard/orders") },
-    ...(hasBusiness ? [{ key: "Business", href: "/dashboard/business", label: labels.business, active: pathname.startsWith("/dashboard/business") }] : []),
+    // Everyone sees Business: members open their dashboard, everyone else the registration form.
+    { key: "Business", href: hasBusiness ? "/dashboard/business" : "/dashboard/business/register", label: labels.business, active: pathname.startsWith("/dashboard/business") },
     { key: "Crew", href: "/dashboard/crew", label: labels.crew, active: pathname.startsWith("/dashboard/crew") },
     { key: "Profile", href: "/dashboard/profile", label: labels.profile, active: pathname.startsWith("/dashboard/profile") },
     { key: "Explore", href: "/explore", label: labels.explore, active: false },
@@ -93,7 +94,7 @@ export function DashboardTabBar({
   labels?: NavLabels;
 }) {
   // the phone bar keeps five slots: Explore makes room for Business
-  const items = useItems(isAdmin, labels, hasBusiness).filter((i) => !(hasBusiness && i.key === "Explore"));
+  const items = useItems(isAdmin, labels, hasBusiness).filter((i) => i.key !== "Explore");
   return (
     <nav
       aria-label="Dashboard"
