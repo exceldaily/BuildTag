@@ -39,6 +39,7 @@ function text(overrides: Omit<Partial<TextConfig>, "fields"> & { fields?: Partia
 
 type Partialish = Omit<Partial<TagConfigV2>, "text" | "qr" | "colors" | "background" | "advanced" | "social" | "size"> & {
   palette?: string;
+  colors?: Partial<TagConfigV2["colors"]>;
   text?: TextConfig;
   qr?: Partial<TagConfigV2["qr"]>;
   background?: Partial<TagConfigV2["background"]>;
@@ -62,7 +63,7 @@ function base(o: Partialish): TagConfigV2 {
       scale: o.qr?.scale ?? 1,
     },
     frame: o.frame ?? "none",
-    colors: { ...palette.colors },
+    colors: { ...palette.colors, ...(o.colors ?? {}) },
     text: o.text ?? text({ logo: true, cta: "scan" }),
     social: { source: o.social?.source ?? "auto", showIcon: o.social?.showIcon ?? true },
     background: { kind: o.background?.kind ?? "solid", imageUrl: o.background?.imageUrl ?? null, imageDim: o.background?.imageDim ?? 0.55 },
@@ -157,7 +158,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     id: "track",
     name: "Track",
     tagline: "Race number board.",
-    description: "Yellow-and-black motorsport plate with the tachometer frame.",
+    description: "Clear motorsport plate, yellow header, tachometer frame.",
     build: () =>
       base({
         template: "track",
@@ -165,6 +166,9 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         layout: "text-below",
         font: "motorsport",
         palette: "track",
+        // Clear decal: light type reads on glass, the gauge keeps its own dark face behind the code.
+        colors: { foreground: "#ffffff", background: "#0a0a0a" },
+        background: { kind: "transparent" },
         frame: "tachometer",
         // The gauge frame takes most of the plate, so the default keeps the text light: the code stays big enough to scan.
         text: text({ logo: false, cta: "scan", fields: { nickname: true } }),
@@ -176,7 +180,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     id: "offroad",
     name: "Off-Road",
     tagline: "Dust, bolts, tread.",
-    description: "Olive and tan, honeycomb texture, tire frame around the code.",
+    description: "Clear hex decal, tire frame around the code.",
     build: () =>
       base({
         template: "offroad",
@@ -185,7 +189,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         font: "industrial",
         palette: "bronze",
         frame: "tire",
-        background: { kind: "honeycomb" },
+        background: { kind: "transparent" },
         // The tire frame is wide; nickname plus the CTA keeps the code at a scannable size.
         text: text({ logo: false, cta: "built-not-bought", fields: { nickname: true } }),
         qr: { moduleStyle: "pixel", finderStyle: "classic" },
@@ -257,6 +261,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         layout: "social",
         font: "condensed",
         palette: "black-white",
+        colors: { foreground: "#ffffff", accent: "#ffffff" },
+        background: { kind: "transparent" },
         text: text({ logo: false, cta: "scan", fields: { social: true } }),
         social: { source: "auto", showIcon: true },
         qr: { moduleStyle: "dots", finderStyle: "double-ring" },
@@ -283,7 +289,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     id: "minimalqr",
     name: "Minimal QR",
     tagline: "Just the code.",
-    description: "Whiteout, no text, code only with a fine border.",
+    description: "Clear decal, no text, code only with a fine border.",
     build: () =>
       base({
         template: "minimalqr",
@@ -291,6 +297,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
         layout: "text-below",
         font: "minimal",
         palette: "whiteout",
+        background: { kind: "transparent" },
         text: text({ logo: false, cta: "none" }),
         qr: { moduleStyle: "classic", finderStyle: "classic", scale: 1 },
         advanced: { border: true },

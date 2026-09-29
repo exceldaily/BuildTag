@@ -182,12 +182,6 @@ export function Hero({ car, crew, decal }: { car: PublicBuild | null; crew: { na
               <Crosshair x={24} y={21} tone="signal" delay={520} />
             </div>
 
-            {/* SCAN PATH: starts behind the tag, runs along the floor, ends at the phone */}
-            <svg className="pointer-events-none absolute inset-0 z-10 size-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M 12 104 C 22 124, 48 122, 63.5 100" stroke="var(--signal)" strokeWidth="1.6" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash hero-fade hidden lg:inline" style={{ "--delay": "700ms" } as React.CSSProperties} />
-              <path d="M 14 112 C 24 134, 48 134, 60 124" stroke="var(--signal)" strokeWidth="1.6" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash hero-fade lg:hidden" style={{ "--delay": "700ms" } as React.CSSProperties} />
-            </svg>
-
             {/* PHYSICAL BUILDTAG */}
             {decal && (
               <div className="depth absolute top-[84%] left-[-1%] z-20 w-[19%] lg:top-[82%] lg:w-[17%]" style={depth(6)}>
