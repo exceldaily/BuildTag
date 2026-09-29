@@ -11,6 +11,7 @@ import { formatCount } from "@/lib/utils";
 import { StatTile } from "@/components/dashboard/stat-tile";
 import { VehicleCard } from "@/components/dashboard/vehicle-card";
 import { InstallAppPrompt } from "@/components/layout/install-app";
+import { WelcomeTour } from "@/components/onboarding/welcome-tour";
 import { t } from "@/lib/i18n/dictionary";
 
 export const metadata: Metadata = { title: "Garage", robots: { index: false } };
@@ -41,6 +42,25 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         <div>
           <p className="eyebrow">{plan === "pro" ? t(L, "garage_pro_plan") : t(L, "garage_free_plan")}</p>
           <h1 className="mt-2 text-4xl sm:text-5xl xl:text-6xl">{t(L, "garage_welcome", { name: profile.display_name.split(" ")[0] || profile.username })}</h1>
+          <div className="mt-2">
+            <WelcomeTour
+              autoStart={sp.welcome === "1" || vehicles.length === 0}
+              decalSrc="/api/landing/decal/power/car"
+              labels={{
+                skip: t(L, "tour_skip"),
+                next: t(L, "tour_next"),
+                back: t(L, "tour_back"),
+                start: t(L, "tour_start"),
+                replay: t(L, "tour_replay"),
+                slides: [
+                  { title: t(L, "tour_s1_title"), body: t(L, "tour_s1_body") },
+                  { title: t(L, "tour_s2_title"), body: t(L, "tour_s2_body") },
+                  { title: t(L, "tour_s3_title"), body: t(L, "tour_s3_body") },
+                  { title: t(L, "tour_s4_title"), body: t(L, "tour_s4_body") },
+                ],
+              }}
+            />
+          </div>
         </div>
         {canAdd ? (
           <Link href="/dashboard/vehicles/new" className="btn-signal">

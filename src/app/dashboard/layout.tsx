@@ -6,6 +6,7 @@ import { signOutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/layout/logo";
 import { DashboardNav, DashboardTabBar, type NavLabels } from "@/components/dashboard/dashboard-nav";
 import { t } from "@/lib/i18n/dictionary";
+import { TourGuide } from "@/components/onboarding/tour-guide";
 import { getLegalStatus } from "@/lib/legal/status";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -55,6 +56,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <main className="flex-1">
         <div className="mx-auto w-full max-w-[1720px] px-4 py-8 pb-24 sm:px-6 lg:px-10 2xl:px-16 md:py-10 md:pb-10">{children}</div>
       </main>
+      <TourGuide
+        labels={{
+          step: t(L, "tour_step"),
+          skipGuide: t(L, "tour_skip_guide"),
+          gotIt: t(L, "tour_got_it"),
+          finish: t(L, "tour_finish"),
+          tips: {
+            guide_garage: t(L, "guide_garage"),
+            guide_vehicle: t(L, "guide_vehicle"),
+            guide_photos: t(L, "guide_photos"),
+            guide_performance: t(L, "guide_performance"),
+            guide_socials: t(L, "guide_socials"),
+            guide_mods: t(L, "guide_mods"),
+            guide_buildtag: t(L, "guide_buildtag"),
+            guide_designer: t(L, "guide_designer"),
+            guide_checkout: t(L, "guide_checkout"),
+          },
+        }}
+      />
       <DashboardTabBar isAdmin={isAdmin} hasBusiness={hasBusiness} avatarUrl={profile.avatar_url} initial={(profile.display_name.slice(0, 1) || profile.username.slice(0, 1)).toUpperCase()} labels={labels} />
     </div>
   );
