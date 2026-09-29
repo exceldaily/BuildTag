@@ -119,7 +119,7 @@ export function BuildLoop({ bike, decal, link }: { bike: PublicBuild | null; dec
       visual: (
         <div className="relative mx-auto flex aspect-[9/13] w-[80%] items-center justify-center">
           <div className="absolute inset-x-[8%] bottom-[14%] h-[10%] rounded-[50%] bg-black/70 blur-xl" aria-hidden="true" />
-          <PhysicalTag decal={decal} tilt className={decal.width > decal.height * 1.2 ? "w-[112%] max-w-none shrink-0" : "w-[72%]"} />
+          <PhysicalTag decal={decal} className={decal.width > decal.height * 1.2 ? "w-[112%] max-w-none shrink-0" : "w-[72%]"} />
         </div>
       ),
     },
