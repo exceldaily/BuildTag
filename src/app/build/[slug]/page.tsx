@@ -6,7 +6,6 @@ import { getVisitorKey } from "@/lib/analytics/visitor";
 import { buildCrew, buildOwnerPlan, getPublicBuild } from "@/lib/db/public";
 import { getLocale } from "@/lib/i18n/server";
 import { siteUrl } from "@/lib/env";
-import { photoUrl } from "@/lib/storage";
 import { powerLabel, vehicleTitle } from "@/lib/utils";
 import { StatusPage } from "@/components/layout/status-page";
 import { BuildPage } from "@/components/build/build-page";
@@ -33,7 +32,6 @@ export async function generateMetadata({ params }: PageProps<"/build/[slug]">): 
   const description = b.description
     ? b.description.slice(0, 160)
     : `${b.nickname ? `"${b.nickname}" ` : ""}${vehicleTitle(b)} with ${b.mod_count} modifications on BuildTag.`;
-  const image = b.hero_image_url ?? (b.photos[0] ? photoUrl(b.photos[0].storage_path, "full") : undefined);
   const canonical = `${siteUrl()}/build/${b.slug}`;
   const indexable = b.visibility === "public";
 
@@ -45,15 +43,14 @@ export async function generateMetadata({ params }: PageProps<"/build/[slug]">): 
     openGraph: {
       type: "article",
       url: canonical,
-      title: `${title} | BuildTag`,
+      title: `${title} | BuildTags`,
       description,
-      images: image ? [{ url: image, alt: vehicleTitle(b) }] : [{ url: "/og.png", width: 1200, height: 630, alt: "BuildTag" }],
+      // The preview image comes from ./opengraph-image.tsx (photo + name + power).
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} | BuildTag`,
       description,
-      images: image ? [image] : ["/og.png"],
     },
   };
 }

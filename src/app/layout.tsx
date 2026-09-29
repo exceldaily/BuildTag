@@ -33,34 +33,34 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "BuildTag | Scan the build.",
-    template: "%s | BuildTag",
+    default: "BuildTags | Scan the build.",
+    template: "%s | BuildTags",
   },
   description:
-    "BuildTag gives your car a digital build sheet connected to a permanent QR decal. Anyone scans it and sees the power, the mods and the parts.",
-  applicationName: "BuildTag",
-  appleWebApp: { capable: true, title: "BuildTag", statusBarStyle: "black-translucent" },
+    "BuildTags gives your car or motorcycle a digital build sheet connected to a permanent QR decal. Anyone scans it and sees the power, the mods and the parts.",
+  applicationName: "BuildTags",
+  appleWebApp: { capable: true, title: "BuildTags", statusBarStyle: "black-translucent" },
   openGraph: {
     type: "website",
-    siteName: "BuildTag",
-    title: "BuildTag | Scan the build.",
+    siteName: "BuildTags",
+    title: "BuildTags | Scan the build.",
     description:
-      "Your build deserves a spec sheet. Stick your BuildTag on your car and let anyone scan to see what is done to it.",
+      "Your build deserves a spec sheet. Put a BuildTag on your car or bike and let anyone scan to see what is done to it.",
     url: "/",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "BuildTag. Your build deserves a spec sheet." }],
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "BuildTags. Your build deserves a spec sheet." }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BuildTag | Scan the build.",
-    description: "Your build deserves a spec sheet. Stick your BuildTag on your car and let anyone scan to see what is done to it.",
-    images: ["/og.png"],
+    title: "BuildTags | Scan the build.",
+    description: "Your build deserves a spec sheet. Put a BuildTag on your car or bike and let anyone scan to see what is done to it.",
+    images: ["/og.jpg"],
   },
   icons: {
     icon: [
-      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/favicon-32.png?v=2", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png?v=2", sizes: "192x192", type: "image/png" },
     ],
-    apple: "/icons/apple-touch-icon.png",
+    apple: "/icons/apple-touch-icon.png?v=2",
   },
 };
 

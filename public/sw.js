@@ -1,5 +1,5 @@
 /* BuildTag service worker: app-shell offline fallback, network-first pages. */
-const CACHE = "buildtag-v1";
+const CACHE = "buildtag-v2"; // v2: new icons
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {

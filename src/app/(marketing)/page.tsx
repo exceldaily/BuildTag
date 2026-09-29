@@ -38,13 +38,13 @@ export const metadata: Metadata = {
     title: "BuildTags | Your build deserves a spec sheet.",
     description: DESCRIPTION,
     url: "/",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "BuildTags. Your build deserves a spec sheet." }],
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "BuildTags. Your build deserves a spec sheet." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "BuildTags | Your build deserves a spec sheet.",
     description: DESCRIPTION,
-    images: ["/og.png"],
+    images: ["/og.jpg"],
   },
 };
 
