@@ -175,10 +175,11 @@ export function Hero({ car, crew, decal }: { car: PublicBuild | null; crew: { na
                 </div>
               )}
 
-              {/* 02 tag leader: bumper -> label (pink: it's the product) */}
-              <span className="hero-grow-y absolute top-[86%] left-[40%] hidden h-[15%] w-px origin-top bg-signal lg:block" style={{ "--delay": "520ms" } as React.CSSProperties} />
-              <span className="hero-grow-x absolute top-[101%] left-[18.5%] hidden h-px w-[21.5%] origin-right bg-signal lg:block" style={{ "--delay": "640ms" } as React.CSSProperties} />
-              <Crosshair x={40} y={86} tone="signal" delay={520} className="hidden lg:block" />
+              {/* 02 tag leader: windshield corner, where the tag goes -> the tag (pink: it's the product) */}
+              <svg className="hero-fade absolute inset-0 size-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ "--delay": "520ms" } as React.CSSProperties}>
+                <path d="M 24 21 L 7.5 31 L 7.5 84" stroke="var(--signal)" strokeWidth="1" fill="none" vectorEffect="non-scaling-stroke" />
+              </svg>
+              <Crosshair x={24} y={21} tone="signal" delay={520} />
             </div>
 
             {/* SCAN PATH: starts behind the tag, runs along the floor, ends at the phone */}
