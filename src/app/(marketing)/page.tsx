@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { siteUrl } from "@/lib/env";
 import { decalImage, demoScanUrl, loadLanding } from "@/lib/landing";
-import { DESIGNER_TILES, FALLBACK_CODES, HERO_TEMPLATE, REVEAL_TEMPLATE } from "@/lib/landing-config";
+import { DESIGNER_TILES, FALLBACK_CODES, GLASS_TEMPLATE, HERO_TEMPLATE, REVEAL_TEMPLATE } from "@/lib/landing-config";
 import { qrSvg } from "@/lib/qr/generate";
 import type { PublicBuild } from "@/lib/types";
 import { vehicleTitle } from "@/lib/utils";
@@ -17,11 +17,11 @@ import {
   DesignerShowcase,
   FinalCta,
   RealBuilds,
+  SameQuestions,
   ScanDemo,
   Shops,
   Showcase,
   ValueStrip,
-  WhatModIsThat,
   type DesignerTile,
 } from "@/components/marketing/landing-sections";
 
@@ -58,10 +58,11 @@ function label(b: PublicBuild): string {
 
 export default async function HomePage() {
   const data = await loadLanding();
-  const { car, bagger, sportbike, shopBuild, carCrew, crew, builds } = data;
+  const { car, bagger, sportbike, shopBuild, sedan, carCrew, crew, builds } = data;
 
   const heroDecal = decalImage(car, "car", HERO_TEMPLATE);
   const revealDecal = decalImage(sportbike, "sportbike", REVEAL_TEMPLATE);
+  const glassDecal = decalImage(sedan, "sedan", GLASS_TEMPLATE);
   const demoLink = demoScanUrl(car?.qr_code ?? FALLBACK_CODES.car);
   const bikeLink = demoScanUrl(sportbike?.qr_code ?? FALLBACK_CODES.sportbike);
 
@@ -98,7 +99,7 @@ export default async function HomePage() {
       {/* The owner's side first: what it solves */}
       <Hero car={car} crew={carCrew} decal={heroDecal} />
       <ValueStrip />
-      <WhatModIsThat bike={bagger} />
+      <SameQuestions build={sedan} decal={glassDecal} />
 
       {/* Then the scanner's side, with a real permanent code */}
       <ScanDemo car={car} qr={qrSvg(demoLink, 300)} link={demoLink} />

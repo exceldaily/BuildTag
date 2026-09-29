@@ -8,7 +8,7 @@ import { cn, formatCount, powerLabel, vehicleTitle } from "@/lib/utils";
 import { BuildCard } from "@/components/build/build-card";
 import { SocialIcon } from "@/components/build/social-icon";
 
-import { BuildScreen, CameraScreen, Container, Mono, Phone, PhysicalTag, SectionHead, Viewfinder } from "./landing-ui";
+import { BuildScreen, CameraScreen, Container, Decal, Mono, Phone, PhysicalTag, SectionHead, Viewfinder } from "./landing-ui";
 
 /** Lowest orderable BuildTag price (3 x 3 in gloss or matte, buildtag.print_specifications). */
 export const DECAL_FROM = "$8.99";
@@ -423,107 +423,73 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
 /* =============================================================================
  * THE PROBLEM: the same five questions, every time it's parked
  * ========================================================================== */
-const QUESTIONS = [
-  { q: "What exhaust is that?", cls: "lg:col-start-1 lg:row-start-1 lg:-rotate-2" },
-  { q: "What wheels are those?", cls: "lg:col-start-3 lg:row-start-1 lg:rotate-1" },
-  { q: "What suspension are you running?", cls: "lg:col-start-2 lg:row-start-2 lg:-rotate-1" },
-  { q: "How much power does it make?", cls: "lg:col-start-1 lg:row-start-3 lg:rotate-1" },
-  { q: "What all have you done to it?", cls: "lg:col-start-3 lg:row-start-3 lg:-rotate-1" },
-];
+const QUESTIONS = ["What exhaust is that?", "What wheels are those?", "What suspension are you running?", "How much power does it make?", "What all have you done to it?"];
 
-// Positions (percent of the photo) for the DUSK side-profile shot.
-const HOTSPOTS: Partial<Record<ModCategory, { x: number; y: number; flip?: boolean }>> = {
-  exhaust: { x: 21, y: 63 },
-  engine: { x: 49, y: 55 },
-  audio: { x: 70, y: 33, flip: true },
-  suspension: { x: 71, y: 51 },
-  brakes: { x: 75, y: 68, flip: true },
-  tires: { x: 86, y: 75, flip: true },
-};
+/** Where the tag sits on the campaign photo (percent of the image): rear quarter glass. */
+const TAG_ON_GLASS = { left: 24.6, top: 23.5, width: 8.6 };
 
-export function WhatModIsThat({ bike }: { bike: PublicBuild | null }) {
-  if (!bike) return null;
-  const photo = bike.photos[0] ? photoUrl(bike.photos[0].storage_path, "full") : bike.hero_image_url;
-  const seen = new Set<ModCategory>();
-  const spots = bike.modifications
-    .filter((m) => HOTSPOTS[m.category] && !seen.has(m.category) && seen.add(m.category))
-    .map((m) => ({ m, pos: HOTSPOTS[m.category]! }));
+export function SameQuestions({ build, decal }: { build: PublicBuild | null; decal: DecalImage | null }) {
   return (
     <section className={cn(SECTION, "cv-auto overflow-hidden bg-[#080712]")}>
-      <Container className={PAD}>
-        <SectionHead
-          center
-          index="02"
-          eyebrow="Every meet. Every gas station."
-          title={
-            <>
-              <span className="speed-heading">Tired of answering</span>
-              <br />
-              <span className="speed-heading chrome-text">the same questions?</span>
-            </>
-          }
-        />
-        <ul className="mx-auto mt-10 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-4">
-          {QUESTIONS.map(({ q, cls }) => (
-            <li key={q} className={cn("reveal border-l-2 border-foreground/25 bg-white/[0.03] px-4 py-3 font-display text-xl leading-tight font-bold text-foreground/85 italic sm:text-2xl", cls)}>
-              &ldquo;{q}&rdquo;
-            </li>
-          ))}
-        </ul>
-        <div className="reveal mt-12 text-center">
-          <p className="font-display text-xl font-bold tracking-[0.08em] text-foreground/75 uppercase sm:text-2xl">They don&apos;t have to ask anymore.</p>
-          <p className="mt-3 text-5xl leading-[0.9] font-extrabold uppercase italic sm:text-7xl xl:text-8xl">
-            Scan the <span className="text-signal">BuildTag.</span>
+      <Container className={cn("grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-16 xl:gap-24", PAD)}>
+        <div>
+          <p className="eyebrow">
+            <span className="text-foreground/45">02 / </span>Every meet. Every gas station.
+          </p>
+          <h2 className="mt-3 text-4xl leading-[0.95] sm:text-5xl xl:text-6xl">
+            <span className="speed-heading">Tired of answering</span>
+            <br />
+            <span className="speed-heading chrome-text">the same questions?</span>
+          </h2>
+          <ul className="mt-8 border-t border-line">
+            {QUESTIONS.map((q) => (
+              <li key={q} className="border-b border-line py-2.5 font-display text-lg leading-tight font-semibold tracking-wide text-foreground/55 italic sm:text-xl">
+                &ldquo;{q}&rdquo;
+              </li>
+            ))}
+          </ul>
+          <p className="mt-10 font-display text-5xl leading-[0.88] font-extrabold uppercase italic sm:text-6xl xl:text-7xl">
+            They&apos;ll ask.
+            <br />
+            Your <span className="text-signal">BuildTag</span> answers.
           </p>
         </div>
 
-        <div className="mt-12 grid items-center gap-8 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_330px] xl:gap-12">
-          <figure className="reveal">
+        {build && decal && (
+          <figure className="reveal relative">
             <div className="relative overflow-hidden rounded-sm border border-line">
-              {photo && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={photo} alt={`${vehicleTitle(bike)} "${bike.nickname}" side profile`} loading="lazy" decoding="async" className="aspect-[2000/1321] w-full object-cover" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
-              {spots.map(({ m, pos }, i) => (
-                <div key={m.public_id} className="absolute" style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
-                  <span className="hotspot absolute -translate-x-1/2 -translate-y-1/2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-signal font-display text-[10px] font-bold text-white md:size-3.5 md:text-[0px]">{i + 1}</span>
-                  </span>
-                  <span
-                    className={cn(
-                      "absolute hidden -translate-y-1/2 items-center gap-2 border-l-2 border-signal bg-background/85 px-2.5 py-1.5 whitespace-nowrap backdrop-blur md:flex",
-                      pos.flip ? "right-4" : "left-4",
-                    )}
-                  >
-                    <span className="font-mono text-[10px] tracking-[0.16em] text-signal uppercase">{MOD_CATEGORY_LABEL[m.category]}</span>
-                    <span className="text-xs text-foreground/85">{m.brand || m.part_name}</span>
-                  </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/home/tagged-wrx.webp" width={806} height={640} alt={`${vehicleTitle(build)} with a BuildTag on the rear quarter window`} loading="lazy" decoding="async" className="block h-auto w-full" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(8,7,18,0.85),transparent_45%),linear-gradient(to_left,rgba(8,7,18,0.55),transparent_50%)]" aria-hidden="true" />
+              {/* the tag, on the glass */}
+              <div className="absolute" style={{ left: `${TAG_ON_GLASS.left}%`, top: `${TAG_ON_GLASS.top}%`, width: `${TAG_ON_GLASS.width}%` }}>
+                <div className="relative">
+                  <Decal decal={decal} className="opacity-95" />
+                  <Viewfinder tone="signal" />
                 </div>
-              ))}
+              </div>
+              {/* from the tag to the phone */}
+              <svg className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M 34.5 30 L 52 30 L 64 46" stroke="var(--signal)" strokeWidth="1" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash" />
+              </svg>
             </div>
-            <ol className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3 md:hidden">
-              {spots.map(({ m }, i) => (
-                <li key={m.public_id} className="flex gap-2 text-xs">
-                  <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-signal font-display text-[9px] font-bold text-white">{i + 1}</span>
-                  <span>
-                    <span className="font-display font-bold tracking-wider uppercase">{MOD_CATEGORY_LABEL[m.category]}</span> <span className="text-muted-foreground">{m.brand || m.part_name}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <figcaption className="mt-3">
+            <Link
+              href={`/build/${build.slug}?via=tag`}
+              className="absolute right-[3%] bottom-0 block w-[38%] sm:w-[33%]"
+              aria-label={`Open ${build.nickname || vehicleTitle(build)}'s build profile`}
+              data-event="explore_build_clicked"
+            >
+              <Phone className="shadow-[inset_-1px_0_0_rgba(255,45,122,0.5),0_40px_70px_-25px_rgba(0,0,0,1)]">
+                <BuildScreen build={build} mods={3} />
+              </Phone>
+            </Link>
+            <figcaption className="mt-3 min-h-16 max-w-[54%] leading-relaxed sm:min-h-12">
               <Mono>
-                {bike.nickname} · {vehicleTitle(bike)} · demo build, real parts
+                {[build.nickname, vehicleTitle(build)].filter(Boolean).join(" · ")} · demo build, tag placement illustrated
               </Mono>
             </figcaption>
           </figure>
-          <Link href={`/build/${bike.slug}#mods`} className="reveal mx-auto block w-full max-w-[300px] xl:max-w-[330px]" aria-label={`See ${bike.nickname}'s parts list`} data-event="explore_build_clicked">
-            <Phone className="shadow-[inset_-1px_0_0_rgba(255,45,122,0.5),0_50px_80px_-30px_rgba(0,0,0,1)]">
-              <BuildScreen build={bike} mods={6} />
-            </Phone>
-          </Link>
-        </div>
+        )}
       </Container>
     </section>
   );

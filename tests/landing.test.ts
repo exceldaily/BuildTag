@@ -9,7 +9,7 @@ import { describe, it } from "node:test";
 import jsQR from "jsqr";
 import sharp from "sharp";
 
-import { DESIGNER_TILES, FALLBACK_CODES, HERO_TEMPLATE, REVEAL_TEMPLATE, landingOrigin, type LandingBuildKey } from "../src/lib/landing-config";
+import { DESIGNER_TILES, FALLBACK_CODES, GLASS_TEMPLATE, HERO_TEMPLATE, REVEAL_TEMPLATE, landingOrigin, type LandingBuildKey } from "../src/lib/landing-config";
 import { qrSvg, scanUrl } from "../src/lib/qr/generate";
 import { TEMPLATES, renderTagSvg } from "../src/lib/tag";
 import type { TagData } from "../src/lib/tag/types";
@@ -20,6 +20,7 @@ const BUILDS: Record<LandingBuildKey, Omit<TagData, "scanUrl">> = {
   car: { year: 2022, make: "Toyota", model: "GR Supra", trim: "3.0 Premium", nickname: "GHOST", powerLabel: "540 WHP", torqueLabel: "520 WTQ", modCount: 24, username: "buildtag_demo", socials: [{ public_id: "a", platform: "instagram", handle: "ghost_supra", source: "vehicle" }] },
   bagger: { year: 2020, make: "Harley-Davidson", model: "Street Glide", trim: "CVO", nickname: "DUSK", powerLabel: "118 WHP", torqueLabel: "128 WTQ", modCount: 10, username: "buildtag_demo", socials: [{ public_id: "b", platform: "instagram", handle: "dusk_glide", source: "vehicle" }] },
   sportbike: { year: 2021, make: "Ducati", model: "Panigale V2", trim: "955", nickname: "ROSSO", powerLabel: "148 WHP", torqueLabel: "72 WTQ", modCount: 20, username: "buildtag_demo", socials: [{ public_id: "c", platform: "instagram", handle: "rosso_v2", source: "vehicle" }] },
+  sedan: { year: 2016, make: "Subaru", model: "WRX", trim: "Premium", nickname: "BLUEBERRY", powerLabel: "318 WHP", torqueLabel: "340 WTQ", modCount: 11, username: "wrb_boxer", socials: [{ public_id: "d", platform: "instagram", handle: "wrb_boxer", source: "vehicle" }] },
   shopBuild: { year: 2026, make: "Harley-Davidson", model: "Road Glide", trim: "", nickname: "NIGHTSHIFT", powerLabel: "", torqueLabel: "", modCount: 8, username: "nightshift_rider", socials: [] },
 };
 
@@ -50,6 +51,7 @@ describe("homepage QR codes decode", () => {
   const cases: [string, keyof typeof TEMPLATES, LandingBuildKey][] = [
     ["hero", HERO_TEMPLATE, "car"],
     ["reveal", REVEAL_TEMPLATE, "sportbike"],
+    ["glass", GLASS_TEMPLATE, "sedan"],
     ...DESIGNER_TILES.map((t) => [`designer ${t.name}`, t.template, t.build] as [string, keyof typeof TEMPLATES, LandingBuildKey]),
   ];
   for (const [name, template, build] of cases) {

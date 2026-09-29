@@ -28,6 +28,7 @@ export const LANDING_SLUGS = {
   bagger: "dusk-2020-harley-davidson-street-glide",
   sportbike: "rosso-2021-ducati-panigale-v2",
   shopBuild: "nightshift-2026-harley-davidson-road-glide",
+  sedan: "blueberry-2016-subaru-wrx",
   crew: "example-customs",
   shop: "blackline-performance",
 } as const;
@@ -61,17 +62,19 @@ export interface LandingData {
   bagger: PublicBuild | null;
   sportbike: PublicBuild | null;
   shopBuild: PublicBuild | null;
+  sedan: PublicBuild | null;
   carCrew: { name: string; slug: string } | null;
   crew: Crew | null;
   builds: PublicBuildListRow[];
 }
 
 export async function loadLanding(): Promise<LandingData> {
-  const [car, bagger, sportbike, shopBuild, carCrew, crew, explore] = await Promise.all([
+  const [car, bagger, sportbike, shopBuild, sedan, carCrew, crew, explore] = await Promise.all([
     publicBuild(LANDING_SLUGS.car),
     publicBuild(LANDING_SLUGS.bagger),
     publicBuild(LANDING_SLUGS.sportbike),
     publicBuild(LANDING_SLUGS.shopBuild),
+    publicBuild(LANDING_SLUGS.sedan),
     buildCrew(LANDING_SLUGS.car).catch(() => null),
     getCrew(LANDING_SLUGS.crew).catch(() => null),
     exploreBuilds({ sort: "scanned", pageSize: 12 }).catch(() => null),
@@ -80,7 +83,7 @@ export async function loadLanding(): Promise<LandingData> {
   const all = explore?.builds ?? [];
   const strong = all.filter((b) => b.hero_image_url && b.mod_count >= 5);
   const builds = (strong.length >= 4 ? strong : all).slice(0, 4);
-  return { car, bagger, sportbike, shopBuild, carCrew, crew, builds };
+  return { car, bagger, sportbike, shopBuild, sedan, carCrew, crew, builds };
 }
 
 /** The same data the Designer feeds the renderer, from a public build. */

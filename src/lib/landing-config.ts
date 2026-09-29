@@ -5,7 +5,7 @@ import type { TemplateId } from "@/lib/tag/types";
  * every QR the homepage renders really decodes.
  */
 
-export type LandingBuildKey = "car" | "bagger" | "sportbike" | "shopBuild";
+export type LandingBuildKey = "car" | "bagger" | "sportbike" | "shopBuild" | "sedan";
 
 /** Permanent codes of the demo builds, used only if a live lookup fails. */
 export const FALLBACK_CODES: Record<LandingBuildKey, string> = {
@@ -13,10 +13,13 @@ export const FALLBACK_CODES: Record<LandingBuildKey, string> = {
   bagger: "DSK7GR4X",
   sportbike: "RSSV2K7P",
   shopBuild: "BLK7RGX4",
+  sedan: "G9GWYT42",
 };
 
 export const HERO_TEMPLATE: TemplateId = "power";
 export const REVEAL_TEMPLATE: TemplateId = "euro";
+/** The tag shown on the rear quarter glass in the "same questions" photo. */
+export const GLASS_TEMPLATE: TemplateId = "minimalqr";
 
 /** Real template, real build, real permanent code for each designer tile. */
 export const DESIGNER_TILES: { template: TemplateId; name: string; build: LandingBuildKey }[] = [
