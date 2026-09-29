@@ -51,7 +51,31 @@ export const DEMO_IMAGES = [
     alt: "Black touring bagger parked on a pier at dusk",
     blur: [{ left: 0.555, top: 0.7, width: 0.095, height: 0.065 }],
   },
+  // Example community builds (scripts/make-demo-builds.mjs). cropY: portrait shots are cut to 3:2 around the vehicle; plates are blurred.
+  { name: "whiteout", id: "photo-1692807381316-e51140a7a00f", page: "https://unsplash.com/photos/f0RvFtvVWjw", alt: "White lifted Ram 2500 on polished wheels in a wet parking lot" },
+  { name: "cheeto", id: "photo-1608234493333-09825469ab3b", page: "https://unsplash.com/photos/28j19Q5gQFk", alt: "Orange lifted Toyota Tacoma on mud tires beside railroad tracks" },
+  { name: "trailhead", id: "photo-1636138103588-ae927bfe10aa", page: "https://unsplash.com/photos/t5_saablH-c", alt: "Jeep Wrangler with roof lights and a rooftop tent at sunset" },
+  { name: "raptor", id: "photo-1644902166413-b883bc021fd1", page: "https://unsplash.com/photos/ZMStl-plpCE", alt: "White Ford F-150 Raptor parked on red dirt under storm clouds", cropY: 0.58, blur: [{"left":0.25,"top":0.455,"width":0.045,"height":0.065}] },
+  { name: "silverado", id: "photo-1765679244145-9c36a8846daa", page: "https://unsplash.com/photos/ejWPssfH0xs", alt: "Dark red Chevrolet Silverado on a leaf covered dirt road", cropY: 0.47, blur: [{"left":0.705,"top":0.69,"width":0.08,"height":0.065}] },
+  { name: "ctr", id: "photo-1686074449582-6374eaebacf3", page: "https://unsplash.com/photos/FmUNQxq9Isc", alt: "Sonic Gray Honda Civic Type R on bronze wheels parked on a beach", cropY: 0.6 },
+  { name: "sti", id: "photo-1606271463681-e350d3038a2c", page: "https://unsplash.com/photos/MzZAn9GxPLU", alt: "Blue Subaru WRX with a rear wing and polished wheels in a parking garage", blur: [{"left":0.82,"top":0.6,"width":0.065,"height":0.075},{"left":0.298,"top":0.395,"width":0.045,"height":0.04},{"left":0.2,"top":0.375,"width":0.04,"height":0.055}] },
+  { name: "mustang", id: "photo-1649274749460-5851a718dd2a", page: "https://unsplash.com/photos/D4MiC1dNpHg", alt: "Orange Ford Mustang GT on gray wheels on a tree lined road" },
+  { name: "nismo", id: "photo-1647943093662-9ac4566c2f29", page: "https://unsplash.com/photos/0fm2TsorGhY", alt: "White Nissan 370Z NISMO on bronze wheels between two industrial buildings" },
+  { name: "m3", id: "photo-1607853554439-0069ec0f29b6", page: "https://unsplash.com/photos/94lAQc7ipNg", alt: "Gray BMW M3 on black wheels parked on a forest road covered in autumn leaves", cropY: 0.57, blur: [{"left":0.21,"top":0.55,"width":0.115,"height":0.05}] },
+  { name: "miata", id: "photo-1722553708493-5a22cfdac07f", page: "https://unsplash.com/photos/GyZSMud-hQY", alt: "Red first generation Mazda Miata with pop-up headlights on in heavy rain at night", blur: [{"left":0.295,"top":0.745,"width":0.042,"height":0.045}] },
+  { name: "scat", id: "photo-1612813562440-f3f455f77bf7", page: "https://unsplash.com/photos/-Wzkh12-2nY", alt: "Gray Dodge Challenger Scat Pack Widebody parked beside a stone building", cropY: 0.78 },
+  { name: "r6", id: "photo-1660725997525-3cee7da82aec", page: "https://unsplash.com/photos/u41pGFqExG4", alt: "Black Yamaha YZF-R6 parked in front of snow capped mountains", cropY: 0.47 },
+  { name: "ninja", id: "photo-1597497287565-a38cfaa4e762", page: "https://unsplash.com/photos/gbqOm5L5vFc", alt: "Black Kawasaki Ninja 400 with an aftermarket exhaust in front of palm trees", cropY: 0.5 },
+  { name: "iron", id: "photo-1670995959544-9c6602da7345", page: "https://unsplash.com/photos/vtSMC0eYr34", alt: "Matte black Harley-Davidson Iron 883 parked by a brick wall" },
 ];
+
+/** Cuts a portrait photo down to 3:2 landscape, centered on cropY (fraction of the height). */
+async function cropLandscape(buf, cropY) {
+  const { width, height } = await sharp(buf).metadata();
+  const h = Math.round(width * 0.667);
+  const top = Math.max(0, Math.min(height - h, Math.round(height * cropY - h / 2)));
+  return sharp(buf).extract({ left: 0, top, width, height: h }).jpeg({ quality: 92 }).toBuffer();
+}
 
 async function fetchBuffer(id, width) {
   const res = await fetch(`${UNSPLASH}/${id}?w=${width}&q=82&fm=jpg&fit=max`);
@@ -81,10 +105,11 @@ for (const img of HOME_IMAGES) {
 }
 
 for (const img of DEMO_IMAGES) {
-  if (only && !img.name.startsWith(only)) continue;
+  if (only && !only.split(",").some((p) => img.name.startsWith(p))) continue;
   const dir = `public/demo/${img.name}`;
   mkdirSync(dir, { recursive: true });
   let buf = await fetchBuffer(img.id, 2000);
+  if (img.cropY) buf = await cropLandscape(buf, img.cropY);
   if (img.blur) buf = await blurRegions(buf, img.blur);
   // Third-party decals (e.g. the M Performance hood sticker on GHOST) are retouched out.
   if (img.retouch) buf = await removeDecal(buf, img.retouch);
