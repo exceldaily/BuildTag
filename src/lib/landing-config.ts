@@ -16,7 +16,7 @@ export const FALLBACK_CODES: Record<LandingBuildKey, string> = {
 };
 
 export const HERO_TEMPLATE: TemplateId = "power";
-export const REVEAL_TEMPLATE: TemplateId = "track";
+export const REVEAL_TEMPLATE: TemplateId = "euro";
 
 /** Real template, real build, real permanent code for each designer tile. */
 export const DESIGNER_TILES: { template: TemplateId; name: string; build: LandingBuildKey }[] = [

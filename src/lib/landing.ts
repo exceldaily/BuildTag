@@ -114,6 +114,13 @@ export interface DecalImage {
   label: string;
 }
 
+/** Template as the homepage shows it. Euro keeps to the vehicle line and the prompt, like the sample plate. */
+function landingConfig(template: TemplateId) {
+  const config = TEMPLATES[template].build();
+  if (template === "euro") config.text.fields = { ...config.text.fields, power: false, torque: false };
+  return config;
+}
+
 /** Changes whenever the traced brand mark changes, so cached decal images refresh with a new logo. */
 const BRAND_VERSION = createHash("sha1").update(BRAND_PATH).update(WORDMARK_PATH).digest("hex").slice(0, 8);
 
@@ -125,9 +132,9 @@ export function decalImage(b: PublicBuild | null, key: LandingBuildKey, template
   if (!b) return null;
   const data = tagDataFor(b);
   if (!data) return null;
-  const layout = layoutTag(TEMPLATES[template].build(), data);
+  const layout = layoutTag(landingConfig(template), data);
   return {
-    src: `/api/landing/decal/${template}/${key}?v=${BRAND_VERSION}`,
+    src: `/api/landing/decal/${template}/${key}?v=${BRAND_VERSION}2`,
     width: Math.round(layout.width),
     height: Math.round(layout.height),
     label: `${TEMPLATES[template].name} BuildTag for ${b.nickname || `${b.year ?? ""} ${b.make} ${b.model}`.trim()}. Scan it to open the build.`,
@@ -158,7 +165,7 @@ function loadFontFrom(origin: string, id: FontId): Promise<opentype.Font> {
 export async function renderDecalSvg(b: PublicBuild, template: TemplateId, fontOrigin: string): Promise<string | null> {
   const data = tagDataFor(b);
   if (!data) return null;
-  const config = TEMPLATES[template].build();
+  const config = landingConfig(template);
   const layout = layoutTag(config, data);
   const fonts = new Map<FontId, opentype.Font>();
   await Promise.all([...new Set(layout.lines.map((l) => l.font))].map(async (id) => fonts.set(id, await loadFontFrom(fontOrigin, id))));
