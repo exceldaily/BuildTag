@@ -20,13 +20,15 @@ import {
   ScanDemo,
   Shops,
   Showcase,
+  ValueStrip,
   WhatModIsThat,
   type DesignerTile,
 } from "@/components/marketing/landing-sections";
 
-const TITLE = "BuildTags | Digital build profiles and QR tags for cars and motorcycles";
+const TITLE = "BuildTags | Vehicle build profiles and QR build tags for cars and motorcycles";
 const DESCRIPTION =
-  "Create a digital build profile for your car or motorcycle: mods, power, photos, socials and parts. Put a permanent BuildTag QR on the vehicle and let anyone scan the build.";
+  "Stop explaining your build. Put your car mod list, specs, photos and socials on one vehicle build profile, then tag the car or motorcycle with a QR build tag anyone can scan.";
+const SHARE_TITLE = "BuildTags | Stop explaining your build. Tag it.";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -35,14 +37,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "BuildTags",
-    title: "BuildTags | Your build deserves a spec sheet.",
+    title: SHARE_TITLE,
     description: DESCRIPTION,
     url: "/",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "BuildTags. Your build deserves a spec sheet." }],
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "BuildTags. Stop explaining your build. Tag it." }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BuildTags | Your build deserves a spec sheet.",
+    title: SHARE_TITLE,
     description: DESCRIPTION,
     images: ["/og.jpg"],
   },
@@ -93,17 +95,18 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      {/* What it is, in one picture */}
+      {/* The owner's side first: what it solves */}
       <Hero car={car} crew={carCrew} decal={heroDecal} />
+      <ValueStrip />
+      <WhatModIsThat bike={bagger} />
 
-      {/* Prove it with a real permanent code */}
+      {/* Then the scanner's side, with a real permanent code */}
       <ScanDemo car={car} qr={qrSvg(demoLink, 300)} link={demoLink} />
 
-      <BuildLoop bike={sportbike} decal={revealDecal} link={bikeLink} />
       <Showcase car={car} crew={carCrew} />
       <Benefits car={car} bagger={bagger} />
-      <WhatModIsThat bike={bagger} />
       <DesignerShowcase tiles={tiles} />
+      <BuildLoop bike={sportbike} decal={revealDecal} link={bikeLink} />
       <CarsAndBikes car={car} bike={bagger ?? sportbike} />
       <Crews crew={crew} />
       <Shops build={shopBuild} />

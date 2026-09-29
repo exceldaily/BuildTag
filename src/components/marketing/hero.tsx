@@ -75,32 +75,31 @@ export function Hero({ car, crew, decal }: { car: PublicBuild | null; crew: { na
             <Mono className="text-signal">Build profile / 001</Mono>
             <Mono>BT // Digital vehicle identity</Mono>
           </p>
-          <h1 className="mt-5 text-[3.05rem] leading-[0.86] font-extrabold sm:text-6xl md:text-7xl lg:text-[clamp(3.6rem,5.9vw,6.4rem)]">
-            <span className="speed-heading">Your build</span>
+          <h1 className="mt-4 text-[2.7rem] leading-[0.86] font-extrabold sm:mt-5 sm:text-6xl md:text-7xl lg:text-[clamp(3.2rem,5.1vw,5.6rem)]">
+            <span className="speed-heading">Stop explaining</span>
             <br />
-            <span className="speed-heading">deserves</span>
+            <span className="speed-heading">your build.</span>
             <br />
-            <span className="speed-heading chrome-text">a spec sheet.</span>
+            <span className="speed-heading chrome-text">Tag it.</span>
           </h1>
-          <p className="mt-6 font-display text-xl font-semibold tracking-[0.06em] uppercase sm:text-2xl">Build it. Tag it. Let anyone scan it.</p>
-          <p className="mt-3 max-w-lg text-foreground/75 sm:text-lg lg:max-w-[min(36vw,32rem)]">
-            Create the digital profile for your car or bike: mods, power, photos, socials and parts, all connected to one permanent BuildTag.
+          <p className="mt-4 max-w-lg text-foreground/75 sm:mt-6 sm:text-lg lg:max-w-[min(36vw,32rem)]">
+            Put your mods, parts, specs, photos, and socials behind one clean QR tag. When someone wants to know what&apos;s done to your build, they just scan it.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/signup" className="btn-hero" data-event="hero_create_build_clicked">
+          <div className="mt-6 flex gap-3 sm:mt-8">
+            <Link href="/signup" className="btn-hero flex-1 px-2 text-[13px] tracking-[0.08em] whitespace-nowrap sm:flex-none sm:px-5 sm:text-sm sm:tracking-[0.12em]" data-event="hero_create_build_clicked">
               Create your build
-              <ArrowUpRight className="size-4" aria-hidden="true" />
+              <ArrowUpRight className="hidden size-4 sm:block" aria-hidden="true" />
             </Link>
-            <a href="#scan-demo" className="btn-hero-ghost" data-event="hero_demo_opened">
-              Scan a demo
-            </a>
+            <Link href="/explore" className="btn-hero-ghost flex-1 px-2 text-[13px] tracking-[0.08em] whitespace-nowrap sm:flex-none sm:px-5 sm:text-sm sm:tracking-[0.12em]" data-event="explore_build_clicked">
+              Explore builds
+            </Link>
           </div>
-          <p className="label-tech mt-6 lg:max-w-[28vw]">Free to start · Cars and motorcycles · BuildTags from $8.99</p>
+          <p className="label-tech mt-6 hidden sm:block lg:max-w-[28vw]">Free to start · Cars and motorcycles · BuildTags from $8.99</p>
         </div>
 
         {/* ---------- THE SCENE (all positions relative to the car) ---------- */}
         {car && (
-          <div className="relative mt-[26vw] mb-[34vw] ml-[2vw] w-[110vw] sm:mt-[16vw] sm:mb-[22vw] sm:ml-[9vw] sm:w-[86vw] lg:absolute lg:bottom-[19%] lg:left-[40vw] lg:m-0 lg:w-[min(64vw,980px)]" style={{ aspectRatio: `${CUTOUT.w} / ${CUTOUT.h}` }}>
+          <div className="relative mt-[19vw] mb-[34vw] ml-[2vw] w-[110vw] sm:mt-[16vw] sm:mb-[22vw] sm:ml-[9vw] sm:w-[86vw] lg:absolute lg:bottom-[19%] lg:left-[40vw] lg:m-0 lg:w-[min(64vw,980px)]" style={{ aspectRatio: `${CUTOUT.w} / ${CUTOUT.h}` }}>
             {/* phones and tablets: the nickname sits behind the car here */}
             <p className="ghost-type pointer-events-none absolute top-[-40%] left-[-2%] text-[34vw] text-white/[0.05] sm:top-[-30%] sm:text-[26vw] lg:hidden" aria-hidden="true">
               {nickname}

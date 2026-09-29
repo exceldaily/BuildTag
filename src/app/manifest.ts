@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "BuildTags",
     short_name: "BuildTags",
-    description: "Your build deserves a spec sheet. Scan the build.",
+    description: "Stop explaining your build. Tag it.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",

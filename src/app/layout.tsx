@@ -45,14 +45,14 @@ export const metadata: Metadata = {
     siteName: "BuildTags",
     title: "BuildTags | Scan the build.",
     description:
-      "Your build deserves a spec sheet. Put a BuildTag on your car or bike and let anyone scan to see what is done to it.",
+      "Stop explaining your build. Put a BuildTag on your car or bike and let anyone scan to see what is done to it.",
     url: "/",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "BuildTags. Your build deserves a spec sheet." }],
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "BuildTags. Stop explaining your build. Tag it." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "BuildTags | Scan the build.",
-    description: "Your build deserves a spec sheet. Put a BuildTag on your car or bike and let anyone scan to see what is done to it.",
+    description: "Stop explaining your build. Put a BuildTag on your car or bike and let anyone scan to see what is done to it.",
     images: ["/og.jpg"],
   },
   icons: {

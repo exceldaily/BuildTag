@@ -119,11 +119,11 @@ async function main() {
   <!-- eyebrow -->
   <path d="${textPath(mono, "BUILD PROFILE / 001", 72, 196, 19, 0.16)}" fill="${PINK}"/>
   <!-- headline -->
-  <path d="${textPath(italic, "YOUR BUILD", 66, 292, 104, 0.005)}" fill="#ffffff"/>
-  <path d="${textPath(italic, "DESERVES", 66, 384, 104, 0.005)}" fill="#ffffff"/>
-  <path d="${textPath(italic, "A SPEC SHEET.", 66, 476, 104, 0.005)}" fill="#cfc8e8"/>
+  <path d="${textPath(italic, "STOP EXPLAINING", 66, 292, 96, 0.005)}" fill="#ffffff"/>
+  <path d="${textPath(italic, "YOUR BUILD.", 66, 384, 96, 0.005)}" fill="#ffffff"/>
+  <path d="${textPath(italic, "TAG IT.", 66, 476, 96, 0.005)}" fill="#cfc8e8"/>
   <!-- sub + url -->
-  <path d="${textPath(bold, "BUILD IT. TAG IT. LET ANYONE SCAN IT.", 72, 528, 27, 0.08)}" fill="#ffffff" fill-opacity="0.9"/>
+  <path d="${textPath(bold, "YOUR MODS, PARTS AND SPECS. ONE SCAN.", 72, 528, 27, 0.08)}" fill="#ffffff" fill-opacity="0.9"/>
   <path d="M72 560H420" stroke="${PINK}" stroke-width="2"/>
   <path d="${textPath(mono, "BUILDTAGS.APP", 72, 592, 20, 0.16)}" fill="#ffffff" fill-opacity="0.8"/>
 

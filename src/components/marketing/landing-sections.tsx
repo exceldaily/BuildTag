@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, KeyRound, QrCode } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import type { DecalImage } from "@/lib/landing";
 import { photoUrl } from "@/lib/storage";
@@ -35,36 +35,64 @@ function SlashList({ items, className }: { items: string[]; className?: string }
 }
 
 /* =============================================================================
- * LIVE SCAN DEMO: a real permanent code (continues the hero's line)
+ * VALUE STRIP: what sits behind the tag, in one line
  * ========================================================================== */
+const VALUE = [
+  { title: "Mods & parts", body: "Every part, by category." },
+  { title: "Specs & power", body: "HP, torque, the numbers." },
+  { title: "Photos & socials", body: "The build and where to follow it." },
+  { title: "Scan analytics", body: "See who's looking." },
+];
+
+export function ValueStrip() {
+  return (
+    <section className={cn(SECTION, "bg-[#0a0813]")} aria-label="What a BuildTag holds">
+      <Container className="grid gap-6 py-8 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-16 lg:py-10">
+        <p className="font-display text-3xl leading-none font-extrabold uppercase italic sm:text-4xl">
+          Your build. <span className="text-signal">One scan.</span>
+        </p>
+        <ul className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-5 sm:grid-cols-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12">
+          {VALUE.map((v, i) => (
+            <li key={v.title}>
+              <Mono className="text-signal">0{i + 1}</Mono>
+              <p className="mt-1.5 font-display text-base font-bold tracking-wide uppercase sm:text-lg">{v.title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{v.body}</p>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
+/* =============================================================================
+ * THE SCANNER'S SIDE: see it, scan it, read it. With a real permanent code.
+ * ========================================================================== */
+const SCAN_FLOW = ["See the build", "Scan the tag", "View the full build"];
+
 export function ScanDemo({ car, qr, link }: { car: PublicBuild | null; qr: string; link: string }) {
   const pretty = link.replace(/^https?:\/\//, "");
   const buildHref = car ? `/build/${car.slug}?via=tag` : "/explore";
   return (
-    <section id="scan-demo" className={cn(SECTION, "scroll-mt-16 overflow-hidden bg-[#0a0813]")}>
+    <section id="scan-demo" className={cn(SECTION, "cv-auto scroll-mt-16 overflow-hidden bg-[#0a0813]")}>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_36%_55%_at_82%_50%,rgba(255,45,122,0.09),transparent_70%)]" aria-hidden="true" />
-      <Container className={cn("relative grid items-center gap-12 lg:grid-cols-[1fr_auto] lg:gap-24", PAD)}>
+      <Container className={cn("relative grid items-center gap-12 lg:grid-cols-[1fr_auto_auto] lg:gap-20", PAD)}>
         <div className="max-w-2xl">
           <p className="eyebrow">
-            <span className="text-foreground/45">02 / </span>Live demo
+            <span className="text-foreground/45">03 / </span>On the other side of the scan
           </p>
           <h2 className="mt-3 text-4xl leading-[0.95] sm:text-5xl xl:text-6xl">
-            <span className="speed-heading">Don&apos;t take our word for it.</span>
+            <span className="speed-heading">See a build you like?</span>
             <br />
-            <span className="speed-heading chrome-text">Scan this.</span>
+            <span className="speed-heading chrome-text">Scan it.</span>
           </h2>
           <p className="mt-5 text-base text-foreground/75 sm:text-lg">
-            See exactly what someone sees when they scan a BuildTag.
-            {car ? ` This is the real, permanent code on ${car.nickname}, a ${[powerLabel(car.horsepower, car.horsepower_type), vehicleTitle(car)].filter(Boolean).join(" ")}.` : ""}
+            A BuildTag gives anyone instant access to the owner&apos;s build profile: parts, mods, specs, photos, socials and more.
           </p>
-          <ol className="mt-7 hidden divide-y divide-line border-y border-line md:block">
-            {["Open your phone's camera. No app needed.", "Point it at the code.", "Tap the link. You're looking at the build."].map((s, i) => (
-              <li key={s} className="flex items-center gap-4 py-2.5 text-sm text-foreground/80">
-                <Mono className="text-signal">0{i + 1}</Mono>
-                {s}
-              </li>
-            ))}
-          </ol>
+          <p className="mt-3 text-sm text-muted-foreground">
+            No app. Any phone camera.
+            {car ? ` Try it: this is the real, permanent code on ${car.nickname}, a ${[powerLabel(car.horsepower, car.horsepower_type), vehicleTitle(car)].filter(Boolean).join(" ")}.` : ""}
+          </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href={buildHref} className="btn-signal md:hidden" data-event="hero_demo_opened">
               Open demo build
@@ -74,7 +102,24 @@ export function ScanDemo({ car, qr, link }: { car: PublicBuild | null; qr: strin
             </Link>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-[300px]">
+
+        {/* the flow, top to bottom */}
+        <ol className="mx-auto flex w-full max-w-[300px] flex-col items-center text-center lg:w-auto" aria-label="How a scan works">
+          {SCAN_FLOW.map((step, i) => (
+            <li key={step} className="flex flex-col items-center">
+              {i > 0 && (
+                <svg viewBox="0 0 12 40" className="my-3 h-10 w-3 text-signal" aria-hidden="true">
+                  <path d="M6 0 V34" stroke="currentColor" strokeWidth="1.5" className="flow-dash" />
+                  <path d="M1 31 L6 38 L11 31" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                </svg>
+              )}
+              <Mono className="text-signal">0{i + 1}</Mono>
+              <span className={cn("mt-1.5 font-display text-2xl leading-none font-bold tracking-[0.06em] uppercase italic sm:text-3xl", i === 1 && "text-signal")}>{step}</span>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mx-auto w-full max-w-[280px]">
           <div className="relative rounded-sm bg-white p-4 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.9)] sm:p-5">
             <div role="img" aria-label={`QR code for ${pretty}`} className="[&>svg]:block [&>svg]:h-auto [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
             <Viewfinder tone="signal" />
@@ -140,7 +185,7 @@ export function BuildLoop({ bike, decal, link }: { bike: PublicBuild | null; dec
       <div className="eng-paper absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,transparent,#000_20%,#000_70%,transparent)]" aria-hidden="true" />
       <Container className={cn("relative", PAD)}>
         <SectionHead
-          index="03"
+          index="07"
           eyebrow="How it works"
           title={
             <>
@@ -167,7 +212,7 @@ export function BuildLoop({ bike, decal, link }: { bike: PublicBuild | null; dec
         </ol>
         <div className="reveal mt-16 grid gap-6 border-t border-line pt-8 md:grid-cols-[auto_1fr] md:items-end md:gap-12">
           <div className="flex items-start gap-4">
-            <Mono className="mt-2 text-signal">04</Mono>
+            <Mono className="mt-2 text-signal">+</Mono>
             <p className="font-display text-4xl leading-[0.9] font-extrabold uppercase italic sm:text-5xl">
               One permanent tag.
               <br />
@@ -187,16 +232,16 @@ export function BuildLoop({ bike, decal, link }: { bike: PublicBuild | null; dec
  * THE REAL PRODUCT: a build page with engineering callouts
  * ========================================================================== */
 const LEFT_CALLOUTS = [
-  { top: "18%", title: "Hero photo", body: "The shot that stops people." },
-  { top: "40%", title: "Year, make, model", body: "Plus the nickname it's known by." },
-  { top: "50%", title: "Power and torque", body: "WHP, torque and mod count up top." },
-  { top: "61%", title: "Vehicle socials", body: "The car's accounts come first." },
+  { top: "18%", title: "Photos", body: "The shots that stop people." },
+  { top: "44%", title: "HP, torque, engine", body: "WHP or crank, torque, dyno and mileage." },
+  { top: "61%", title: "Social links", body: "The vehicle's accounts come first." },
+  { top: "80%", title: "Build history", body: "When it started and what changed." },
 ];
 const RIGHT_CALLOUTS = [
-  { top: "36%", title: "Scanned from a BuildTag", body: "Visitors know they found it on the vehicle." },
-  { top: "56%", title: "Owner and crew", body: "Who owns it and who they ride with." },
-  { top: "74%", title: "Every modification", body: "Organized by category, with specs." },
-  { top: "86%", title: "Part links", body: "Tap through to the exact part." },
+  { top: "36%", title: "Scan statistics", body: "Scans, likes and part clicks, in your garage." },
+  { top: "62%", title: "Full mod list", body: "Organized by category." },
+  { top: "76%", title: "Brands and parts", body: "Exactly what's installed, and who installed it." },
+  { top: "88%", title: "Part links", body: "Tap through to the exact part." },
 ];
 
 export function Showcase({ car, crew }: { car: PublicBuild | null; crew: { name: string; slug: string } | null }) {
@@ -211,15 +256,13 @@ export function Showcase({ car, crew }: { car: PublicBuild | null; crew: { name:
         <SectionHead
           center
           index="04"
-          eyebrow="The build page"
+          eyebrow="The build profile"
           title={
             <>
-              <span className="speed-heading">Everything about the build.</span>
-              <br />
-              <span className="speed-heading chrome-text">One scan away.</span>
+              <span className="speed-heading">More than</span> <span className="speed-heading chrome-text">a QR code.</span>
             </>
           }
-          lede={`This is ${car.nickname}'s real public page, the one its BuildTag opens.`}
+          lede={`Every tag connects to a living build profile you can update as your vehicle changes. This one is ${car.nickname}'s, the page its BuildTag opens.`}
         />
         <div className="mt-12 grid items-center gap-10 lg:grid-cols-[1fr_330px_1fr] lg:gap-0 xl:grid-cols-[1fr_360px_1fr]">
           <Callouts items={LEFT_CALLOUTS} side="left" start={1} />
@@ -293,7 +336,7 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
           ))}
           {car && (
             <div className="self-end">
-              <Mono className="text-foreground/40">{car.nickname} · real build</Mono>
+              <Mono className="text-foreground/40">{car.nickname} · demo build</Mono>
             </div>
           )}
         </dl>
@@ -371,14 +414,23 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
             </li>
           ))}
         </ol>
+        <PartsFlow />
       </Container>
     </section>
   );
 }
 
 /* =============================================================================
- * "WHAT EXHAUST IS THAT?" and part discovery (the benchmark section)
+ * THE PROBLEM: the same five questions, every time it's parked
  * ========================================================================== */
+const QUESTIONS = [
+  { q: "What exhaust is that?", cls: "lg:col-start-1 lg:row-start-1 lg:-rotate-2" },
+  { q: "What wheels are those?", cls: "lg:col-start-3 lg:row-start-1 lg:rotate-1" },
+  { q: "What suspension are you running?", cls: "lg:col-start-2 lg:row-start-2 lg:-rotate-1" },
+  { q: "How much power does it make?", cls: "lg:col-start-1 lg:row-start-3 lg:rotate-1" },
+  { q: "What all have you done to it?", cls: "lg:col-start-3 lg:row-start-3 lg:-rotate-1" },
+];
+
 // Positions (percent of the photo) for the DUSK side-profile shot.
 const HOTSPOTS: Partial<Record<ModCategory, { x: number; y: number; flip?: boolean }>> = {
   exhaust: { x: 21, y: 63 },
@@ -399,13 +451,29 @@ export function WhatModIsThat({ bike }: { bike: PublicBuild | null }) {
   return (
     <section className={cn(SECTION, "cv-auto overflow-hidden bg-[#080712]")}>
       <Container className={PAD}>
-        <div className="text-center">
-          <p className="eyebrow">
-            <span className="text-foreground/45">06 / </span>The question every build gets
-          </p>
-          <h2 className="mt-4 text-5xl leading-[0.9] font-extrabold italic sm:text-7xl xl:text-8xl">&ldquo;What exhaust is that?&rdquo;</h2>
-          <p className="mt-4 font-display text-2xl font-bold tracking-[0.08em] uppercase sm:text-3xl">
-            Don&apos;t ask. <span className="text-signal">Scan it.</span>
+        <SectionHead
+          center
+          index="02"
+          eyebrow="Every meet. Every gas station."
+          title={
+            <>
+              <span className="speed-heading">Tired of answering</span>
+              <br />
+              <span className="speed-heading chrome-text">the same questions?</span>
+            </>
+          }
+        />
+        <ul className="mx-auto mt-10 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-4">
+          {QUESTIONS.map(({ q, cls }) => (
+            <li key={q} className={cn("reveal border-l-2 border-foreground/25 bg-white/[0.03] px-4 py-3 font-display text-xl leading-tight font-bold text-foreground/85 italic sm:text-2xl", cls)}>
+              &ldquo;{q}&rdquo;
+            </li>
+          ))}
+        </ul>
+        <div className="reveal mt-12 text-center">
+          <p className="font-display text-xl font-bold tracking-[0.08em] text-foreground/75 uppercase sm:text-2xl">They don&apos;t have to ask anymore.</p>
+          <p className="mt-3 text-5xl leading-[0.9] font-extrabold uppercase italic sm:text-7xl xl:text-8xl">
+            Scan the <span className="text-signal">BuildTag.</span>
           </p>
         </div>
 
@@ -446,7 +514,7 @@ export function WhatModIsThat({ bike }: { bike: PublicBuild | null }) {
             </ol>
             <figcaption className="mt-3">
               <Mono>
-                {bike.nickname} · {vehicleTitle(bike)} · real build, real parts list
+                {bike.nickname} · {vehicleTitle(bike)} · demo build, real parts
               </Mono>
             </figcaption>
           </figure>
@@ -456,8 +524,6 @@ export function WhatModIsThat({ bike }: { bike: PublicBuild | null }) {
             </Phone>
           </Link>
         </div>
-
-        <PartsFlow />
       </Container>
     </section>
   );
@@ -467,7 +533,7 @@ const PART_FLOW = ["Vehicle", "BuildTag", "Modification", "Product", "Product li
 
 function PartsFlow() {
   return (
-    <div className="reveal mt-16 grid gap-10 border-t border-line pt-10 lg:grid-cols-[1fr_1.15fr] lg:items-center">
+    <div className="reveal mt-14 grid gap-10 border-t border-line pt-10 lg:grid-cols-[1fr_1.15fr] lg:items-center">
       <div>
         <h3 className="text-3xl leading-[0.95] sm:text-4xl">
           <span className="speed-heading">Your build already</span>
@@ -509,6 +575,8 @@ export interface DesignerTile {
   build: string;
 }
 
+const PLACEMENTS = ["Rear quarter windows", "Rear glass", "Motorcycle windscreens", "Tail fairings", "Saddlebags and panniers", "Any clean, flat surface"];
+
 const SIZES = [
   { size: "3 × 3 in", price: "$8.99" },
   { size: "4 × 4 in", price: "$11.99" },
@@ -524,26 +592,27 @@ export function DesignerShowcase({ tiles }: { tiles: DesignerTile[] }) {
       <Container className={cn("relative grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center", PAD)}>
         <div>
           <SectionHead
-            index="07"
-            eyebrow="The BuildTag designer"
+            index="06"
+            eyebrow="The physical BuildTag"
             title={
               <>
-                <span className="speed-heading">Make the tag</span>
+                <span className="speed-heading">Built to live</span>
                 <br />
-                <span className="speed-heading chrome-text">match the build.</span>
+                <span className="speed-heading chrome-text">on the build.</span>
               </>
             }
+            lede="Clean enough to belong on the vehicle. Pick a layout that matches the build, size it for where it's going, and we print, cut and ship it."
           />
-          <ol className="mt-8 divide-y divide-line border-y border-line">
-            {["Choose the layout", "Choose the style", "Choose the size", "Preview it", "Order it"].map((s, i) => (
-              <li key={s} className="flex items-center gap-4 py-2.5 font-display text-lg font-bold tracking-wide uppercase">
-                <Mono className="text-signal">0{i + 1}</Mono>
-                {s}
+          <Mono className="mt-8 block text-signal">Where it goes</Mono>
+          <ul className="mt-3 grid grid-cols-2 border-t border-line">
+            {PLACEMENTS.map((p) => (
+              <li key={p} className="border-b border-line py-2.5 pr-3 font-display text-base font-bold tracking-wide uppercase sm:text-lg">
+                {p}
               </li>
             ))}
-          </ol>
+          </ul>
           <p className="mt-6 text-sm text-foreground/75">
-            Every design is test-scanned before you can order it. BuildTags from {DECAL_FROM}, gloss or matte, printed and shipped to you.
+            Every design is test-scanned before you can order it. BuildTags from {DECAL_FROM}, gloss or matte.
           </p>
           <Link href="/signup" className="btn-signal mt-8" data-event="designer_clicked">
             Design your BuildTag
@@ -694,9 +763,7 @@ export function Crews({ crew }: { crew: Crew | null }) {
 /* =============================================================================
  * SHOPS: built by the shop, owned by the customer, credit that keeps working
  * ========================================================================== */
-const SHOP_FLOW = ["Shop or dealer", "Creates the build", "Documents installed mods", "Installs the BuildTag", "Customer takes delivery", "Customer claims the build", "Customer keeps building"];
-const CLAIM_FLOW = ["Shop builds it", "Customer scans the private claim card", "Claim your build", "Build appears in the customer's garage", "Customer continues the story"];
-const PORTFOLIO_TRAIL = ["Scan", "View shop", "View other builds", "Website, socials, crew"];
+const SHOP_FLOW = ["Shop creates the build", "Adds installed parts and mods", "Places the BuildTag", "Transfers the profile to the owner"];
 
 export function Shops({ build }: { build: PublicBuild | null }) {
   const shop = build ? builtByOf(build) : null;
@@ -708,128 +775,72 @@ export function Shops({ build }: { build: PublicBuild | null }) {
   return (
     <section id="shops" className={cn(SECTION, "cv-auto scroll-mt-16 overflow-hidden")}>
       <div className="carbon absolute inset-0 opacity-50" aria-hidden="true" />
-      <Container className={cn("relative", PAD)}>
-        <SectionHead
-          index="10"
-          eyebrow="For shops & dealers"
-          title={
-            <>
-              <span className="speed-heading">Built by the shop.</span>
-              <br />
-              <span className="speed-heading chrome-text">Owned by the customer.</span>
-            </>
-          }
-          lede="A shop can create the entire digital build before the customer even has an account. When the vehicle is delivered, the customer securely claims it. The shop stays credited for the work it did."
-        />
-
-        {/* the handoff, as one line */}
-        <ol className="relative mt-12 grid gap-5 pl-6 lg:grid-cols-7 lg:gap-4 lg:pl-0">
-          <span className="absolute top-0 bottom-0 left-[5px] w-px bg-signal/50 lg:top-[5px] lg:right-0 lg:bottom-auto lg:left-0 lg:h-px lg:w-auto" aria-hidden="true" />
-          {SHOP_FLOW.map((s, i) => (
-            <li key={s} className="relative">
-              <span className="absolute top-[1px] left-[-24px] size-[11px] border border-signal bg-background lg:static lg:block" aria-hidden="true" />
-              <Mono className="block text-signal lg:mt-4">{String(i + 1).padStart(2, "0")}</Mono>
-              <p className="mt-1.5 font-display text-sm font-bold tracking-wide uppercase">{s}</p>
-            </li>
-          ))}
-        </ol>
-
-        <p className="reveal mt-16 max-w-4xl font-display text-3xl leading-[0.95] font-extrabold uppercase italic sm:text-5xl">
-          The customer takes ownership.
-          <br />
-          <span className="text-signal">The shop keeps the credit.</span>
-        </p>
-
-        <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* An excerpt of a real build sheet */}
-          {build && shop && (
-            <Link href={`/build/${build.slug}#built-by`} className="reveal group block" data-event="business_clicked">
-              <div className="flex items-end gap-4 border-b border-foreground/20 pb-4">
-                {photo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={photo} alt={`${vehicleTitle(build)} "${build.nickname}"`} loading="lazy" decoding="async" className="size-24 shrink-0 object-cover sm:size-28" />
-                )}
-                <div className="min-w-0">
-                  <Mono>{vehicleTitle(build)}</Mono>
-                  <p className="mt-1 font-display text-4xl leading-none font-extrabold uppercase italic">{build.nickname}</p>
-                  <p className="mt-2 font-display text-sm font-bold tracking-wide uppercase">
-                    <span className="text-muted-foreground">Built by </span>
-                    {shop.name}
-                  </p>
-                  <Mono className="mt-1 block text-foreground/40">Fictional demo shop</Mono>
-                </div>
-              </div>
-              <ul className="divide-y divide-line">
-                {[...shopMods, ...ownerMods].map((m) => {
-                  const isShop = m.source_type !== "owner";
-                  return (
-                    <li key={m.public_id} className="flex flex-col items-start gap-1.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                      <div className="min-w-0 max-w-full">
-                        <p className="truncate text-sm">
-                          {m.brand && <span className="text-foreground/60">{m.brand} </span>}
-                          {m.part_name}
-                        </p>
-                        <Mono className="mt-1 block">{MOD_CATEGORY_LABEL[m.category]}</Mono>
-                      </div>
-                      <Mono className={cn("shrink-0", isShop ? "text-signal" : "text-foreground/50")}>{isShop ? `Shop installed · ${m.recorded_by?.name}` : "Owner added"}</Mono>
-                    </li>
-                  );
-                })}
-              </ul>
-              <p className="border-t border-line pt-3 text-xs text-muted-foreground">Parts a shop records stay as recorded. The owner can hide them, not rewrite who did the work.</p>
-            </Link>
-          )}
-
-          {/* Claiming */}
-          <div className="reveal">
-            <div className="border-b border-foreground/20 pb-4">
-              <Mono className="text-signal">How claiming works</Mono>
-            </div>
-            <ol className="divide-y divide-line">
-              {CLAIM_FLOW.map((s, i) => (
-                <li key={s} className="flex items-center gap-4 py-3 text-sm">
-                  <Mono className="text-signal">0{i + 1}</Mono>
-                  {s}
-                </li>
-              ))}
-            </ol>
-            <div className="mt-6 grid gap-6 border-t border-foreground/20 pt-6 sm:grid-cols-2 sm:gap-0 sm:divide-x sm:divide-line">
-              <div className="sm:pr-6">
-                <QrCode className="size-5" aria-hidden="true" />
-                <p className="mt-2 font-display text-base font-bold uppercase">Public BuildTag</p>
-                <p className="mt-1 text-xs text-muted-foreground">On the vehicle. Anyone can scan it to see the build. It never transfers ownership.</p>
-              </div>
-              <div className="sm:pl-6">
-                <KeyRound className="size-5 text-signal" aria-hidden="true" />
-                <p className="mt-2 font-display text-base font-bold uppercase">Private claim card</p>
-                <p className="mt-1 text-xs text-muted-foreground">Handed to the owner. A single-use ownership credential that stops working once it&apos;s used.</p>
-              </div>
-            </div>
-          </div>
+      <Container className={cn("relative grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16", PAD)}>
+        <div>
+          <SectionHead
+            index="10"
+            eyebrow="Shops & builders"
+            title={
+              <>
+                <span className="speed-heading">Built by a shop?</span>
+                <br />
+                <span className="speed-heading chrome-text">Let them document it.</span>
+              </>
+            }
+            lede="Shops can create the build, add installed parts and modifications, place the BuildTag, and transfer the profile to the owner."
+          />
+          <ol className="mt-8 divide-y divide-line border-y border-line">
+            {SHOP_FLOW.map((s, i) => (
+              <li key={s} className="flex items-center gap-4 py-2.5 font-display text-base font-bold tracking-wide uppercase sm:text-lg">
+                <Mono className="text-signal">0{i + 1}</Mono>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-5 text-sm text-muted-foreground">The owner takes it from there. The shop stays credited for the work it did.</p>
+          <Link href="/business" className="btn-signal mt-8" data-event="business_clicked">
+            For shops & builders
+          </Link>
         </div>
 
-        {/* Portfolio value, in one line */}
-        <div className="reveal mt-16 grid gap-6 border-t border-foreground/20 pt-8 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
-            <p className="font-display text-2xl leading-tight font-bold uppercase sm:text-3xl">Every build that leaves your shop can keep promoting your work.</p>
-            <p className="mt-3 font-mono text-[11px] tracking-[0.14em] text-foreground/70 uppercase">
-              {PORTFOLIO_TRAIL.map((s, i) => (
-                <span key={s}>
-                  {i > 0 && <span className="px-2 text-signal">→</span>}
-                  {s}
-                </span>
-              ))}
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/business" className="btn-signal" data-event="business_clicked">
-              BuildTags for shops
-            </Link>
-            <Link href="/business/contact?interest=customer_buildtags" className="btn-ghost" data-event="business_clicked">
-              Talk to us
-            </Link>
-          </div>
-        </div>
+        {/* An excerpt of a real build sheet */}
+        {build && shop && (
+          <Link href={`/build/${build.slug}#built-by`} className="reveal group block" data-event="business_clicked">
+            <div className="flex items-end gap-4 border-b border-foreground/20 pb-4">
+              {photo && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo} alt={`${vehicleTitle(build)} "${build.nickname}"`} loading="lazy" decoding="async" className="size-24 shrink-0 object-cover sm:size-28" />
+              )}
+              <div className="min-w-0">
+                <Mono>{vehicleTitle(build)}</Mono>
+                <p className="mt-1 font-display text-4xl leading-none font-extrabold uppercase italic">{build.nickname}</p>
+                <p className="mt-2 font-display text-sm font-bold tracking-wide uppercase">
+                  <span className="text-muted-foreground">Built by </span>
+                  {shop.name}
+                </p>
+                <Mono className="mt-1 block text-foreground/40">Fictional demo shop</Mono>
+              </div>
+            </div>
+            <ul className="divide-y divide-line">
+              {[...shopMods, ...ownerMods].map((m) => {
+                const isShop = m.source_type !== "owner";
+                return (
+                  <li key={m.public_id} className="flex flex-col items-start gap-1.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="min-w-0 max-w-full">
+                      <p className="truncate text-sm">
+                        {m.brand && <span className="text-foreground/60">{m.brand} </span>}
+                        {m.part_name}
+                      </p>
+                      <Mono className="mt-1 block">{MOD_CATEGORY_LABEL[m.category]}</Mono>
+                    </div>
+                    <Mono className={cn("shrink-0", isShop ? "text-signal" : "text-foreground/50")}>{isShop ? `Shop installed · ${m.recorded_by?.name}` : "Owner added"}</Mono>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="border-t border-line pt-3 text-xs text-muted-foreground">Parts a shop records stay as recorded. The owner can hide them, not rewrite who did the work.</p>
+          </Link>
+        )}
       </Container>
     </section>
   );
@@ -905,8 +916,9 @@ export function FinalCta() {
           <span className="speed-heading">gets attention.</span>
         </h2>
         <p className="mt-6 font-display text-2xl font-bold tracking-[0.06em] uppercase sm:text-4xl">
-          Give people <span className="text-signal">something to scan.</span>
+          Give people <span className="text-signal">the details.</span>
         </p>
+        <p className="mx-auto mt-4 max-w-xl text-base text-foreground/75 sm:text-lg">Create your BuildTag and let the build speak for itself.</p>
         <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
           <Link href="/signup" className="btn-signal" data-event="signup_started">
             Create your build
