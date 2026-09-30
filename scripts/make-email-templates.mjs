@@ -122,7 +122,7 @@ function html(e) {
             <tr>
               <td style="padding:20px 4px 0 4px;">
                 <p style="margin:0 0 6px 0;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:2px;color:${MUTED};">SCAN THE BUILD. &nbsp;&middot;&nbsp; <a href="${SITE}" style="color:${MUTED};text-decoration:none;">BUILDTAGS.APP</a></p>
-                <p style="margin:0;font-family:${FONT};font-size:12px;line-height:18px;color:${MUTED};">Sent to {{ .Email }} because of activity on a BuildTags account. Questions? <a href="${SITE}/contact" style="color:${MUTED};">buildtags.app/contact</a></p>
+                <p style="margin:0;font-family:${FONT};font-size:12px;line-height:18px;color:${MUTED};">Sent to {{ .Email }} because of activity on a BuildTags account. Questions? <a href="mailto:customersupport@buildtags.app" style="color:${MUTED};">customersupport@buildtags.app</a></p>
               </td>
             </tr>
           </table>
