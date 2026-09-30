@@ -655,3 +655,20 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/*
+ * App chrome: the bottom tab bar (and its spacer) shows on phones, on touch
+ * devices of any width and whenever the site runs as an installed app.
+ * Wherever it shows, the header's desktop links step aside.
+ */
+.app-chrome {
+  display: none;
+}
+@media (max-width: 47.999rem), (display-mode: standalone), (display-mode: fullscreen), (hover: none) and (pointer: coarse) {
+  .app-chrome {
+    display: block;
+  }
+  .app-chrome-hide {
+    display: none;
+  }
+}

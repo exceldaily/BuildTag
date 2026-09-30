@@ -47,8 +47,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </span>
               <span className="hidden max-w-32 truncate text-muted-foreground sm:inline">@{profile.username}</span>
             </Link>
-            {/* Phones sign out from the More tab. */}
-            <form action={signOutAction} className="hidden md:block">
+            {/* With the tab bar showing, sign out lives in the More tab. */}
+            <form action={signOutAction} className="app-chrome-hide hidden md:block">
               <button type="submit" className="btn-ghost btn-small">
                 {t(L, "nav_sign_out")}
               </button>

@@ -43,7 +43,7 @@ const ICONS: Record<string, React.ReactNode> = {
 };
 
 /**
- * Phones: the app's bottom tab bar. Five slots (Garage, Explore, Orders,
+ * Phones, touch tablets and the installed app (any width): the bottom tab bar. Five slots (Garage, Explore, Orders,
  * Crew or Business, More), shown to signed-in members on every page so the
  * installed app never loses its navigation. Renders its own spacer so page
  * content can scroll clear of the bar.
@@ -87,8 +87,8 @@ export function AppTabBar({
 
   return (
     <>
-      <div className="h-[calc(4rem+env(safe-area-inset-bottom))] shrink-0 md:hidden" aria-hidden="true" />
-      <nav aria-label="App" className="app-tab-bar fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur select-none md:hidden">
+      <div className="app-chrome h-[calc(4rem+env(safe-area-inset-bottom))] shrink-0" aria-hidden="true" />
+      <nav aria-label="App" className="app-chrome app-tab-bar fixed inset-x-0 bottom-0 z-40 border-t border-line bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur select-none">
         <ul className="mx-auto flex max-w-xl items-stretch">
           {tabs.map((t) => (
             <li key={t.key} className="min-w-0 flex-1">
@@ -119,7 +119,7 @@ export function AppTabBar({
       </nav>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom" showCloseButton={false} className="gap-0 border-line bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
+        <SheetContent side="bottom" showCloseButton={false} className="mx-auto max-w-xl gap-0 border-line bg-background pb-[env(safe-area-inset-bottom)]">
           <SheetTitle className="sr-only">{labels.more}</SheetTitle>
           <span className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-foreground/20" aria-hidden="true" />
           <ul className="mt-2 divide-y divide-line">

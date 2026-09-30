@@ -35,7 +35,7 @@ function useItems(isAdmin: boolean, labels: NavLabels, hasBusiness: boolean) {
 export function DashboardNav({ isAdmin, hasBusiness = false, labels = EN }: { isAdmin: boolean; hasBusiness?: boolean; labels?: NavLabels }) {
   const items = useItems(isAdmin, labels, hasBusiness);
   return (
-    <nav className="hidden items-center gap-6 md:flex" aria-label="Dashboard">
+    <nav className="app-chrome-hide hidden items-center gap-6 md:flex" aria-label="Dashboard">
       {items.map((i) => (
         <Link
           key={i.href}
