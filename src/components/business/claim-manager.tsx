@@ -93,7 +93,7 @@ export function ClaimManager({
     start(async () => {
       const res = await sendClaimInviteAction({ claimId: fresh.claim_id, token: fresh.token, email });
       if (!res.ok) toast.error(res.error);
-      else toast.success(`Claim link sent to ${email}`);
+      else toast.success(`Claim link sent to ${email}. If they don't see it, ask them to check Spam or Junk.`);
     });
   };
 

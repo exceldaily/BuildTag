@@ -40,7 +40,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       )}
       {checkEmail && (
         <p className="mb-4 rounded-md border border-signal/40 bg-signal/10 px-3 py-2 text-sm">
-          Check your inbox to confirm your email, then sign in.
+          We sent you a link to confirm your email. Open it, then sign in. If it isn&apos;t in your inbox in a minute or two, check your Spam or Junk folder for an email from BuildTags.
         </p>
       )}
       {authError && (

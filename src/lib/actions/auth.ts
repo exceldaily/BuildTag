@@ -102,6 +102,10 @@ export async function signInAction(_prev: ActionResult | null, form: FormData): 
   });
   if (error) {
     if (error.code === "user_banned") return { ok: false, error: "This account has been suspended. Contact us if you think this is a mistake." };
+    // Only returned when the password was right, so this doesn't reveal anything new.
+    if (error.code === "email_not_confirmed") {
+      return { ok: false, error: "Confirm your email first. We sent you a link when you signed up. If it isn't in your inbox, check your Spam or Junk folder for an email from BuildTags." };
+    }
     return { ok: false, error: "Wrong email or password." };
   }
   // Follow the account's saved language from the first page after sign-in.

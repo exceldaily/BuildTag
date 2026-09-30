@@ -9,7 +9,7 @@ export function ResetForm() {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(sendPasswordResetAction, null);
 
   if (state?.ok) {
-    return <p className="text-sm text-muted-foreground">If that email has an account, a reset link is on its way.</p>;
+    return <p className="text-sm text-muted-foreground">If that email has an account, a reset link is on its way. If you don&apos;t see it in a minute or two, check your Spam or Junk folder for an email from BuildTags.</p>;
   }
 
   return (
