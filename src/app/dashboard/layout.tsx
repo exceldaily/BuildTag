@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/supabase/server";
 import { signOutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/layout/logo";
-import { DashboardNav, DashboardTabBar, type NavLabels } from "@/components/dashboard/dashboard-nav";
+import { DashboardNav, type NavLabels } from "@/components/dashboard/dashboard-nav";
+import { AppTabBar } from "@/components/layout/app-tab-bar";
+import { tabLabels } from "@/components/layout/signed-in-tab-bar";
 import { t } from "@/lib/i18n/dictionary";
 import { TourGuide } from "@/components/onboarding/tour-guide";
 import { getLegalStatus } from "@/lib/legal/status";
@@ -45,7 +47,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </span>
               <span className="hidden max-w-32 truncate text-muted-foreground sm:inline">@{profile.username}</span>
             </Link>
-            <form action={signOutAction}>
+            {/* Phones sign out from the More tab. */}
+            <form action={signOutAction} className="hidden md:block">
               <button type="submit" className="btn-ghost btn-small">
                 {t(L, "nav_sign_out")}
               </button>
@@ -54,7 +57,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </header>
       <main className="flex-1">
-        <div className="mx-auto w-full max-w-[1720px] px-4 py-8 pb-24 sm:px-6 lg:px-10 2xl:px-16 md:py-10 md:pb-10">{children}</div>
+        <div className="mx-auto w-full max-w-[1720px] px-4 py-8 sm:px-6 lg:px-10 2xl:px-16 md:py-10">{children}</div>
       </main>
       <TourGuide
         labels={{
@@ -75,7 +78,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           },
         }}
       />
-      <DashboardTabBar isAdmin={isAdmin} hasBusiness={hasBusiness} avatarUrl={profile.avatar_url} initial={(profile.display_name.slice(0, 1) || profile.username.slice(0, 1)).toUpperCase()} labels={labels} />
+      <AppTabBar isAdmin={isAdmin} hasBusiness={hasBusiness} avatarUrl={profile.avatar_url} initial={(profile.display_name.slice(0, 1) || profile.username.slice(0, 1)).toUpperCase()} labels={tabLabels(L)} />
     </div>
   );
 }

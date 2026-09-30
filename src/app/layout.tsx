@@ -77,7 +77,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang={locale} className={`dark ${inter.variable} ${barlow.variable} ${mono.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         {children}
-        <Toaster theme="dark" position="bottom-center" richColors closeButton />
+        <Toaster theme="dark" position="bottom-center" richColors closeButton mobileOffset={{ bottom: "5.25rem" }} />
         <PwaRegister />
       </body>
     </html>

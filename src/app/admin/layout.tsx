@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/supabase/server";
 import { signOutAction } from "@/lib/actions/auth";
 import { Logo } from "@/components/layout/logo";
+import { SignedInTabBar } from "@/components/layout/signed-in-tab-bar";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { client } = await requireAdmin();
@@ -41,6 +42,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </header>
       <main className="mx-auto w-full max-w-[1720px] flex-1 px-4 py-8 sm:px-6 lg:px-10 2xl:px-16">{children}</main>
+      <SignedInTabBar />
     </div>
   );
 }

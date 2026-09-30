@@ -9,6 +9,7 @@ import { siteUrl } from "@/lib/env";
 import { powerLabel, vehicleTitle } from "@/lib/utils";
 import { StatusPage } from "@/components/layout/status-page";
 import { BuildPage } from "@/components/build/build-page";
+import { SignedInTabBar } from "@/components/layout/signed-in-tab-bar";
 
 export const dynamic = "force-dynamic";
 
@@ -130,6 +131,7 @@ export default async function BuildRoute({ params, searchParams }: PageProps<"/b
         </div>
       )}
       <BuildPage build={b} liked={result.liked} viaTag={sp.via === "tag"} ownerPro={ownerPlan === "pro"} crew={crew} locale={locale} />
+      <SignedInTabBar />
     </>
   );
 }
