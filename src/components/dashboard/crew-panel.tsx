@@ -1,23 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { Crown, LogOut, Plus, Trash2, UserMinus, Users } from "lucide-react";
+import { Copy, Crown, LogOut, Plus, RefreshCw, Share2, Trash2, UserMinus, Users } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { addCrewMemberAction, createCrewAction, deleteCrewAction, removeCrewMemberAction, updateCrewAction } from "@/lib/actions/crews";
+import { addCrewMemberAction, createCrewAction, deleteCrewAction, removeCrewMemberAction, resetCrewInviteAction, updateCrewAction } from "@/lib/actions/crews";
 import type { Crew } from "@/lib/types";
 
 interface Props {
   crew: Crew | null;
   userId: string;
   isPro: boolean;
+  /** The owner's shareable join link (Pro crews only). */
+  inviteUrl?: string | null;
 }
 
-export function CrewPanel({ crew, userId, isPro }: Props) {
+export function CrewPanel({ crew, userId, isPro, inviteUrl = null }: Props) {
   const [pending, start] = useTransition();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const usernameRef = useRef<HTMLInputElement>(null);
+  const [link, setLink] = useState(inviteUrl);
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string; fieldErrors?: Record<string, string> }>, okMsg?: string) =>
     start(async () => {
@@ -39,7 +42,7 @@ export function CrewPanel({ crew, userId, isPro }: Props) {
           <p className="eyebrow text-signal">Pro feature</p>
           <h2 className="mt-2 text-3xl">Start a crew</h2>
           <p className="mt-2 max-w-lg text-sm text-foreground/80">
-            A crew is your group on BuildTag. Add members by username, get a shared crew page with everyone&apos;s builds and combined scans, and a crew badge on every member&apos;s build page.
+            A crew is your group on BuildTag. Add people with an invite link or by username, get a shared crew page with everyone&apos;s builds and combined scans, and a crew badge on every member&apos;s build page.
           </p>
           {isPro ? (
             <form
@@ -72,14 +75,14 @@ export function CrewPanel({ crew, userId, isPro }: Props) {
               <Link href="/dashboard/profile" className="btn-signal mt-3">
                 Go Pro
               </Link>
-              <p className="mt-2 text-xs text-muted-foreground">Already in someone else&apos;s crew? It shows up here once they add your username.</p>
+              <p className="mt-2 text-xs text-muted-foreground">Joining someone else&apos;s crew is free. Open their invite link, or ask them to add your username.</p>
             </div>
           )}
         </section>
         <aside className="panel p-5 text-sm text-muted-foreground">
           <p className="label-tech">How crews work</p>
           <ul className="mt-3 space-y-2">
-            <li>· The Pro member who creates the crew is the owner and adds members by their BuildTag username.</li>
+            <li>· The Pro member who creates the crew is the owner. They add people any time, with an invite link or by BuildTags username.</li>
             <li>· Members do not need Pro. One crew per person, up to 25 members.</li>
             <li>· The crew page lists every member&apos;s public builds and adds up their scans.</li>
             <li>· Members can leave any time. The owner can remove members or delete the crew.</li>
@@ -142,32 +145,126 @@ export function CrewPanel({ crew, userId, isPro }: Props) {
           )}
         </section>
 
+        {isOwner && (
+          <section className="panel p-6" id="add-people">
+            <p className="eyebrow text-signal">Grow the crew</p>
+            <h3 className="mt-1 text-2xl">Add people</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {crew.members.length} of 25 spots used. People you add don&apos;t need Pro, and they can be in one crew at a time.
+            </p>
+
+            <div className="mt-5">
+              <p className="field-label">Share an invite link</p>
+              {link ? (
+                <>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <input readOnly value={link} onFocus={(e) => e.currentTarget.select()} className="field flex-1 font-mono text-xs" aria-label="Crew invite link" />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn-signal flex-1 sm:flex-none"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(link);
+                            toast.success("Invite link copied");
+                          } catch {
+                            toast.error("Could not copy. Select the link and copy it by hand.");
+                          }
+                        }}
+                      >
+                        <Copy className="size-4" aria-hidden="true" />
+                        Copy
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-ghost flex-1 sm:flex-none"
+                        onClick={async () => {
+                          if (typeof navigator.share === "function") {
+                            try {
+                              await navigator.share({ title: `Join ${crew.name} on BuildTags`, text: `Join my crew, ${crew.name}, on BuildTags.`, url: link });
+                            } catch {
+                              /* share sheet dismissed */
+                            }
+                            return;
+                          }
+                          try {
+                            await navigator.clipboard.writeText(link);
+                            toast.success("Invite link copied");
+                          } catch {
+                            toast.error("Could not copy. Select the link and copy it by hand.");
+                          }
+                        }}
+                      >
+                        <Share2 className="size-4" aria-hidden="true" />
+                        Share
+                      </button>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Anyone with this link can join until the crew is full. If they&apos;re new to BuildTags, the link takes them through sign-up first.{" "}
+                    <button
+                      type="button"
+                      disabled={pending}
+                      className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
+                      onClick={() => {
+                        if (!window.confirm("Make a new invite link? The current link will stop working.")) return;
+                        start(async () => {
+                          const res = await resetCrewInviteAction();
+                          if (!res.ok) {
+                            toast.error(res.error ?? "Could not make a new link.");
+                            return;
+                          }
+                          setLink(res.data.url);
+                          toast.success("New invite link ready");
+                        });
+                      }}
+                    >
+                      <RefreshCw className="size-3" aria-hidden="true" />
+                      Make a new link
+                    </button>
+                  </p>
+                </>
+              ) : (
+                <p className="rounded-md border border-line p-3 text-sm text-muted-foreground">
+                  Invite links need an active Pro plan on the crew owner&apos;s account.{" "}
+                  <Link href="/dashboard/profile" className="underline underline-offset-2 hover:text-foreground">
+                    Check your plan
+                  </Link>
+                </p>
+              )}
+            </div>
+
+            <div className="mt-6 border-t border-line pt-5">
+              <p className="field-label">Or add someone by username</p>
+              <form
+                className="flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const v = usernameRef.current?.value.trim() ?? "";
+                  if (!v) return;
+                  run(() => addCrewMemberAction(v), "Member added");
+                  if (usernameRef.current) usernameRef.current.value = "";
+                }}
+              >
+                <div className="relative flex-1">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">@</span>
+                  <input ref={usernameRef} placeholder="username" autoCapitalize="none" autoComplete="off" className="field pl-8" aria-label="BuildTags username to add" />
+                </div>
+                <button type="submit" disabled={pending} className="btn-ghost">
+                  <Plus className="size-4" aria-hidden="true" />
+                  Add
+                </button>
+              </form>
+              <p className="mt-2 text-xs text-muted-foreground">They need a BuildTags account already. Their username is on their profile and build pages.</p>
+            </div>
+          </section>
+        )}
+
         <section className="panel p-6">
           <div className="flex items-center justify-between">
             <h3 className="text-2xl">Members</h3>
             <span className="label-tech">{crew.members.length} / 25</span>
           </div>
-          {isOwner && (
-            <form
-              className="mt-4 flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const v = usernameRef.current?.value.trim() ?? "";
-                if (!v) return;
-                run(() => addCrewMemberAction(v), "Member added");
-                if (usernameRef.current) usernameRef.current.value = "";
-              }}
-            >
-              <div className="relative flex-1">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">@</span>
-                <input ref={usernameRef} placeholder="username" autoCapitalize="none" autoComplete="off" className="field pl-8" aria-label="BuildTag username to add" />
-              </div>
-              <button type="submit" disabled={pending} className="btn-signal">
-                <Plus className="size-4" aria-hidden="true" />
-                Add
-              </button>
-            </form>
-          )}
           <ul className="mt-4 divide-y divide-line rounded-lg border border-line">
             {crew.members.map((m) => (
               <li key={m.user_id} className="flex items-center gap-3 px-3 py-2.5">

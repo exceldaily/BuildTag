@@ -1431,6 +1431,9 @@ export interface Database {
       create_crew: { Args: { p_name: string; p_tagline?: string }; Returns: Json };
       update_crew: { Args: { p_name: string; p_tagline: string }; Returns: Json };
       crew_add_member: { Args: { p_username: string }; Returns: undefined };
+      crew_invite: { Args: { p_reset?: boolean }; Returns: string };
+      crew_invite_preview: { Args: { p_code: string }; Returns: Json };
+      crew_join: { Args: { p_code: string }; Returns: Json };
       crew_remove_member: { Args: { p_user_id: string }; Returns: undefined };
       delete_crew: { Args: Record<never, never>; Returns: undefined };
       get_crew: { Args: { p_slug: string }; Returns: Json };

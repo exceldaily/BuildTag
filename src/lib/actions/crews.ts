@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { crewInviteUrl } from "@/lib/crew-invite";
 import { requireProfile } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/validation/common";
 
@@ -58,6 +60,26 @@ export async function removeCrewMemberAction(userId: string): Promise<ActionResu
   if (error) return { ok: false, error: message(error, "Could not remove that member.") };
   revalidatePath("/dashboard/crew");
   return { ok: true, data: undefined };
+}
+
+/** Replaces the crew's invite link; every link shared before stops working. */
+export async function resetCrewInviteAction(): Promise<ActionResult<{ url: string }>> {
+  const { client } = await requireProfile("/dashboard/crew");
+  const { data, error } = await client.rpc("crew_invite", { p_reset: true });
+  if (error || typeof data !== "string") return { ok: false, error: message(error, "Could not make a new link.") };
+  revalidatePath("/dashboard/crew");
+  return { ok: true, data: { url: crewInviteUrl(data) } };
+}
+
+/** Joins the crew behind an invite code, then opens the crew tab. */
+export async function joinCrewAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const code = z.string().trim().min(6).max(20).safeParse(form.get("code"));
+  if (!code.success) return { ok: false, error: "This invite link is not valid." };
+  const { client } = await requireProfile(`/crew-invite/${code.data}`);
+  const { error } = await client.rpc("crew_join", { p_code: code.data });
+  if (error) return { ok: false, error: message(error, "Could not join the crew.") };
+  revalidatePath("/dashboard/crew");
+  redirect("/dashboard/crew");
 }
 
 export async function deleteCrewAction(): Promise<ActionResult> {
