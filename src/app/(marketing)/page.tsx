@@ -15,6 +15,7 @@ import {
   CarsAndBikes,
   Crews,
   DesignerShowcase,
+  EarnFromBuild,
   FinalCta,
   RealBuilds,
   SameQuestions,
@@ -106,6 +107,7 @@ export default async function HomePage() {
 
       <Showcase car={car} crew={carCrew} />
       <Benefits car={car} bagger={bagger} />
+      <EarnFromBuild build={bagger ?? car} />
       <DesignerShowcase tiles={tiles} />
       <BuildLoop bike={sportbike} decal={revealDecal} link={bikeLink} />
       <CarsAndBikes car={car} bike={bagger ?? sportbike} />
@@ -116,10 +118,10 @@ export default async function HomePage() {
       <section id="pricing" className="relative scroll-mt-16 border-b border-line bg-[#080712]">
         <Container className="py-16 md:py-24">
           <SectionHead
-            index="12"
+            index="13"
             eyebrow="Pricing"
             title={<span className="speed-heading">Free is the real thing.</span>}
-            lede="Build pages are free. Pro adds more vehicles and crews. BuildTags themselves are priced per order."
+            lede="Build pages are free, including part links and your own affiliate links. Pro adds more vehicles and crews. BuildTags themselves are priced per order."
           />
           <div className="mt-10">
             <Pricing />
@@ -129,7 +131,7 @@ export default async function HomePage() {
 
       <section className="border-b border-line">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24 lg:px-10 xl:max-w-4xl">
-          <SectionHead index="13" eyebrow="Questions" title={<span className="speed-heading">Before you scan.</span>} />
+          <SectionHead index="14" eyebrow="Questions" title={<span className="speed-heading">Before you scan.</span>} />
           <div className="mt-10">
             <Faq />
           </div>

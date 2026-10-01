@@ -43,7 +43,7 @@ export function Pricing() {
         <p className="mt-3 font-display text-5xl font-extrabold uppercase italic">
           $0 <span className="text-lg text-muted-foreground not-italic">forever</span>
         </p>
-        <Bullets items={["1 vehicle, 12 photos", "Unlimited mods and part links", "Vehicle and owner socials", "Permanent BuildTag QR", "The BuildTag designer", "Scan and click analytics"]} />
+        <Bullets items={["1 vehicle, 12 photos", "Unlimited mods and part links", "Your own affiliate links on parts", "Scan, part click and affiliate click analytics", "Vehicle and owner socials", "Permanent BuildTag QR", "The BuildTag designer"]} />
         <Link href="/signup" className="btn-signal mt-auto w-full" data-event="pricing_clicked">
           Create your build
         </Link>

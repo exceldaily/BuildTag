@@ -185,7 +185,7 @@ export function BuildLoop({ bike, decal, link }: { bike: PublicBuild | null; dec
       <div className="eng-paper absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,transparent,#000_20%,#000_70%,transparent)]" aria-hidden="true" />
       <Container className={cn("relative", PAD)}>
         <SectionHead
-          index="07"
+          index="08"
           eyebrow="How it works"
           title={
             <>
@@ -358,7 +358,7 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
     },
     {
       title: "Make your parts list work",
-      body: "Someone asks “what exhaust is that?” They scan and find it. Add product links, including eligible affiliate links, to the parts you actually run.",
+      body: "Someone asks “what exhaust is that?” They scan and find it. Link every part to where it's sold, and use your own affiliate links where you have them.",
       evidence: linked && (
         <div className="flex items-center justify-between gap-4 border-y border-line py-3">
           <div className="min-w-0">
@@ -414,7 +414,6 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
             </li>
           ))}
         </ol>
-        <PartsFlow />
       </Container>
     </section>
   );
@@ -495,39 +494,181 @@ export function SameQuestions({ build, decal }: { build: PublicBuild | null; dec
   );
 }
 
-const PART_FLOW = ["Vehicle", "BuildTag", "Modification", "Product", "Product link"];
+/* =============================================================================
+ * AFFILIATE LINKS: the parts list can earn. Build, scan, click, purchase.
+ * ========================================================================== */
+const EARN_STEPS = [
+  { title: "Add your parts", body: "Build your mod list and link the products you actually use." },
+  { title: "Get scanned", body: "Your BuildTag connects the physical vehicle directly to its digital build page." },
+  { title: "Earn from your build", body: "Use your eligible affiliate links so traffic from your build can potentially generate commissions." },
+];
+/** Desktop: the full path, left to right. */
+const EARN_FLOW = ["Build", "BuildTag QR", "Scan", "Part list", "Click", "Purchase", "Commission"];
+/** Phones: the same path as a short vertical story. */
+const EARN_STORY = [
+  { step: "Build", body: "List the parts on your build." },
+  { step: "Scan", body: "Someone scans the BuildTag." },
+  { step: "Discover", body: "They open your part list." },
+  { step: "Buy", body: "They tap through and purchase." },
+  { step: "Earn", body: "An eligible link may earn you a commission." },
+];
+/** Illustration only. Labeled as example data wherever it shows. */
+const EARN_EXAMPLE: { label: string; value: string; note: string }[] = [
+  { label: "Part clicks", value: "184", note: "Counted by BuildTags" },
+  { label: "Product views", value: "327", note: "Counted by BuildTags" },
+  { label: "Est. commission", value: "$42.80", note: "Reported by your affiliate program" },
+];
 
-function PartsFlow() {
+export function EarnFromBuild({ build }: { build: PublicBuild | null }) {
+  // Lead with the parts people ask about most.
+  const rank = (c: ModCategory) => (c === "exhaust" ? 0 : c === "suspension" ? 1 : c === "intake" ? 2 : 3);
+  const seen = new Set<ModCategory>();
+  const parts = [...(build?.modifications.filter((m) => m.has_link) ?? [])]
+    .sort((a, b) => rank(a.category) - rank(b.category))
+    .filter((m) => !seen.has(m.category) && seen.add(m.category))
+    .slice(0, 3);
+
   return (
-    <div className="reveal mt-14 grid gap-10 border-t border-line pt-10 lg:grid-cols-[1fr_1.15fr] lg:items-center">
-      <div>
-        <h3 className="text-3xl leading-[0.95] sm:text-4xl">
-          <span className="speed-heading">Your build already</span>
-          <br />
-          <span className="speed-heading chrome-text">influences people.</span>
-        </h3>
-        <p className="mt-4 max-w-lg text-foreground/80">
-          BuildTags turns curiosity around a vehicle into instant product discovery. Connect eligible affiliate links to the parts you actually use, and a scan
-          can follow through to your product link.
-        </p>
-        <p className="mt-3 max-w-lg text-xs text-muted-foreground">
-          Links go through your own programs. BuildTags takes no cut, doesn&apos;t guarantee earnings and adds a disclosure to build pages with affiliate links.
-        </p>
-      </div>
-      {/* one technical line, five stations */}
-      <ol className="relative flex flex-col gap-6 pl-6 md:flex-row md:justify-between md:gap-0 md:pl-0" aria-label="From vehicle to product link">
-        <span className="absolute top-0 bottom-0 left-[5px] w-px bg-signal/50 md:top-[5px] md:right-0 md:bottom-auto md:left-0 md:h-px md:w-auto" aria-hidden="true" />
-        {PART_FLOW.map((s, i) => (
-          <li key={s} className="relative flex items-center gap-3 md:flex-col md:items-start md:gap-3">
-            <span className="absolute left-[-24px] size-[11px] border border-signal bg-background md:static" aria-hidden="true" />
-            <span>
-              <Mono className="block text-signal">0{i + 1}</Mono>
-              <span className="mt-1 block font-display text-sm font-bold tracking-[0.1em] uppercase">{s}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <section id="earn" className={cn(SECTION, "cv-auto scroll-mt-16 overflow-hidden bg-[#080712]")}>
+      <div className="eng-paper absolute inset-0 opacity-50 [mask-image:linear-gradient(to_bottom,transparent,#000_25%,#000_75%,transparent)]" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_34%_48%_at_78%_38%,rgba(255,45,122,0.1),transparent_70%)]" aria-hidden="true" />
+      <Container className={cn("relative", PAD)}>
+        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16 xl:gap-24">
+          {/* ---------- the pitch ---------- */}
+          <div>
+            <p className="eyebrow">
+              <span className="text-foreground/45">06 / </span>Affiliate links
+            </p>
+            <h2 className="mt-3 text-4xl leading-[0.95] sm:text-5xl xl:text-6xl">
+              <span className="speed-heading">Your build can</span>
+              <br />
+              <span className="speed-heading chrome-text">pay you back.</span>
+            </h2>
+            <p className="mt-5 font-display text-xl leading-tight font-bold tracking-[0.06em] uppercase sm:text-2xl">
+              List the parts. Share the build. <span className="text-signal">Earn from it.</span>
+            </p>
+            <p className="mt-4 max-w-xl text-base text-foreground/75 sm:text-lg">
+              Add your own affiliate links to the parts on your build. When someone scans your BuildTag, checks out your setup, and purchases through an eligible affiliate link, you may earn a
+              commission.
+            </p>
+            <ol className="mt-8 divide-y divide-line border-y border-line">
+              {EARN_STEPS.map((s, i) => (
+                <li key={s.title} className="flex gap-4 py-3.5">
+                  <Mono className="mt-1.5 text-signal">0{i + 1}</Mono>
+                  <div>
+                    <p className="font-display text-lg leading-none font-bold tracking-wide uppercase">{s.title}</p>
+                    <p className="mt-1.5 text-sm text-foreground/70">{s.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <Link href="/signup" className="btn-signal mt-8" data-event="signup_started">
+              Monetize your build
+            </Link>
+            <p className="mt-5 max-w-xl text-xs leading-relaxed text-muted-foreground">
+              Affiliate earnings depend on the user&apos;s affiliate programs, eligibility, attribution and applicable program terms. BuildTags does not guarantee commissions or earnings.
+            </p>
+          </div>
+
+          {/* ---------- the interface: a part list being tapped, and what it adds up to ---------- */}
+          <figure className="reveal relative">
+            <div className="border border-foreground/20 bg-background shadow-[0_40px_80px_-40px_rgba(0,0,0,1)]">
+              <div className="flex items-center justify-between gap-3 border-b border-foreground/20 px-4 py-3 sm:px-5">
+                <Mono className="text-foreground/80">Build page / Part list</Mono>
+                {build && <Mono className="truncate">{[build.nickname, build.model].filter(Boolean).join(" · ")}</Mono>}
+              </div>
+              <ul className="divide-y divide-line">
+                {parts.map((m, i) => (
+                  <li key={m.public_id} className={cn("flex items-center justify-between gap-4 px-4 py-4 sm:px-5", i === 0 && "bg-signal/[0.06]")}>
+                    <div className="min-w-0">
+                      <Mono className="block text-signal">{MOD_CATEGORY_LABEL[m.category]}</Mono>
+                      <p className="mt-1.5 truncate font-display text-lg leading-none font-bold tracking-wide uppercase sm:text-xl">{m.part_name}</p>
+                      {m.brand && <p className="mt-1 truncate text-xs text-muted-foreground">{m.brand}</p>}
+                    </div>
+                    {/* Same click-tracked redirect a scanner uses on the real build page. */}
+                    <a
+                      href={`/out/${build!.slug}/part/${m.public_id}`}
+                      target="_blank"
+                      rel={m.is_affiliate ? "noopener noreferrer nofollow sponsored" : "noopener noreferrer nofollow"}
+                      className={cn(
+                        "relative inline-flex h-9 shrink-0 items-center gap-1.5 border px-3 font-display text-xs font-bold tracking-[0.12em] uppercase transition-colors",
+                        i === 0 ? "border-signal bg-signal text-white" : "border-foreground/30 hover:border-signal hover:text-signal",
+                      )}
+                      aria-label={`View part: ${[m.brand, m.part_name].filter(Boolean).join(" ")} (opens the seller's site)`}
+                      data-event="explore_build_clicked"
+                    >
+                      View part <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                      {/* the tap */}
+                      {i === 0 && (
+                        <span className="hotspot absolute -right-1.5 -bottom-1.5 size-3" aria-hidden="true">
+                          <span className="absolute inset-0 rounded-full bg-white" />
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {/* readout */}
+              <div className="border-t border-foreground/20">
+                <div className="flex items-center justify-between gap-3 px-4 pt-3 sm:px-5">
+                  <Mono className="text-foreground/80">Link performance</Mono>
+                  <Mono className="border border-signal/60 px-1.5 py-1 text-signal">Example data</Mono>
+                </div>
+                <dl className="grid grid-cols-3 divide-x divide-line px-1 pt-2 pb-4 sm:px-2">
+                  {EARN_EXAMPLE.map((e, i) => (
+                    <div key={e.label} className="flex flex-col-reverse px-3">
+                      <dt>
+                        <Mono className="block">{e.label}</Mono>
+                        <span className="mt-1 hidden text-[10px] leading-tight text-muted-foreground sm:block">{e.note}</span>
+                      </dt>
+                      <dd className={cn("mb-1.5 font-display text-3xl leading-none font-extrabold italic tabular-nums sm:text-5xl", i === 2 && "text-signal")}>{e.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+            <figcaption className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              Example numbers to show the idea, not real results. BuildTags counts the clicks. Your affiliate program tracks purchases and pays any commission.
+            </figcaption>
+          </figure>
+        </div>
+
+        {/* ---------- the path. Desktop: seven stations on one line. ---------- */}
+        <ol className="relative mt-16 hidden grid-cols-7 md:grid" aria-label="From build to commission">
+          <svg className="pointer-events-none absolute top-[5px] right-[7%] left-[7%] h-px w-[86%] overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 1" aria-hidden="true">
+            <path d="M0 0.5 H100" stroke="var(--signal)" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash" />
+          </svg>
+          {EARN_FLOW.map((s, i) => {
+            const last = i === EARN_FLOW.length - 1;
+            return (
+              <li key={s} className="relative flex flex-col items-center text-center">
+                <span className={cn("relative size-[11px] border border-signal", last ? "bg-signal" : "bg-background")} aria-hidden="true" />
+                <Mono className="mt-4 block text-signal">0{i + 1}</Mono>
+                <span className={cn("mt-1.5 font-display text-sm font-bold tracking-[0.12em] uppercase lg:text-base", last && "text-signal")}>{s}</span>
+              </li>
+            );
+          })}
+        </ol>
+
+        {/* ---------- Phones: the same path as a vertical story. ---------- */}
+        <ol className="relative mt-12 space-y-6 pl-8 md:hidden" aria-label="From build to commission">
+          <svg className="pointer-events-none absolute top-1 bottom-1 left-[5px] h-[calc(100%-0.5rem)] w-px overflow-visible" preserveAspectRatio="none" viewBox="0 0 1 100" aria-hidden="true">
+            <path d="M0.5 0 V100" stroke="var(--signal)" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke" className="flow-dash" />
+          </svg>
+          {EARN_STORY.map((s, i) => {
+            const last = i === EARN_STORY.length - 1;
+            return (
+              <li key={s.step} className="relative">
+                <span className={cn("absolute top-1 left-[-32px] size-[11px] border border-signal", last ? "bg-signal" : "bg-background")} aria-hidden="true" />
+                <p className={cn("font-display text-2xl leading-none font-extrabold uppercase italic", last && "text-signal")}>{s.step}</p>
+                <p className="mt-1 text-sm text-foreground/70">{s.body}</p>
+              </li>
+            );
+          })}
+        </ol>
+      </Container>
+    </section>
   );
 }
 
@@ -558,7 +699,7 @@ export function DesignerShowcase({ tiles }: { tiles: DesignerTile[] }) {
       <Container className={cn("relative grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center", PAD)}>
         <div>
           <SectionHead
-            index="06"
+            index="07"
             eyebrow="The physical BuildTag"
             title={
               <>
@@ -650,7 +791,7 @@ export function CarsAndBikes({ car, bike }: { car: PublicBuild | null; bike: Pub
       {/* the headline crosses the split */}
       <div className="pointer-events-none relative px-4 py-10 text-center md:absolute md:inset-x-0 md:top-0 md:bg-gradient-to-b md:from-background/85 md:to-transparent md:pt-12 md:pb-24">
         <p className="eyebrow">
-          <span className="text-foreground/45">08 / </span>Cars and motorcycles
+          <span className="text-foreground/45">09 / </span>Cars and motorcycles
         </p>
         <h2 className="mt-3 text-4xl leading-[0.95] sm:text-5xl xl:text-6xl">
           <span className="speed-heading">Four wheels.</span> <span className="speed-heading">Two wheels.</span>{" "}
@@ -676,7 +817,7 @@ export function Crews({ crew }: { crew: Crew | null }) {
       <Container className={cn("relative grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end", PAD)}>
         <div>
           <SectionHead
-            index="09"
+            index="10"
             eyebrow="Crews"
             title={
               <>
@@ -744,7 +885,7 @@ export function Shops({ build }: { build: PublicBuild | null }) {
       <Container className={cn("relative grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16", PAD)}>
         <div>
           <SectionHead
-            index="10"
+            index="11"
             eyebrow="Shops & builders"
             title={
               <>
@@ -828,7 +969,7 @@ export function RealBuilds({ builds }: { builds: PublicBuildListRow[] }) {
       <Container className={PAD}>
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <SectionHead
-            index="11"
+            index="12"
             eyebrow="Explore"
             title={
               <>
