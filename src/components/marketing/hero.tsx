@@ -105,7 +105,7 @@ export function Hero({ car, crew, decal }: { car: PublicBuild | null; crew: { na
               {nickname}
             </p>
             {/* grounding shadow (large, soft) and faint wet-floor reflection */}
-            <div className="depth absolute inset-0" style={depth(4)} aria-hidden="true">
+            <div className="depth pointer-events-none absolute inset-0" style={depth(4)} aria-hidden="true">
               <div className="absolute top-[88%] left-[-4%] h-[16%] w-[108%] rounded-[50%] bg-black/80 blur-2xl" />
               <div className="absolute top-[93%] left-[6%] h-[7%] w-[88%] rounded-[50%] bg-black blur-md" />
               {/* eslint-disable-next-line @next/next/no-img-element */}

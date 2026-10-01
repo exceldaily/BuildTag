@@ -107,9 +107,11 @@ export default async function HomePage() {
       {/* Then the scanner's side, with a real permanent code */}
       <ScanDemo car={car} qr={qrSvg(demoLink, 300)} link={demoLink} />
 
+      {/* What the parts list can do for the owner */}
+      <EarnFromBuild build={bagger ?? car} />
+
       <Showcase car={car} crew={carCrew} />
       <Benefits car={car} bagger={bagger} />
-      <EarnFromBuild build={bagger ?? car} />
       <DesignerShowcase tiles={tiles} />
       <BuildLoop bike={sportbike} decal={revealDecal} link={bikeLink} />
       <CarsAndBikes car={car} bike={bagger ?? sportbike} />

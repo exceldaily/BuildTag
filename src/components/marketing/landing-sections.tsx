@@ -53,7 +53,7 @@ export function ValueStrip() {
         <p className="font-display text-3xl leading-none font-extrabold uppercase italic sm:text-4xl">
           Your build. <span className="text-signal">One scan.</span>
         </p>
-        <ul className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-5 sm:grid-cols-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12">
+        <ul className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-5 sm:grid-cols-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12">
           {VALUE.map((v, i) => (
             <li key={v.title}>
               <Mono className="text-signal">0{i + 1}</Mono>
@@ -61,6 +61,16 @@ export function ValueStrip() {
               <p className="mt-0.5 text-xs text-muted-foreground">{v.body}</p>
             </li>
           ))}
+          {/* the earning angle, one tap from its section */}
+          <li className="col-span-2 sm:col-span-1">
+            <a href="#earn" className="group block border-l-2 border-signal pl-3" data-event="explore_build_clicked">
+              <Mono className="text-signal">05</Mono>
+              <p className="mt-1.5 font-display text-base font-bold tracking-wide text-signal uppercase sm:text-lg">
+                Affiliate links <ArrowUpRight className="inline size-4 transition-transform group-hover:translate-x-0.5 sm:max-lg:hidden" aria-hidden="true" />
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Your parts list can pay you back.</p>
+            </a>
+          </li>
         </ul>
       </Container>
     </section>
@@ -257,7 +267,7 @@ export function Showcase({ car, crew }: { car: PublicBuild | null; crew: { name:
       <Container className={cn("relative", PAD)}>
         <SectionHead
           center
-          index="04"
+          index="05"
           eyebrow="The build profile"
           title={
             <>
@@ -394,7 +404,7 @@ export function Benefits({ car, bagger }: { car: PublicBuild | null; bagger: Pub
     <section className={cn(SECTION, "cv-auto")}>
       <Container className={PAD}>
         <SectionHead
-          index="05"
+          index="06"
           eyebrow="What you get"
           title={
             <>
@@ -539,7 +549,7 @@ export function EarnFromBuild({ build }: { build: PublicBuild | null }) {
           {/* ---------- the pitch ---------- */}
           <div>
             <p className="eyebrow">
-              <span className="text-foreground/45">06 / </span>Affiliate links
+              <span className="text-foreground/45">04 / </span>Affiliate links
             </p>
             <h2 className="mt-3 text-4xl leading-[0.95] sm:text-5xl xl:text-6xl">
               <span className="speed-heading">Your build can</span>
