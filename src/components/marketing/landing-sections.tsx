@@ -5,7 +5,9 @@ import type { DecalImage } from "@/lib/landing";
 import { photoUrl } from "@/lib/storage";
 import { MOD_CATEGORY_LABEL, type Crew, type ModCategory, type PublicBuild, type PublicBuildListRow, type SocialPlatform } from "@/lib/types";
 import { cn, formatCount, powerLabel, vehicleTitle } from "@/lib/utils";
+import { BOARDS, type BoardBuildRow } from "@/lib/leaderboards";
 import { BuildCard } from "@/components/build/build-card";
+import { OpenPlace, StandingBuild } from "@/components/leaderboard/board-ui";
 import { SocialIcon } from "@/components/build/social-icon";
 
 import { BuildScreen, CameraScreen, Container, Decal, Mono, Phone, PhysicalTag, SectionHead, Viewfinder } from "./landing-ui";
@@ -999,6 +1001,59 @@ export function RealBuilds({ builds }: { builds: PublicBuildListRow[] }) {
         <Link href="/explore" className="btn-ghost mt-8" data-event="explore_build_clicked">
           Explore builds
         </Link>
+      </Container>
+    </section>
+  );
+}
+
+/* =============================================================================
+ * LEADERBOARD PREVIEW: the live top of the scan board
+ * ========================================================================== */
+export function ScanBoardPreview({ rows }: { rows: BoardBuildRow[] }) {
+  const board = BOARDS[0];
+  const top = rows.slice(0, 5);
+  const leader = top[0]?.scans ?? 0;
+  const openPlaces = Array.from({ length: Math.max(0, 3 - top.length) }, (_, i) => top.length + i + 1);
+  return (
+    <section className={cn(SECTION, "cv-auto bg-[#080712]")}>
+      <Container className={cn("grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:gap-16", PAD)}>
+        <div>
+          <SectionHead
+            index="13"
+            eyebrow="Leaderboards"
+            title={
+              <>
+                <span className="speed-heading">What&apos;s getting</span>
+                <br />
+                <span className="speed-heading chrome-text">scanned.</span>
+              </>
+            }
+            lede="Live standings from real scans on public builds. Most scanned, most liked, trending, top builds and top crews."
+          />
+          <Link href="/leaderboards" className="btn-signal mt-8" data-event="explore_build_clicked">
+            View leaderboards <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="reveal">
+          <div className="flex items-center justify-between border-b border-foreground/20 pb-3">
+            <Mono className="text-foreground/80">Most scanned / All time</Mono>
+            <Mono className="text-signal">Live</Mono>
+          </div>
+          {top.length > 0 && (
+            <ol className="divide-y divide-line">
+              {top.map((b) => (
+                <StandingBuild key={b.slug} b={b} board={board} leader={leader} compact />
+              ))}
+            </ol>
+          )}
+          {openPlaces.length > 0 && (
+            <ol className={cn("grid gap-4 pt-5", openPlaces.length === 3 ? "sm:grid-cols-3" : openPlaces.length === 2 ? "sm:grid-cols-2" : "")}>
+              {openPlaces.map((rank) => (
+                <OpenPlace key={rank} rank={rank} />
+              ))}
+            </ol>
+          )}
+        </div>
       </Container>
     </section>
   );

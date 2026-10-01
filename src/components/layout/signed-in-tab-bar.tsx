@@ -16,7 +16,7 @@ export function tabLabels(L: Locale): TabLabels {
     admin: t(L, "nav_admin"),
     more: t(L, "nav_more"),
     crews: t(L, "nav_crews"),
-    leaderboard: t(L, "nav_leaderboard"),
+    leaderboard: t(L, "nav_leaderboards"),
     signOut: t(L, "nav_sign_out"),
   };
 }

@@ -10,7 +10,7 @@ const COLUMNS = [
     links: [
       { href: "/signup", label: "Create Your Build" },
       { href: "/explore", label: "Explore Builds" },
-      { href: "/leaderboard", label: "Scan Leaderboard" },
+      { href: "/leaderboards", label: "Leaderboards" },
       { href: "/crews", label: "Crews" },
       { href: "/about", label: "About" },
     ],

@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 import { publicEnv } from "@/lib/env";
+import type { BoardBuildRow, BoardCrewRow, BoardId, BoardPeriod } from "@/lib/leaderboards";
 import type { Crew, CrewLeaderboardRow, Database, LeaderboardRow, Plan, PublicBuildListRow, PublicBuildResult, PublicOrganization } from "@/lib/types";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -112,6 +113,20 @@ export async function scanLeaderboard(period: LeaderboardPeriod, limit = 25): Pr
   const { data, error } = await anonClient().rpc("scan_leaderboard", { p_period: period, p_limit: limit });
   if (error || !Array.isArray(data)) return [];
   return data as unknown as LeaderboardRow[];
+}
+
+/** Public build standings (most scanned, most liked, trending, top). Ranked in the database; demo accounts are never included. */
+export async function leaderboard(board: Exclude<BoardId, "crews">, period: BoardPeriod, limit = 50): Promise<BoardBuildRow[]> {
+  const { data, error } = await anonClient().rpc("leaderboard", { p_board: board, p_period: period, p_limit: limit });
+  if (error || !Array.isArray(data)) return [];
+  return data as unknown as BoardBuildRow[];
+}
+
+/** Public crew standings by combined member scans. */
+export async function leaderboardCrews(period: BoardPeriod, limit = 50): Promise<BoardCrewRow[]> {
+  const { data, error } = await anonClient().rpc("leaderboard_crews", { p_period: period, p_limit: limit });
+  if (error || !Array.isArray(data)) return [];
+  return data as unknown as BoardCrewRow[];
 }
 
 /** Plan of a build's owner, for the Pro badge on the public page. */

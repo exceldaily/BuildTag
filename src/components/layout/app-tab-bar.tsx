@@ -77,7 +77,7 @@ export function AppTabBar({
     { href: "/dashboard/profile", label: labels.profile },
     hasBusiness ? { href: "/dashboard/crew", label: labels.crew } : { href: "/dashboard/business/register", label: labels.business },
     { href: "/crews", label: labels.crews },
-    { href: "/leaderboard", label: labels.leaderboard },
+    { href: "/leaderboards", label: labels.leaderboard },
     ...(isAdmin ? [{ href: "/admin", label: labels.admin }] : []),
   ];
   const moreActive = !tabs.some((t) => t.active) && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"));

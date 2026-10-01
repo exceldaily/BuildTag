@@ -1439,6 +1439,8 @@ export interface Database {
       get_crew: { Args: { p_slug: string }; Returns: Json };
       build_crew: { Args: { p_slug: string }; Returns: Json };
       crew_leaderboard: { Args: { p_period?: string; p_limit?: number }; Returns: Json };
+      leaderboard: { Args: { p_board?: string; p_period?: string; p_limit?: number }; Returns: Json };
+      leaderboard_crews: { Args: { p_period?: string; p_limit?: number }; Returns: Json };
       my_crew: { Args: Record<never, never>; Returns: Json };
       build_owner_plan: { Args: { p_slug: string }; Returns: Plan };
       create_organization: { Args: { p_name: string; p_type: OrganizationType; p_details?: Json }; Returns: OrganizationRow };

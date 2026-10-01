@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { siteUrl } from "@/lib/env";
+import { leaderboard } from "@/lib/db/public";
 import { decalImage, demoScanUrl, loadLanding } from "@/lib/landing";
 import { DESIGNER_TILES, FALLBACK_CODES, GLASS_TEMPLATE, HERO_TEMPLATE, REVEAL_TEMPLATE } from "@/lib/landing-config";
 import { qrSvg } from "@/lib/qr/generate";
@@ -19,6 +20,7 @@ import {
   FinalCta,
   RealBuilds,
   SameQuestions,
+  ScanBoardPreview,
   ScanDemo,
   Shops,
   Showcase,
@@ -58,7 +60,7 @@ function label(b: PublicBuild): string {
 }
 
 export default async function HomePage() {
-  const data = await loadLanding();
+  const [data, scanBoard] = await Promise.all([loadLanding(), leaderboard("scanned", "all", 5).catch(() => [])]);
   const { car, bagger, sportbike, shopBuild, sedan, carCrew, crew, builds } = data;
 
   const heroDecal = decalImage(car, "car", HERO_TEMPLATE);
@@ -114,11 +116,12 @@ export default async function HomePage() {
       <Crews crew={crew} />
       <Shops build={shopBuild} />
       <RealBuilds builds={builds} />
+      <ScanBoardPreview rows={scanBoard} />
 
       <section id="pricing" className="relative scroll-mt-16 border-b border-line bg-[#080712]">
         <Container className="py-16 md:py-24">
           <SectionHead
-            index="13"
+            index="14"
             eyebrow="Pricing"
             title={<span className="speed-heading">Free is the real thing.</span>}
             lede="Build pages are free, including part links and your own affiliate links. Pro adds more vehicles and crews. BuildTags themselves are priced per order."
@@ -131,7 +134,7 @@ export default async function HomePage() {
 
       <section className="border-b border-line">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24 lg:px-10 xl:max-w-4xl">
-          <SectionHead index="14" eyebrow="Questions" title={<span className="speed-heading">Before you scan.</span>} />
+          <SectionHead index="15" eyebrow="Questions" title={<span className="speed-heading">Before you scan.</span>} />
           <div className="mt-10">
             <Faq />
           </div>
