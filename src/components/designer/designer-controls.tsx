@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Upload } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -8,21 +9,22 @@ import { qrContrastVerdict } from "@/lib/qr/contrast";
 import { QR_FINDER_STYLES, QR_MODULE_STYLES, LOGO_MAX_SCALE, LOGO_MIN_SCALE } from "@/lib/qr/render";
 import { BACKGROUND_OPTIONS, CTA_PRESETS, FONT_LIST, FRAME_LIST, LAYOUT_LIST, MATERIALS, PALETTES, SAFE_QR_PAIRS, SHAPE_LIST, SIZE_PRESETS, TEMPLATE_LIST, renderTagSvg, sizeFromPreset } from "@/lib/tag";
 import { SOCIAL_GLYPHS } from "@/lib/tag/icons";
+import { SAMPLE_LINES, isSampleLine } from "@/lib/tag/wording";
 import type { BackgroundKind, FrameId, LayoutId, MaterialId, ShapeId, TagConfig, TagData, TemplateId, TextFields } from "@/lib/tag/types";
 import type { Plan, PrintSpecificationRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type SectionId = "template" | "shape" | "layout" | "qr" | "frame" | "colors" | "text" | "vehicle" | "social" | "background" | "size" | "material" | "advanced";
+type SectionId = "template" | "wording" | "shape" | "layout" | "qr" | "frame" | "colors" | "text" | "social" | "background" | "size" | "material" | "advanced";
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "template", label: "Template" },
+  { id: "wording", label: "Wording" },
   { id: "shape", label: "Shape" },
   { id: "layout", label: "Layout" },
   { id: "qr", label: "QR Style" },
   { id: "frame", label: "Frame" },
   { id: "colors", label: "Colors" },
-  { id: "text", label: "Text" },
-  { id: "vehicle", label: "Vehicle Data" },
+  { id: "text", label: "Font & Logo" },
   { id: "social", label: "Social" },
   { id: "background", label: "Background" },
   { id: "size", label: "Size" },
@@ -41,7 +43,7 @@ interface Props {
   onChange: (patch: Partial<TagConfig> | ((c: TagConfig) => TagConfig)) => void;
 }
 
-export function DesignerControls({ config, data, printSpecs, shopLogos, autosave, onAutosave, onChange }: Props) {
+export function DesignerControls({ config, data, plan, printSpecs, shopLogos, autosave, onAutosave, onChange }: Props) {
   const [open, setOpen] = useState<SectionId>("template");
   const set = <K extends keyof TagConfig>(key: K, value: TagConfig[K]) => onChange({ [key]: value } as Partial<TagConfig>);
 
@@ -57,13 +59,13 @@ export function DesignerControls({ config, data, printSpecs, shopLogos, autosave
             {open === s.id && (
               <>
                 {s.id === "template" && <TemplateSection config={config} data={data} onChange={onChange} />}
+                {s.id === "wording" && <WordingSection config={config} data={data} canCustom={plan === "pro"} onChange={onChange} />}
                 {s.id === "shape" && <ShapeSection config={config} data={data} set={set} />}
                 {s.id === "layout" && <LayoutSection config={config} set={set} />}
                 {s.id === "qr" && <QrSection config={config} shopLogos={shopLogos} onChange={onChange} />}
                 {s.id === "frame" && <FrameSection config={config} data={data} set={set} />}
                 {s.id === "colors" && <ColorsSection config={config} onChange={onChange} />}
                 {s.id === "text" && <TextSection config={config} onChange={onChange} />}
-                {s.id === "vehicle" && <VehicleSection config={config} data={data} onChange={onChange} />}
                 {s.id === "social" && <SocialSection config={config} data={data} onChange={onChange} />}
                 {s.id === "background" && <BackgroundSection config={config} onChange={onChange} />}
                 {s.id === "size" && <SizeSection config={config} onChange={onChange} />}
@@ -339,7 +341,7 @@ function TextSection({ config, onChange }: { config: TagConfig; onChange: Props[
   const setText = (patch: Partial<TagConfig["text"]>) => onChange((c) => ({ ...c, text: { ...c.text, ...patch } }));
   return (
     <>
-      <Hint>Typography and the words on the decal.</Hint>
+      <Hint>Typeface and the logo line. The words themselves are under Wording.</Hint>
       <p className="field-label">Font</p>
       <div className="grid grid-cols-2 gap-1.5">
         {FONT_LIST.map((f) => (
@@ -366,37 +368,20 @@ function TextSection({ config, onChange }: { config: TagConfig; onChange: Props[
           />
         </div>
       )}
-      <label className="mt-3 block">
-        <span className="field-label">Headline</span>
-        <select value={t.headline} onChange={(e) => setText({ headline: e.target.value as TagConfig["text"]["headline"] })} className="field">
-          <option value="none">None</option>
-          <option value="whats-done">WHAT&apos;S DONE TO IT?</option>
-          <option value="build-sheet">BUILD SHEET</option>
-          <option value="custom">Custom…</option>
-        </select>
-      </label>
-      {t.headline === "custom" && <input value={t.headlineCustom} maxLength={40} placeholder="Custom headline" onChange={(e) => setText({ headlineCustom: e.target.value })} className="field mt-2" aria-label="Custom headline" />}
-      <label className="mt-3 block">
-        <span className="field-label">Call to action</span>
-        <select value={t.cta} onChange={(e) => setText({ cta: e.target.value as TagConfig["text"]["cta"] })} className="field">
-          {CTA_PRESETS.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      {t.cta === "custom" && <input value={t.ctaCustom} maxLength={40} placeholder="Custom call to action" onChange={(e) => setText({ ctaCustom: e.target.value })} className="field mt-2" aria-label="Custom call to action" />}
-      <label className="mt-3 block">
-        <span className="field-label">Custom short text</span>
-        <input value={t.custom} maxLength={40} placeholder="STAGE 2 · E85" onChange={(e) => setText({ custom: e.target.value })} className="field" />
-      </label>
     </>
   );
 }
 
-function VehicleSection({ config, data, onChange }: { config: TagConfig; data: TagData; onChange: Props["onChange"] }) {
-  const f = config.text.fields;
+const OWN_WORDS = "__own";
+
+/**
+ * Everything the tag says, in one place. Any plan can take a line off or
+ * swap in ready-made wording; typing your own words is Pro.
+ */
+function WordingSection({ config, data, canCustom, onChange }: { config: TagConfig; data: TagData; canCustom: boolean; onChange: Props["onChange"] }) {
+  const t = config.text;
+  const f = t.fields;
+  const setText = (patch: Partial<TagConfig["text"]>) => onChange((c) => ({ ...c, text: { ...c.text, ...patch } }));
   const toggle = (key: keyof TextFields) => onChange((c) => ({ ...c, text: { ...c.text, fields: { ...c.text.fields, [key]: !c.text.fields[key] } } }));
   const rows: { key: keyof TextFields; label: string; value: string }[] = [
     { key: "year", label: "Year", value: data.year ? String(data.year) : "" },
@@ -404,25 +389,114 @@ function VehicleSection({ config, data, onChange }: { config: TagConfig; data: T
     { key: "model", label: "Model", value: data.model },
     { key: "trim", label: "Trim", value: data.trim },
     { key: "nickname", label: "Nickname", value: data.nickname },
-    { key: "power", label: "HP / WHP", value: data.powerLabel },
+    { key: "power", label: "Power", value: data.powerLabel },
     { key: "torque", label: "Torque", value: data.torqueLabel },
-    { key: "modCount", label: "Modification count", value: data.modCount ? `${data.modCount} mods` : "" },
-    { key: "username", label: "BuildTag username", value: data.username ? `@${data.username}` : "" },
+    { key: "modCount", label: "Mod count", value: data.modCount ? `${data.modCount} mods` : "" },
+    { key: "username", label: "Username", value: data.username ? `@${data.username}` : "" },
   ];
+  const extraValue = t.custom.trim() === "" ? "" : isSampleLine(t.custom) ? t.custom.trim() : OWN_WORDS;
+  const [ownExtra, setOwnExtra] = useState(extraValue === OWN_WORDS);
+  const pro = <span className="ml-1 rounded-sm border border-signal/60 px-1 py-px font-display text-[9px] font-bold tracking-[0.14em] text-signal uppercase">Pro</span>;
+
   return (
     <>
-      <Hint>Values come from your build and stay in sync until you approve a proof.</Hint>
+      <Hint>Choose what the tag says. Untick a line to take it off the tag.</Hint>
+
+      <p className="field-label">Lines from your build</p>
       <ul className="divide-y divide-line rounded-md border border-line">
         {rows.map((r) => (
           <li key={r.key}>
             <label className={cn("flex items-center gap-3 px-3 py-2 text-sm", !r.value && "opacity-50")}>
-              <input type="checkbox" checked={f[r.key]} disabled={!r.value} onChange={() => toggle(r.key)} className="size-4 accent-[#ff2d7a]" />
+              <input type="checkbox" checked={f[r.key] && Boolean(r.value)} disabled={!r.value} onChange={() => toggle(r.key)} className="size-4 accent-[#ff2d7a]" />
               <span className="flex-1">{r.label}</span>
               <span className="truncate text-xs text-muted-foreground">{r.value || "not set"}</span>
             </label>
           </li>
         ))}
       </ul>
+      <p className="mt-1.5 text-[11px] text-muted-foreground">These come from the build, so they stay correct when the build changes.</p>
+
+      <label className="mt-4 block">
+        <span className="field-label">Headline</span>
+        <select
+          value={t.headline}
+          onChange={(e) => setText({ headline: e.target.value as TagConfig["text"]["headline"] })}
+          className="field"
+        >
+          <option value="none">None</option>
+          <option value="whats-done">WHAT&apos;S DONE TO IT?</option>
+          <option value="build-sheet">BUILD SHEET</option>
+          <option value="custom" disabled={!canCustom}>
+            {canCustom ? "Your own words…" : "Your own words (Pro)"}
+          </option>
+        </select>
+      </label>
+      {canCustom && t.headline === "custom" && (
+        <input value={t.headlineCustom} maxLength={40} placeholder="Type your headline" onChange={(e) => setText({ headlineCustom: e.target.value })} className="field mt-2" aria-label="Your headline" />
+      )}
+
+      <label className="mt-3 block">
+        <span className="field-label">Call to action</span>
+        <select value={t.cta} onChange={(e) => setText({ cta: e.target.value as TagConfig["text"]["cta"] })} className="field">
+          {CTA_PRESETS.map((c) =>
+            c.id === "custom" ? (
+              <option key={c.id} value={c.id} disabled={!canCustom}>
+                {canCustom ? "Your own words…" : "Your own words (Pro)"}
+              </option>
+            ) : (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ),
+          )}
+        </select>
+      </label>
+      {canCustom && t.cta === "custom" && (
+        <input value={t.ctaCustom} maxLength={40} placeholder="Type your call to action" onChange={(e) => setText({ ctaCustom: e.target.value })} className="field mt-2" aria-label="Your call to action" />
+      )}
+
+      <label className="mt-3 block">
+        <span className="field-label">Extra line</span>
+        <select
+          value={ownExtra ? OWN_WORDS : extraValue}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === OWN_WORDS) {
+              setOwnExtra(true);
+              if (isSampleLine(t.custom)) setText({ custom: "" });
+              return;
+            }
+            setOwnExtra(false);
+            setText({ custom: v });
+          }}
+          className="field"
+        >
+          <option value="">None</option>
+          {SAMPLE_LINES.map((line) => (
+            <option key={line} value={line}>
+              {line}
+            </option>
+          ))}
+          <option value={OWN_WORDS} disabled={!canCustom}>
+            {canCustom ? "Your own words…" : "Your own words (Pro)"}
+          </option>
+        </select>
+      </label>
+      {canCustom && ownExtra && (
+        <input value={t.custom} maxLength={40} placeholder="STAGE 2 · E85" onChange={(e) => setText({ custom: e.target.value })} className="field mt-2" aria-label="Your extra line" />
+      )}
+
+      {!canCustom && (
+        <div className="mt-4 rounded-md border border-signal/40 bg-signal/5 p-3">
+          <p className="text-sm">
+            Want your own words? {pro}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Pro lets you type any headline, call to action and extra line. Removing lines and the ready-made wording above are free.</p>
+          <Link href="/dashboard/profile?plan=pro" className="btn-signal btn-small mt-3">
+            Go Pro
+          </Link>
+        </div>
+      )}
     </>
   );
 }

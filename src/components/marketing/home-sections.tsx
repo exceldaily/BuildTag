@@ -59,7 +59,7 @@ export function Pricing() {
         <p className="mt-1 text-sm text-muted-foreground">
           or <span className="font-display text-xl font-bold text-foreground">$50</span> a year
         </p>
-        <Bullets items={["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Start a crew and add members", "Pro badge on your build page", "Priority support"]} />
+        <Bullets items={["Up to 10 vehicles", "60 photos per vehicle", "25 saved decal designs", "Your own wording on BuildTags", "Start a crew and add members", "Pro badge on your build page", "Priority support"]} />
         <Link href="/signup?plan=pro" className="btn-ghost mt-auto w-full" data-event="pricing_clicked">
           Go Pro
         </Link>

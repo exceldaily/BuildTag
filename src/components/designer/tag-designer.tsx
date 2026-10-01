@@ -11,6 +11,7 @@ import { evaluateQrSafety, type SafetyReport } from "@/lib/qr/safety";
 import { MATERIAL_BY_ID, TEMPLATES, formatSize, moduleSizeMm, renderTagSvg, toInches } from "@/lib/tag";
 import { PRINT_DPI, canvasToPngBlob, decodeAtSizes, downloadBlob, embedRemoteImages, makeTextToPath, rasterizeSvg, type DecodeResult } from "@/lib/tag/export";
 import type { PrintGeometry } from "@/lib/tag/render";
+import { stripCustomWording } from "@/lib/tag/wording";
 import type { TagConfig, TagData } from "@/lib/tag/types";
 import type { Plan, PrintSpecificationRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,11 @@ interface DecodeRecord {
  */
 export function TagDesigner({ vehicleId, code, data, plan, printSpecs, shopLogos, initialDesign, savedDesigns, admin = null }: Props) {
   const router = useRouter();
-  const [config, setConfig] = useState<TagConfig>(() => initialDesign?.config ?? TEMPLATES.stealth.build());
+  // Typed-in wording is Pro: a design saved while on Pro opens without it on a free plan.
+  const [config, setConfig] = useState<TagConfig>(() => {
+    const start = initialDesign?.config ?? TEMPLATES.stealth.build();
+    return plan === "pro" ? start : stripCustomWording(start);
+  });
   const [name, setName] = useState(initialDesign?.name ?? "My BuildTag");
   const [designId, setDesignId] = useState<string | null>(initialDesign?.id ?? null);
   const [dirty, setDirty] = useState(false);

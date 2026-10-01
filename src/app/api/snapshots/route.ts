@@ -9,6 +9,8 @@ import { scanUrl } from "@/lib/qr/generate";
 import { siteUrl } from "@/lib/env";
 import { getOptionalUser } from "@/lib/supabase/server";
 import { normalizeConfig } from "@/lib/tag/templates";
+import { usesCustomWording } from "@/lib/tag/wording";
+import { getVehiclePlan } from "@/lib/db/plan";
 import { toInches } from "@/lib/tag/sizes";
 import type { Json, ProductionSnapshotRow } from "@/lib/types";
 import { getManageContext } from "@/lib/db/vehicles";
@@ -105,6 +107,10 @@ export async function POST(request: NextRequest) {
   if (!spec) return NextResponse.json({ ok: false, error: "Unknown print specification." }, { status: 400 });
 
   const config = normalizeConfig(meta.config);
+  // Typing your own wording is Pro. Admin-made free tags and business-managed builds are exempt.
+  if (!meta.admin && usesCustomWording(config) && (await getVehiclePlan(client, vehicle)) !== "pro") {
+    return NextResponse.json({ ok: false, error: "Your own wording is a Pro feature. Pick the ready-made wording, or go Pro to keep your words." }, { status: 403 });
+  }
   const inches = toInches(config.size);
   const snapshotId = crypto.randomUUID();
   const base = `${user.id}/${snapshotId}`;
